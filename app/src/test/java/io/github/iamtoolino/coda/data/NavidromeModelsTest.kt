@@ -1,0 +1,290 @@
+package io.github.iamtoolino.coda.data
+
+import kotlinx.serialization.json.Json
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
+import org.junit.Test
+import kotlinx.coroutines.runBlocking
+import okhttp3.FormBody
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Protocol
+import okhttp3.Request
+import okhttp3.Response
+import okhttp3.ResponseBody.Companion.toResponseBody
+import okhttp3.HttpUrl.Companion.toHttpUrl
+
+class NavidromeModelsTest {
+    private val json = Json { ignoreUnknownKeys = true }
+
+    @Test
+    fun `normalizes server URLs for first login`() {
+        assertEquals(
+            "https://music.example.test",
+            NavidromeClient.normalizeServerUrl(" music.example.test/ "),
+        )
+        assertEquals(
+            "http://192.168.1.10:4533/navidrome",
+            NavidromeClient.normalizeServerUrl("http://192.168.1.10:4533/navidrome/"),
+        )
+    }
+
+    @Test
+    fun `decodes album lists from the Subsonic envelope`() {
+        val envelope = json.decodeFromString<SubsonicEnvelope>(
+            """
+            {
+              "subsonic-response": {
+                "status": "ok",
+                "version": "1.16.1",
+                "albumList2": {
+                  "album": [
+                    {
+                      "id": "album-1",
+                      "name": "Ecliptica",
+                      "artist": "Sonata Arctica",
+                      "year": 1999,
+                      "originalReleaseDate": { "year": 1999, "month": 11, "day": 22 },
+                      "created": "2026-07-10T10:00:00Z",
+                      "coverArt": "al-album-1",
+                      "userRating": 4
+                    }
+                  ]
+                }
+              }
+            }
+            """.trimIndent(),
+        )
+
+        val album = requireNotNull(envelope.response.albumList2).album.single()
+        assertEquals("Ecliptica", album.name)
+        assertEquals("Sonata Arctica", album.artist)
+        assertEquals(1999, album.year)
+        assertEquals(11, album.originalReleaseDate?.month)
+        assertEquals(4, album.userRating)
+    }
+
+    @Test
+    fun `playlist entries retain exact server order`() {
+        val envelope = json.decodeFromString<SubsonicEnvelope>(
+            """
+            {
+              "subsonic-response": {
+                "status": "ok",
+                "playlist": {
+                  "id": "playlist-1",
+                  "name": "Albums",
+                  "songCount": 3,
+                  "entry": [
+                    { "id": "song-3", "title": "Third", "album": "Album B", "albumId": "b" },
+                    { "id": "song-1", "title": "First", "album": "Album A", "albumId": "a" },
+                    { "id": "song-2", "title": "Second", "album": "Album A", "albumId": "a" }
+                  ]
+                }
+              }
+            }
+            """.trimIndent(),
+        )
+
+        assertEquals(
+            listOf("song-3", "song-1", "song-2"),
+            requireNotNull(envelope.response.playlist).entry.map { it.id },
+        )
+    }
+
+    @Test
+    fun `decodes cross client play queue position`() {
+        val envelope = json.decodeFromString<SubsonicEnvelope>(
+            """
+            {
+              "subsonic-response": {
+                "status": "ok",
+                "playQueue": {
+                  "current": "song-2",
+                  "position": 93210,
+                  "changedBy": "Another client",
+                  "entry": [
+                    { "id": "song-1", "title": "First" },
+                    { "id": "song-2", "title": "Second" }
+                  ]
+                }
+              }
+            }
+            """.trimIndent(),
+        )
+
+        val queue = requireNotNull(envelope.response.playQueue)
+        assertEquals("song-2", queue.current)
+        assertEquals(93_210L, queue.position)
+        assertEquals("Another client", queue.changedBy)
+    }
+
+    @Test
+    fun `save queue posts repeated ids current song and millisecond position`() = runBlocking {
+        var captured: Request? = null
+        val client = testClient { request -> captured = request }
+
+        client.savePlayQueue(listOf("song-1", "song-2", "song-3"), 1, 93_210)
+
+        val request = requireNotNull(captured)
+        val form = request.body as FormBody
+        assertEquals("https://music.example.test/rest/savePlayQueue.view", request.url.toString())
+        assertEquals(listOf("song-1", "song-2", "song-3"), form.values("id"))
+        assertEquals(listOf("song-2"), form.values("current"))
+        assertEquals(listOf("93210"), form.values("position"))
+    }
+
+    @Test
+    fun `empty save queue omits queue parameters to clear server state`() = runBlocking {
+        var captured: Request? = null
+        val client = testClient { request -> captured = request }
+
+        client.savePlayQueue(emptyList(), 0, 0)
+
+        val form = requireNotNull(captured).body as FormBody
+        val names = (0 until form.size).map(form::name)
+        assertFalse("id" in names)
+        assertFalse("current" in names)
+        assertFalse("position" in names)
+    }
+
+    @Test
+    fun `album rating is posted to the server`() = runBlocking {
+        var captured: Request? = null
+        val client = testClient { request -> captured = request }
+
+        client.setAlbumRating("album-1", 4)
+
+        val request = requireNotNull(captured)
+        val form = request.body as FormBody
+        assertEquals("https://music.example.test/rest/setRating.view", request.url.toString())
+        assertEquals(listOf("album-1"), form.values("id"))
+        assertEquals(listOf("4"), form.values("rating"))
+    }
+
+    @Test
+    fun `stream policy requests raw on wifi and opus on mobile without a bitrate`() {
+        val client = testClient()
+
+        val wifi = client.streamUrl("song-1", mobile = false).toHttpUrl()
+        val mobile = client.streamUrl("song-1", mobile = true).toHttpUrl()
+
+        assertEquals("raw", wifi.queryParameter("format"))
+        assertEquals("opus", mobile.queryParameter("format"))
+        assertEquals(null, mobile.queryParameter("estimateContentLength"))
+        assertNull(wifi.queryParameter("maxBitRate"))
+        assertNull(mobile.queryParameter("maxBitRate"))
+    }
+
+    @Test
+    fun `release year album list requests newest release years first`() = runBlocking {
+        var captured: Request? = null
+        val client = testClient { request -> captured = request }
+
+        client.albums(AlbumListType.RELEASE_YEAR, size = 24)
+
+        val url = requireNotNull(captured).url
+        assertEquals("byYear", url.queryParameter("type"))
+        assertEquals("3000", url.queryParameter("fromYear"))
+        assertEquals("0", url.queryParameter("toYear"))
+        assertEquals("24", url.queryParameter("size"))
+    }
+
+    @Test
+    fun `highest rated albums put recent discoveries first within a rating`() = runBlocking {
+        val client = testClient(
+            responseJson = """
+                {
+                  "subsonic-response": {
+                    "status": "ok",
+                    "albumList2": {
+                      "album": [
+                        { "id": "older-five", "name": "Older", "userRating": 5,
+                          "created": "2024-01-01T00:00:00Z" },
+                        { "id": "new-four", "name": "Four", "userRating": 4,
+                          "created": "2026-01-01T00:00:00Z" },
+                        { "id": "newer-five", "name": "Newer", "userRating": 5,
+                          "created": "2026-02-01T00:00:00Z" }
+                      ]
+                    }
+                  }
+                }
+            """.trimIndent(),
+        )
+
+        val albums = client.allAlbums(AlbumListType.HIGHEST_RATED)
+
+        assertEquals(
+            listOf("newer-five", "older-five", "new-four"),
+            albums.map { it.id },
+        )
+    }
+
+    @Test
+    fun `artist discography uses structured original release dates oldest first`() = runBlocking {
+        val client = testClient(
+            responseJson = """
+                {
+                  "subsonic-response": {
+                    "status": "ok",
+                    "artist": {
+                      "id": "artist-1",
+                      "name": "Artist",
+                      "album": [
+                        {
+                          "id": "album-late",
+                          "name": "Late",
+                          "artist": "Artist",
+                          "originalReleaseDate": { "year": 2001, "month": 10, "day": 2 }
+                        },
+                        {
+                          "id": "album-early",
+                          "name": "Early",
+                          "artist": "Artist",
+                          "originalReleaseDate": { "year": 2001, "month": 3, "day": 10 }
+                        },
+                        { "id": "album-undated", "name": "Undated", "artist": "Artist" }
+                      ]
+                    }
+                  }
+                }
+            """.trimIndent(),
+        )
+
+        val albums = client.artistAlbums("artist-1").second
+
+        assertEquals(listOf("album-early", "album-late", "album-undated"), albums.map { it.id })
+    }
+
+    private fun testClient(
+        responseJson: String =
+            """{"subsonic-response":{"status":"ok","version":"1.16.1"}}""",
+        onRequest: (Request) -> Unit = {},
+    ): NavidromeClient {
+        val httpClient = OkHttpClient.Builder()
+            .addInterceptor { chain ->
+                val request = chain.request()
+                onRequest(request)
+                Response.Builder()
+                    .request(request)
+                    .protocol(Protocol.HTTP_1_1)
+                    .code(200)
+                    .message("OK")
+                    .body(
+                        responseJson.toResponseBody("application/json".toMediaType()),
+                    )
+                    .build()
+            }
+            .build()
+        return NavidromeClient(
+            serverUrl = "https://music.example.test",
+            username = "user",
+            password = "password",
+            httpClient = httpClient,
+        )
+    }
+
+    private fun FormBody.values(name: String): List<String> =
+        (0 until size).filter { this.name(it) == name }.map { value(it) }
+}

@@ -1,0 +1,13 @@
+.DS_Store
+.gradle/
+.gradle-user-home/
+.idea/
+build/
+app/build/
+local.properties
+*.jks
+*.keystore
+*.p12
+*.iml
+.DS_Store
+captures/
