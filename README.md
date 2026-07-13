@@ -1,4 +1,4 @@
-# Coda
+# Coda — Album-First Navidrome Client for Android
 
 Coda is a focused, album-first Android client for Navidrome and compatible OpenSubsonic servers.
 It is built for people who want their server to remain the source of truth, without waiting for a
