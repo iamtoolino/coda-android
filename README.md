@@ -14,7 +14,7 @@ Coda is an independent community project and is not affiliated with or endorsed 
   <img src="docs/screenshots/01_home.webp" width="23%" alt="Coda home screen">
   <img src="docs/screenshots/02_artist_discography.webp" width="23%" alt="Artist discography">
   <img src="docs/screenshots/03_album_view_1.webp" width="23%" alt="Album and track view">
-  <img src="docs/screenshots/04_now_playing_2.webp" width="23%" alt="Now playing screen">
+  <img src="docs/screenshots/06_now_playing_2.webp" width="23%" alt="Now playing screen">
 </p>
 
 ## Why Coda exists
