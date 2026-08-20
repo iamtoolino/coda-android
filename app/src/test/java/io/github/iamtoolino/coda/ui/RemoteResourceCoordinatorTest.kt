@@ -12,34 +12,34 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-class RemoteCollectionCoordinatorTest {
+class RemoteResourceCoordinatorTest {
     @Test
     fun `refresh retains good content when it fails`() = runBlocking {
         var failure: Throwable? = null
-        val coordinator = RemoteCollectionCoordinator(
+        val coordinator = RemoteResourceCoordinator(
             scope = CoroutineScope(coroutineContext),
             initialKey = Unit,
         ) {
             failure?.let { throw it }
-            listOf("loaded")
+            "loaded"
         }
 
         coordinator.load().join()
         failure = IOException("offline")
         val refresh = coordinator.refresh()
 
-        assertEquals(listOf("loaded"), coordinator.state.value)
+        assertEquals("loaded", coordinator.state.value)
         assertTrue(coordinator.state.isLoading)
         refresh.join()
-        assertEquals(listOf("loaded"), coordinator.state.value)
+        assertEquals("loaded", coordinator.state.value)
         assertEquals("offline", coordinator.state.errorMessage)
         assertFalse(coordinator.state.isLoading)
     }
 
     @Test
     fun `new key clears old content and stale completion cannot publish`() = runBlocking {
-        val oldRequest = CompletableDeferred<List<String>>()
-        val coordinator = RemoteCollectionCoordinator(
+        val oldRequest = CompletableDeferred<String>()
+        val coordinator = RemoteResourceCoordinator(
             scope = CoroutineScope(coroutineContext),
             initialKey = "old",
         ) { key ->
@@ -47,9 +47,9 @@ class RemoteCollectionCoordinatorTest {
                 "old" -> try {
                     oldRequest.await()
                 } catch (_: CancellationException) {
-                    listOf("stale")
+                    "stale"
                 }
-                else -> listOf("fresh")
+                else -> "fresh"
             }
         }
 
@@ -61,7 +61,7 @@ class RemoteCollectionCoordinatorTest {
         assertNull(coordinator.state.value)
         newestRequest.join()
         yield()
-        assertEquals(listOf("fresh"), coordinator.state.value)
+        assertEquals("fresh", coordinator.state.value)
         assertNull(coordinator.state.errorMessage)
     }
 }

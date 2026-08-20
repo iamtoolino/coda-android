@@ -1009,26 +1009,25 @@ private fun SearchScreen(
 
 @Composable
 private fun ArtistScreen(navController: NavHostController, id: String) {
-    var data by remember(id) { mutableStateOf<Pair<Artist, List<Album>>?>(null) }
-    var error by remember(id) { mutableStateOf<String?>(null) }
-    var generation by rememberSaveable(id) { mutableIntStateOf(0) }
-    var loading by remember(id) { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+    val coordinator = remember(scope) {
+        RemoteDetailCoordinator(scope, id) { requestedId ->
+            AppGraph.withCurrentSession { artistAlbums(requestedId) }
+        }
+    }
+    val state = coordinator.state
+    val data = state.value.takeIf { state.key == id }
+    val error = state.errorMessage.takeIf { state.key == id }
     val albumRows = data?.second?.chunked(3).orEmpty()
     val listState = rememberRestorableLazyListState(
         contentReady = data != null || error != null,
         maxIndex = albumRows.size + 1,
     )
-    LaunchedEffect(id, generation) {
-        loading = true
-        runCatching { AppGraph.withCurrentSession { artistAlbums(id) } }
-            .onSuccess { data = it; error = null }
-            .onFailureUnlessCancelled { error = it.message }
-        loading = false
-    }
+    LaunchedEffect(coordinator, id) { coordinator.load(id) }
     AdaptiveBackground {
             PullToRefreshBox(
-                isRefreshing = loading && data != null,
-                onRefresh = { generation++ },
+                isRefreshing = state.isLoading && data != null,
+                onRefresh = { coordinator.load(id) },
                 modifier = Modifier.fillMaxSize(),
             ) {
                 LazyColumn(
