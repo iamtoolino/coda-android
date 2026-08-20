@@ -595,26 +595,23 @@ private fun HomeSectionHeader(title: String, onClick: (() -> Unit)? = null) {
 
 @Composable
 private fun ArtistsScreen(navController: NavHostController) {
-    var generation by rememberSaveable { mutableIntStateOf(0) }
-    var artists by remember { mutableStateOf<List<Artist>?>(null) }
-    var error by remember { mutableStateOf<String?>(null) }
-    var loading by remember { mutableStateOf(false) }
     var activeLetter by remember { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
+    val coordinator = remember(scope) {
+        RemoteCollectionCoordinator(scope, Unit) {
+            AppGraph.withCurrentSession { artists() }
+        }
+    }
+    val state = coordinator.state
+    val artists = state.value
     val listState = rememberRestorableLazyListState(
-        contentReady = artists != null || error != null,
+        contentReady = artists != null || state.errorMessage != null,
         maxIndex = artists?.size ?: 0,
     )
-    val scope = rememberCoroutineScope()
-    LaunchedEffect(generation) {
-        loading = true
-        runCatching { AppGraph.withCurrentSession { artists() } }
-            .onSuccess { artists = it; error = null }
-            .onFailureUnlessCancelled { error = it.message }
-        loading = false
-    }
+    LaunchedEffect(coordinator) { coordinator.load() }
     PullToRefreshBox(
-        isRefreshing = loading && artists != null,
-        onRefresh = { generation++ },
+        isRefreshing = state.isLoading && artists != null,
+        onRefresh = { coordinator.refresh() },
         modifier = Modifier.fillMaxSize(),
     ) {
         Box(Modifier.fillMaxSize()) {
@@ -629,8 +626,10 @@ private fun ArtistsScreen(navController: NavHostController) {
                         title = "Artists",
                     )
                 }
-                if (artists == null && error == null) item { LoadingBlock() }
-                if (error != null) item { MessageCard("Could not load Artists", error.orEmpty()) }
+                if (artists == null && state.errorMessage == null) item { LoadingBlock() }
+                state.errorMessage?.let { error ->
+                    item { MessageCard("Could not load Artists", error) }
+                }
                 artists?.let { list ->
                     items(list, key = { it.id }) { artist ->
                         ArtistRow(artist) {
@@ -755,31 +754,24 @@ private fun AlbumsScreen(
     initialMode: AlbumViewMode,
 ) {
     var mode by rememberSaveable { mutableStateOf(initialMode) }
-    var generation by rememberSaveable { mutableIntStateOf(0) }
-    var albums by remember { mutableStateOf<List<Album>?>(null) }
-    var error by remember { mutableStateOf<String?>(null) }
-    var loading by remember { mutableStateOf(false) }
-    var loadedMode by remember { mutableStateOf<AlbumViewMode?>(null) }
+    val scope = rememberCoroutineScope()
+    val coordinator = remember(scope) {
+        RemoteCollectionCoordinator(scope, initialMode) { requestedMode ->
+            AppGraph.withCurrentSession { allAlbums(requestedMode.listType) }
+        }
+    }
+    val state = coordinator.state
+    val albums = state.value.takeIf { state.key == mode }
+    val error = state.errorMessage.takeIf { state.key == mode }
     val gridState = rememberRestorableLazyGridState(
         contentReady = albums != null || error != null,
         maxIndex = albums?.size ?: 0,
         stateKey = mode.routeValue,
     )
-    LaunchedEffect(mode, generation) {
-        loading = true
-        if (loadedMode != mode) albums = null
-        runCatching { AppGraph.withCurrentSession { allAlbums(mode.listType) } }
-            .onSuccess {
-                albums = it
-                loadedMode = mode
-                error = null
-            }
-            .onFailureUnlessCancelled { error = it.message }
-        loading = false
-    }
+    LaunchedEffect(coordinator, mode) { coordinator.load(mode) }
     PullToRefreshBox(
-        isRefreshing = loading && albums != null,
-        onRefresh = { generation++ },
+        isRefreshing = state.isLoading && albums != null,
+        onRefresh = { coordinator.load(mode) },
         modifier = Modifier.fillMaxSize(),
     ) {
         LazyVerticalGrid(
@@ -1413,24 +1405,22 @@ private fun <T> RemoteListScreen(
     loader: suspend NavidromeClient.() -> List<T>,
     content: androidx.compose.foundation.lazy.LazyListScope.(List<T>) -> Unit,
 ) {
-    var generation by rememberSaveable { mutableIntStateOf(0) }
-    var data by remember { mutableStateOf<List<T>?>(null) }
-    var error by remember { mutableStateOf<String?>(null) }
-    var loading by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+    val coordinator = remember(scope) {
+        RemoteCollectionCoordinator(scope, Unit) {
+            AppGraph.withCurrentSession(loader)
+        }
+    }
+    val state = coordinator.state
+    val data = state.value
     val listState = rememberRestorableLazyListState(
-        contentReady = data != null || error != null,
+        contentReady = data != null || state.errorMessage != null,
         maxIndex = data?.size ?: 0,
     )
-    LaunchedEffect(generation) {
-        loading = true
-        runCatching { AppGraph.withCurrentSession(loader) }
-            .onSuccess { data = it; error = null }
-            .onFailureUnlessCancelled { error = it.message }
-        loading = false
-    }
+    LaunchedEffect(coordinator) { coordinator.load() }
     PullToRefreshBox(
-        isRefreshing = loading && data != null,
-        onRefresh = { generation++ },
+        isRefreshing = state.isLoading && data != null,
+        onRefresh = { coordinator.refresh() },
         modifier = Modifier.fillMaxSize(),
     ) {
         LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
@@ -1438,11 +1428,13 @@ private fun <T> RemoteListScreen(
                 ScreenHeader(
                     title = title,
                     onBack = onBack,
-                    onRefresh = { generation++ },
+                    onRefresh = { coordinator.refresh() },
                 )
             }
-            if (data == null && error == null) item { LoadingBlock() }
-            if (error != null) item { MessageCard("Could not load $title", error.orEmpty()) }
+            if (data == null && state.errorMessage == null) item { LoadingBlock() }
+            state.errorMessage?.let { error ->
+                item { MessageCard("Could not load $title", error) }
+            }
             data?.let { content(it) }
         }
     }

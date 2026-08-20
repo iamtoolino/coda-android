@@ -53,6 +53,9 @@
 - Home sections load and fail independently. Keep their shells visible immediately, publish each
   successful section without waiting for its siblings, retain good content during refresh, and use
   only bounded network-error retries. One slow endpoint must not blank or block the rest of Home.
+- Collection composables render coordinator state; they do not own request generations or publish
+  suspended results directly. Preserve good content on same-key refresh, clear mismatched content
+  when a collection key changes, and reject late completions from superseded loads.
 - Artwork identity, album identity, and track identity are not interchangeable. Prefer canonical
   album artwork for playback, cache, and theme decisions.
 - Shared visual policy is resolved centrally. Brand teal is the default; the current playback

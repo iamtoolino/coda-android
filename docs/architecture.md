@@ -18,6 +18,12 @@ Previously loaded section content remains visible during refresh. Network `IOExc
 short backoff retries; cancellation and permanent response errors do not retry. Exhausted failures
 remain local to their section and can be retried individually.
 
+`RemoteCollectionCoordinator` owns the request lifecycle for the Artists, Albums, and Playlists
+destinations. Compose selects a collection key and renders immutable coordinator state. Refreshing
+the same key retains good content, while changing an album view clears mismatched content. Each new
+load cancels its predecessor and also uses a generation gate, so even a non-cooperative obsolete
+request cannot publish after a newer selection.
+
 `CredentialStore` encrypts the selected server and account with Android Keystore. `AppGraph`
 reconstructs the active `NavidromeClient` after a cold start, so no private server values are compiled
 into the APK. A non-secret hash of server URL and username namespaces transient caches so identifiers
