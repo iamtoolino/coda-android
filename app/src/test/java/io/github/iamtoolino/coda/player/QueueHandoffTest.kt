@@ -93,4 +93,47 @@ class QueueHandoffTest {
             ),
         )
     }
+
+    @Test
+    fun `saved own queue resolves its current item and position for service restoration`() {
+        val secondSong = Song(id = "song-2", title = "Second")
+        val queue = PlayQueue(
+            current = secondSong.id,
+            position = 93_210,
+            changedBy = ownClientName,
+            entry = listOf(song, secondSong),
+        )
+
+        assertEquals(
+            SavedQueueStart(index = 1, positionMs = 93_210),
+            savedQueueStart(queue, ownClientName),
+        )
+    }
+
+    @Test
+    fun `service restoration rejects an external queue`() {
+        val queue = PlayQueue(
+            current = song.id,
+            position = 1_000,
+            changedBy = "CodaMac",
+            entry = listOf(song),
+        )
+
+        assertEquals(null, savedQueueStart(queue, ownClientName))
+    }
+
+    @Test
+    fun `service restoration clamps malformed start values`() {
+        val queue = PlayQueue(
+            currentIndex = 99,
+            position = -1,
+            changedBy = ownClientName,
+            entry = listOf(song),
+        )
+
+        assertEquals(
+            SavedQueueStart(index = 0, positionMs = 0),
+            savedQueueStart(queue, ownClientName),
+        )
+    }
 }

@@ -28,6 +28,8 @@ import io.github.iamtoolino.coda.data.Song
 import java.util.LinkedHashMap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 internal object CodaMediaIds {
     const val ROOT = "coda:root"
@@ -58,6 +60,10 @@ internal class CodaMediaLibraryCallback(
     private val scope: CoroutineScope,
 ) : MediaLibrarySession.Callback {
     private val searchCache = BoundedSearchCache(MAX_CACHED_SEARCHES)
+    private val restorationMutex = Mutex()
+    private var restorationGeneration: Long? = null
+    private var restorationLoaded = false
+    private var cachedRestoration: MediaSession.MediaItemsWithStartPosition? = null
 
     override fun onGetLibraryRoot(
         session: MediaLibrarySession,
@@ -142,6 +148,41 @@ internal class CodaMediaLibraryCallback(
             }
         }
     }
+
+    override fun onPlaybackResumption(
+        mediaSession: MediaSession,
+        controller: MediaSession.ControllerInfo,
+        isForPlayback: Boolean,
+    ): ListenableFuture<MediaSession.MediaItemsWithStartPosition> = asyncFuture {
+        checkNotNull(loadPlaybackRestoration()) { "No saved Coda queue is available" }
+    }
+
+    internal suspend fun loadPlaybackRestoration(): MediaSession.MediaItemsWithStartPosition? =
+        restorationMutex.withLock {
+            val account = AppGraph.sessionSnapshot() ?: return@withLock null
+            if (restorationGeneration != account.generation) {
+                restorationGeneration = account.generation
+                restorationLoaded = false
+                cachedRestoration = null
+            }
+            if (restorationLoaded) return@withLock cachedRestoration
+
+            val queue = account.client.playQueue()
+            account.requireCurrent()
+            val start = savedQueueStart(queue, account.client.queueClientName)
+            cachedRestoration = start?.let {
+                val mobile = isMobileNetwork(context)
+                MediaSession.MediaItemsWithStartPosition(
+                    requireNotNull(queue).entry.map { song ->
+                        song.toPlayableMediaItem(context, mobile, account)
+                    },
+                    it.index,
+                    it.positionMs,
+                )
+            }
+            restorationLoaded = true
+            cachedRestoration
+        }
 
     private suspend fun children(account: NavidromeSession, parentId: String): List<MediaItem> =
         when (parentId) {

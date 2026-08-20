@@ -46,3 +46,9 @@ Home performs opportunistic queue reads when it opens, refreshes, or returns to 
 cold-start queue last written by Android is restored paused. A non-empty queue written by another
 client is exposed separately as a Continue candidate and never replaces the local paused queue until
 the user accepts it. Queue-read failures do not fail Home's library content.
+
+The playback service also persists an account-scoped local queue snapshot containing song metadata,
+the current index, and position. It restores that snapshot synchronously before publishing a new
+MediaSession, so the phone UI, notifications, Bluetooth, and Android Auto all see the same paused
+queue after process death without waiting for the activity or network. The server queue remains the
+fallback when no local snapshot exists and the source for cross-client handoff.

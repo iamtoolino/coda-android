@@ -65,6 +65,27 @@ internal fun isAndroidQueue(changedBy: String?, ownClientName: String): Boolean 
         normalizeClientName(changedBy) == normalizeClientName(NavidromeClient.CLIENT_NAME) ||
         normalizeClientName(changedBy) == normalizeClientName("Coda")
 
+internal data class SavedQueueStart(
+    val index: Int,
+    val positionMs: Long,
+)
+
+internal fun savedQueueStart(
+    queue: PlayQueue?,
+    ownClientName: String,
+): SavedQueueStart? {
+    if (queue == null || queue.entry.isEmpty() || !isAndroidQueue(queue.changedBy, ownClientName)) {
+        return null
+    }
+    val index = queue.currentIndex
+        ?: queue.entry.indexOfFirst { it.id == queue.current }.takeIf { it >= 0 }
+        ?: 0
+    return SavedQueueStart(
+        index = index.coerceIn(queue.entry.indices),
+        positionMs = queue.position?.coerceAtLeast(0) ?: 0,
+    )
+}
+
 private fun normalizeClientName(value: String?): String? = value
     ?.trim()
     ?.replace(Regex("\\s+"), " ")

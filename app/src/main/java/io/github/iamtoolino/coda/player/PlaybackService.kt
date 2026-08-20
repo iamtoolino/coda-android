@@ -35,15 +35,19 @@ import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @androidx.annotation.OptIn(markerClass = [UnstableApi::class])
 class PlaybackService : MediaLibraryService(), Player.Listener {
     private lateinit var player: ExoPlayer
     private lateinit var session: MediaLibrarySession
+    private lateinit var libraryCallback: CodaMediaLibraryCallback
+    private lateinit var snapshotStore: PlaybackSnapshotStore
     private lateinit var cache: SimpleCache
     private lateinit var cacheFactory: CacheDataSource.Factory
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var prefetchJob: Job? = null
+    private var snapshotJob: Job? = null
     @Volatile
     private var activeCacheWriter: CacheWriter? = null
     private val mainHandler = Handler(Looper.getMainLooper())
@@ -76,6 +80,7 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
             .setUpstreamDataSourceFactory(upstreamFactory)
             .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
 
+        snapshotStore = PlaybackSnapshotStore(this)
         player = ExoPlayer.Builder(this)
             .setMediaSourceFactory(DefaultMediaSourceFactory(cacheFactory))
             .setAudioAttributes(
@@ -91,10 +96,12 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
                 it.setWakeMode(C.WAKE_MODE_NETWORK)
                 it.addListener(this)
             }
+        restoreLocalSnapshot()
+        libraryCallback = CodaMediaLibraryCallback(this, scope)
         val sessionBuilder = MediaLibrarySession.Builder(
             this,
             player,
-            CodaMediaLibraryCallback(this, scope),
+            libraryCallback,
         )
         packageManager.getLaunchIntentForPackage(packageName)?.let { launchIntent ->
             sessionBuilder.setSessionActivity(
@@ -108,9 +115,56 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
         }
         session = sessionBuilder.build()
         connectivity.registerDefaultNetworkCallback(networkCallback)
+        restoreSavedQueue()
     }
 
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaLibrarySession = session
+
+    private fun restoreSavedQueue() {
+        scope.launch {
+            val restoration = runCatching { libraryCallback.loadPlaybackRestoration() }
+                .getOrNull() ?: return@launch
+            withContext(Dispatchers.Main.immediate) {
+                if (player.mediaItemCount != 0 || player.playWhenReady) return@withContext
+                player.setMediaItems(
+                    restoration.mediaItems,
+                    restoration.startIndex,
+                    restoration.startPositionMs,
+                )
+                player.prepare()
+            }
+        }
+    }
+
+    private fun restoreLocalSnapshot() {
+        val account = AppGraph.sessionSnapshot() ?: return
+        val snapshot = snapshotStore.load(account.cacheNamespace) ?: return
+        val mobile = isMobileNetwork(this)
+        player.setMediaItems(
+            snapshot.songs.map { it.toPlayableMediaItem(this, mobile, account) },
+            snapshot.currentIndex.coerceIn(snapshot.songs.indices),
+            snapshot.positionMs.coerceAtLeast(0),
+        )
+        player.prepare()
+    }
+
+    private fun persistLocalSnapshot() {
+        val account = AppGraph.sessionSnapshot()
+        val snapshot = account?.let(player::playbackSnapshot)
+        if (snapshot == null) snapshotStore.clear() else snapshotStore.save(snapshot)
+    }
+
+    private fun updateSnapshotTimer() {
+        snapshotJob?.cancel()
+        snapshotJob = null
+        if (!player.isPlaying) return
+        snapshotJob = scope.launch {
+            while (true) {
+                delay(15_000)
+                withContext(Dispatchers.Main.immediate) { persistLocalSnapshot() }
+            }
+        }
+    }
 
     override fun onEvents(player: Player, events: Player.Events) {
         if (events.contains(Player.EVENT_MEDIA_ITEM_TRANSITION) ||
@@ -120,6 +174,15 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
             maintainFourTrackWindow()
         }
         if (events.contains(Player.EVENT_TIMELINE_CHANGED)) refreshUpcomingStreamVariants()
+        if (events.contains(Player.EVENT_TIMELINE_CHANGED) ||
+            events.contains(Player.EVENT_MEDIA_ITEM_TRANSITION) ||
+            events.contains(Player.EVENT_POSITION_DISCONTINUITY) ||
+            events.contains(Player.EVENT_PLAY_WHEN_READY_CHANGED) ||
+            events.contains(Player.EVENT_IS_PLAYING_CHANGED)
+        ) {
+            persistLocalSnapshot()
+        }
+        if (events.contains(Player.EVENT_IS_PLAYING_CHANGED)) updateSnapshotTimer()
     }
 
     private fun maintainFourTrackWindow() {
@@ -225,6 +288,7 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
         if (activeInstance === this) activeInstance = null
         activeCacheWriter?.cancel()
         prefetchJob?.cancel()
+        snapshotJob?.cancel()
         runCatching { connectivity.unregisterNetworkCallback(networkCallback) }
         session.release()
         player.release()
