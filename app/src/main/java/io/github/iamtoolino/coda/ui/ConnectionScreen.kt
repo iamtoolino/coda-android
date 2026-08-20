@@ -28,7 +28,9 @@ import io.github.iamtoolino.coda.data.ServerCredentials
 @Composable
 internal fun ConnectionScreen(
     credentials: ServerCredentials,
+    artworkRefreshing: Boolean,
     onBack: () -> Unit,
+    onRefreshArtwork: () -> Unit,
     onDisconnect: () -> Unit,
 ) {
     Column(Modifier.fillMaxSize()) {
@@ -57,6 +59,18 @@ internal fun ConnectionScreen(
             ConnectionValue("Server", credentials.serverUrl)
             ConnectionValue("Username", credentials.username)
             Spacer(Modifier.height(8.dp))
+            Text(
+                text = "If artwork was changed on the server, clear Coda's image cache to fetch it again.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            OutlinedButton(
+                onClick = onRefreshArtwork,
+                enabled = !artworkRefreshing,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(if (artworkRefreshing) "Refreshing artwork…" else "Refresh artwork")
+            }
             Text(
                 text = "Disconnecting stops playback and removes the encrypted credentials from this device.",
                 style = MaterialTheme.typography.bodyMedium,

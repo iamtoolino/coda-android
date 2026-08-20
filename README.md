@@ -29,7 +29,8 @@ Coda deliberately takes the opposite approach:
 - Opening a playlist fetches its current contents from the server.
 - Pull-to-refresh requests fresh data without a background polling loop.
 - Library metadata is not copied into a second local database.
-- Phone artwork is cached persistently by the UI image loader so browsing still feels responsive.
+- Phone artwork is cached persistently by the UI image loader so browsing still feels responsive;
+  changed server artwork can be refreshed explicitly from Connection.
 
 The result is a small client centered on albums rather than podcasts, radio, generated mixes,
 recommendation feeds, or extensive configuration screens.
@@ -67,8 +68,9 @@ There is intentionally no permanent offline library. The bounded audio window su
 process/service recreation so prepared playback remains useful in poor reception, and is cleared
 when the queue is emptied or the account disconnects.
 
-Artwork uses separate caches: the phone UI maintains its own image cache, while Android Auto uses a
-bounded car-artwork cache described below. These are not part of the four-track audio window.
+Artwork uses separate caches: the phone UI shares consolidated 420/500/600/1200 px sources through
+its image cache, while Android Auto uses a bounded car-artwork cache described below. These are not
+part of the four-track audio window. The Connection screen can clear stale artwork explicitly.
 
 ## Queue handoff
 

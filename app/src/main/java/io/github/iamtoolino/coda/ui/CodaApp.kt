@@ -118,9 +118,13 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.NavType
 import coil3.compose.AsyncImage
+import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import io.github.iamtoolino.coda.AppGraph
 import io.github.iamtoolino.coda.CodaApplication
+import io.github.iamtoolino.coda.artwork.ArtworkSizes
+import io.github.iamtoolino.coda.artwork.ArtworkSource
+import io.github.iamtoolino.coda.artwork.localPlaybackArtworkSource
 import io.github.iamtoolino.coda.data.Album
 import io.github.iamtoolino.coda.data.AlbumListType
 import io.github.iamtoolino.coda.data.AlbumPage
@@ -145,8 +149,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 private val OverlayButtonBackground = Color.Black.copy(alpha = 0.46f)
-
-private fun accountCacheKey(value: String): String = "${AppGraph.cacheNamespace}:$value"
 
 private enum class AlbumViewMode(
     val routeValue: String,
@@ -227,6 +229,7 @@ fun CodaApp() {
     val application = LocalContext.current.applicationContext as CodaApplication
     val playback = remember(application) { application.playback }
     val playbackState by playback.state.collectAsStateWithLifecycle()
+    val artworkGeneration by application.artworkGeneration.collectAsStateWithLifecycle()
     val credentials by AppGraph.credentials.collectAsStateWithLifecycle()
     if (credentials == null) {
         RoutedCodaTheme(CodaThemeRequest.Brand) {
@@ -236,6 +239,7 @@ fun CodaApp() {
     }
     val activeCredentials = requireNotNull(credentials)
     val ratingScope = rememberCoroutineScope()
+    var artworkRefreshing by remember { mutableStateOf(false) }
     val ratings = remember(activeCredentials, ratingScope) {
         AlbumRatingCoordinator(ratingScope) { albumId, rating ->
             AppGraph.withCurrentSession { setAlbumRating(albumId, rating) }
@@ -252,10 +256,18 @@ fun CodaApp() {
     val entry by navController.currentBackStackEntryAsState()
     val route = entry?.destination?.route.orEmpty()
     val fullScreenPlayer = route == "now-playing" || route == "queue"
-    val playbackThemeRequest = playbackState.artworkUrl?.let { artworkUrl ->
+    val playbackThemeSource = localPlaybackArtworkSource(
+        namespace = AppGraph.cacheNamespace,
+        generation = artworkGeneration,
+        artworkIdentity = playbackState.artworkKey ?: playbackState.currentSongId.orEmpty(),
+        url = playbackState.artworkUrl,
+    )
+    val playbackThemeRequest = playbackThemeSource?.let { source ->
         CodaThemeRequest.Artwork(
             identity = "album:${playbackState.artworkKey ?: playbackState.currentSongId}",
-            artworkUrl = artworkUrl,
+            artworkUrl = source.url,
+            diskCacheKey = source.diskCacheKey,
+            memoryCacheKey = source.memoryCacheKey,
         )
     }
     val themeRequest = resolveThemeRequest(
@@ -263,7 +275,10 @@ fun CodaApp() {
         playback = playbackThemeRequest,
     )
     RoutedCodaTheme(themeRequest) {
-        CompositionLocalProvider(LocalAlbumRatingCoordinator provides ratings) {
+        CompositionLocalProvider(
+            LocalAlbumRatingCoordinator provides ratings,
+            LocalArtworkGeneration provides artworkGeneration,
+        ) {
             AdaptiveBackground {
                 Scaffold(
                 modifier = Modifier.fillMaxSize(),
@@ -305,7 +320,32 @@ fun CodaApp() {
                     composable("connection") {
                         ConnectionScreen(
                             credentials = activeCredentials,
+                            artworkRefreshing = artworkRefreshing,
                             onBack = { navController.popBackStack() },
+                            onRefreshArtwork = {
+                                if (!artworkRefreshing) {
+                                    val namespace = AppGraph.cacheNamespace
+                                    ratingScope.launch {
+                                        artworkRefreshing = true
+                                        runCatching {
+                                            application.refreshArtworkCaches(namespace)
+                                        }.onSuccess {
+                                            Toast.makeText(
+                                                application,
+                                                "Artwork refreshed",
+                                                Toast.LENGTH_SHORT,
+                                            ).show()
+                                        }.onFailureUnlessCancelled {
+                                            Toast.makeText(
+                                                application,
+                                                "Could not refresh artwork",
+                                                Toast.LENGTH_SHORT,
+                                            ).show()
+                                        }
+                                        artworkRefreshing = false
+                                    }
+                                }
+                            },
                             onDisconnect = {
                                 val oldNamespace = AppGraph.cacheNamespace
                                 AppGraph.logout()
@@ -816,7 +856,10 @@ private fun AlbumsScreen(
             }
             albums?.let { list ->
                 items(list, key = { it.id }) { album ->
-                    AlbumCard(album) { navController.navigate("album/${Uri.encode(album.id)}") }
+                    AlbumCard(
+                        album = album,
+                        artworkSize = ArtworkSizes.ALBUM_GRID,
+                    ) { navController.navigate("album/${Uri.encode(album.id)}") }
                 }
             }
         }
@@ -892,9 +935,11 @@ private fun PlaylistRow(playlist: Playlist, onClick: () -> Unit) {
         ) {
             if (playlist.coverArt != null) {
                 Artwork(
-                    url = AppGraph.navidrome.coverArtUrl(playlist.coverArt, size = 240),
+                    source = navidromeCoverSource(
+                        playlist.coverArt,
+                        ArtworkSizes.PLAYLIST_THUMBNAIL,
+                    ),
                     description = playlist.name,
-                    cacheKey = "playlist:${playlist.id}:${playlist.coverArt}:240",
                     modifier = Modifier.fillMaxSize(),
                 )
             } else {
@@ -1084,6 +1129,7 @@ private fun ArtistScreen(navController: NavHostController, id: String) {
                                         album = album,
                                         modifier = Modifier.weight(1f),
                                         subtitle = album.releaseYearLabel(),
+                                        artworkSize = ArtworkSizes.ALBUM_GRID,
                                     ) {
                                         navController.navigate("album/${Uri.encode(album.id)}")
                                     }
@@ -1125,13 +1171,15 @@ private fun AlbumScreen(
     }
     val album = page?.album
     val coverKey = album?.coverArt ?: album?.id
-    val artworkUrl = coverKey?.let { AppGraph.navidrome.coverArtUrl(it, size = 1_200) }
+    val artworkSource = navidromeCoverSource(coverKey, ArtworkSizes.HERO)
     val themeRequest = when {
         page == null && error == null -> CodaThemeRequest.Pending
-        album == null || artworkUrl == null -> CodaThemeRequest.Brand
+        album == null || artworkSource == null -> CodaThemeRequest.Brand
         else -> CodaThemeRequest.Artwork(
             identity = "album:${album.id}",
-            artworkUrl = artworkUrl,
+            artworkUrl = artworkSource.url,
+            diskCacheKey = artworkSource.diskCacheKey,
+            memoryCacheKey = artworkSource.memoryCacheKey,
         )
     }
     RegisterForegroundTheme(themeRouter, themeOwner, themeRequest)
@@ -1222,16 +1270,16 @@ private fun PlaylistScreen(
         loading = false
     }
     val playlistCoverKey = playlist?.coverArt
-    val playlistArtworkUrl = playlistCoverKey?.let {
-        AppGraph.navidrome.coverArtUrl(it, size = 1_200)
-    }
+    val playlistArtworkSource = navidromeCoverSource(playlistCoverKey, ArtworkSizes.HERO)
     val themeRequest = when {
         playlist == null && error == null -> CodaThemeRequest.Pending
-        playlistCoverKey == null || playlistArtworkUrl == null ->
+        playlistCoverKey == null || playlistArtworkSource == null ->
             CodaThemeRequest.InheritPlayback
         else -> CodaThemeRequest.Artwork(
             identity = "playlist:$id:$playlistCoverKey",
-            artworkUrl = playlistArtworkUrl,
+            artworkUrl = playlistArtworkSource.url,
+            diskCacheKey = playlistArtworkSource.diskCacheKey,
+            memoryCacheKey = playlistArtworkSource.memoryCacheKey,
         )
     }
     RegisterForegroundTheme(themeRouter, themeOwner, themeRequest)
@@ -1336,9 +1384,8 @@ private fun PlaylistAlbumHeader(songs: List<Song>) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Artwork(
-            url = coverKey?.let { AppGraph.navidrome.coverArtUrl(it, size = 360) },
+            source = navidromeCoverSource(coverKey, ArtworkSizes.PLAYLIST_THUMBNAIL),
             description = first.album,
-            cacheKey = "playlist-album:${coverKey ?: first.album}:360",
             modifier = Modifier
                 .size(82.dp)
                 .clip(RoundedCornerShape(13.dp)),
@@ -1472,8 +1519,11 @@ private fun ArtistHero(
     artist: Artist,
     albums: List<Album>,
 ) {
-    val imageUrl = artist.artistImageUrl
-        ?: artist.coverArt?.let { AppGraph.navidrome.coverArtUrl(it, size = 1_200) }
+    val artworkSource = artistArtworkSource(
+        artist = artist,
+        size = ArtworkSizes.HERO,
+        preferExternal = true,
+    )
     val trackCount = albums.sumOf { it.songCount }
     val duration = albums.sumOf { it.duration }
     Box(
@@ -1482,9 +1532,8 @@ private fun ArtistHero(
             .aspectRatio(1.45f),
     ) {
         Artwork(
-            url = imageUrl,
+            source = artworkSource,
             description = artist.name,
-            cacheKey = "artist-hero:${artist.id}",
             modifier = Modifier.fillMaxSize(),
         )
         Box(
@@ -1530,7 +1579,7 @@ private fun AlbumHero(
             Cover(
                 page.album,
                 Modifier.fillMaxSize(),
-                size = 1_200,
+                size = ArtworkSizes.HERO,
                 showRatingBadge = false,
             )
             Box(
@@ -1687,10 +1736,8 @@ private fun ArtistCard(
 ) {
     Column(modifier = modifier.clickable(onClick = onClick)) {
         Artwork(
-            url = artist.coverArt?.let { AppGraph.navidrome.coverArtUrl(it, size = 500) }
-                ?: artist.artistImageUrl,
+            source = artistArtworkSource(artist, ArtworkSizes.ARTIST_THUMBNAIL),
             description = artist.name,
-            cacheKey = "artist-card:${artist.id}",
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(1f)
@@ -1740,6 +1787,7 @@ private fun AlbumCard(
     album: Album,
     modifier: Modifier = Modifier,
     subtitle: String = album.artist,
+    artworkSize: Int = ArtworkSizes.ALBUM_CARD,
     onClick: () -> Unit,
 ) {
     Column(modifier = modifier.clickable(onClick = onClick)) {
@@ -1749,6 +1797,7 @@ private fun AlbumCard(
                 .fillMaxWidth()
                 .aspectRatio(1f)
                 .clip(RoundedCornerShape(14.dp)),
+            size = artworkSize,
         )
         Spacer(Modifier.height(8.dp))
         Text(album.name, maxLines = 1, overflow = TextOverflow.Ellipsis, fontWeight = FontWeight.Medium)
@@ -1766,15 +1815,15 @@ private fun AlbumCard(
 private fun Cover(
     album: Album,
     modifier: Modifier,
-    size: Int = 600,
+    size: Int = ArtworkSizes.ALBUM_CARD,
     showRatingBadge: Boolean = true,
 ) {
-    val url = AppGraph.navidrome.coverArtUrl(album.coverArt ?: album.id, size = size)
+    val source = navidromeCoverSource(album.coverArt ?: album.id, size)
     val rating = LocalAlbumRatingCoordinator.current
         .state(album.id, album.userRating)
         .rating
     Box(modifier = modifier.background(MaterialTheme.colorScheme.surfaceVariant)) {
-        if (url == null) {
+        if (source == null) {
             Icon(
                 Icons.Default.Album,
                 contentDescription = null,
@@ -1783,13 +1832,8 @@ private fun Cover(
                     .size(48.dp),
             )
         } else {
-            val request = ImageRequest.Builder(LocalContext.current)
-                .data(url)
-                .memoryCacheKey(accountCacheKey("album:${album.coverArt ?: album.id}:$size"))
-                .diskCacheKey(accountCacheKey("album:${album.coverArt ?: album.id}:$size"))
-                .build()
             AsyncImage(
-                model = request,
+                model = artworkRequest(source),
                 contentDescription = album.name,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
@@ -1826,10 +1870,8 @@ private fun ArtistRow(artist: Artist, onClick: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Artwork(
-            url = artist.coverArt?.let { AppGraph.navidrome.coverArtUrl(it) }
-                ?: artist.artistImageUrl,
+            source = artistArtworkSource(artist, ArtworkSizes.ARTIST_THUMBNAIL),
             description = artist.name,
-            cacheKey = "artist:${artist.id}",
             modifier = Modifier
                 .size(58.dp)
                 .clip(RoundedCornerShape(13.dp)),
@@ -1888,7 +1930,7 @@ private fun SongRow(
 private fun ContinueCard(queue: PlayQueue, onClick: () -> Unit) {
     val song = queue.entry.firstOrNull { it.id == queue.current } ?: queue.entry.first()
     val coverKey = song.albumId ?: song.coverArt ?: song.id
-    val coverUrl = AppGraph.navidrome.coverArtUrl(coverKey, size = 900)
+    val artworkSource = navidromeCoverSource(coverKey, ArtworkSizes.HERO)
     Box(
         modifier = Modifier
             .padding(horizontal = 16.dp)
@@ -1898,13 +1940,9 @@ private fun ContinueCard(queue: PlayQueue, onClick: () -> Unit) {
             .background(MaterialTheme.colorScheme.primaryContainer)
             .clickable(onClick = onClick),
     ) {
-        if (coverUrl != null) {
+        if (artworkSource != null) {
             AsyncImage(
-                model = ImageRequest.Builder(LocalContext.current)
-                    .data(coverUrl)
-                    .memoryCacheKey(accountCacheKey("continue:$coverKey"))
-                    .diskCacheKey(accountCacheKey("continue:$coverKey"))
-                    .build(),
+                model = artworkRequest(artworkSource),
                 contentDescription = song.album,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
@@ -1987,9 +2025,11 @@ private fun MiniPlayer(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Artwork(
-                url = state.artworkUrl,
+                source = playbackArtworkSource(
+                    state.artworkKey ?: state.currentSongId.orEmpty(),
+                    state.artworkUrl,
+                ),
                 description = state.album,
-                cacheKey = "playback:${state.artworkKey ?: state.currentSongId}",
                 modifier = Modifier.size(68.dp),
             )
             Column(
@@ -2073,9 +2113,11 @@ private fun NowPlayingScreen(
                             .height(artworkHeight),
                     ) {
                         Artwork(
-                            url = state.artworkUrl,
+                            source = playbackArtworkSource(
+                                state.artworkKey ?: state.currentSongId.orEmpty(),
+                                state.artworkUrl,
+                            ),
                             description = state.album,
-                            cacheKey = "playback:${state.artworkKey ?: state.currentSongId}",
                             modifier = Modifier.fillMaxSize(),
                         )
                         Box(
@@ -2394,9 +2436,8 @@ private fun QueueRow(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Artwork(
-            url = item.artworkUrl,
+            source = playbackArtworkSource(item.artworkKey, item.artworkUrl),
             description = item.album,
-            cacheKey = "playback:${item.artworkKey}",
             modifier = Modifier
                 .size(54.dp)
                 .clip(RoundedCornerShape(10.dp)),
@@ -2420,28 +2461,34 @@ private fun QueueRow(
 
 @Composable
 private fun Artwork(
-    url: String?,
+    source: ArtworkSource?,
     description: String,
-    cacheKey: String,
     modifier: Modifier,
 ) {
-    if (url == null) {
+    if (source == null) {
         Box(modifier.background(MaterialTheme.colorScheme.surfaceVariant), contentAlignment = Alignment.Center) {
             Icon(Icons.Default.Album, null, modifier = Modifier.size(48.dp))
         }
         return
     }
-    val request = ImageRequest.Builder(LocalContext.current)
-        .data(url)
-        .memoryCacheKey(accountCacheKey(cacheKey))
-        .diskCacheKey(accountCacheKey(cacheKey))
-        .build()
     AsyncImage(
-        model = request,
+        model = artworkRequest(source),
         contentDescription = description,
         contentScale = ContentScale.Crop,
         modifier = modifier.background(MaterialTheme.colorScheme.surfaceVariant),
     )
+}
+
+@Composable
+private fun artworkRequest(source: ArtworkSource): ImageRequest {
+    val builder = ImageRequest.Builder(LocalContext.current)
+        .data(source.url)
+        .memoryCacheKey(source.memoryCacheKey)
+    return if (source.diskCacheKey == null) {
+        builder.diskCachePolicy(CachePolicy.DISABLED).build()
+    } else {
+        builder.diskCacheKey(source.diskCacheKey).build()
+    }
 }
 
 @Composable

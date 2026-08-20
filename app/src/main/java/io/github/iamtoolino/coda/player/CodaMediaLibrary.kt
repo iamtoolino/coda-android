@@ -20,6 +20,7 @@ import com.google.common.util.concurrent.SettableFuture
 import io.github.iamtoolino.coda.AppGraph
 import io.github.iamtoolino.coda.NavidromeSession
 import io.github.iamtoolino.coda.R
+import io.github.iamtoolino.coda.artwork.ArtworkSizes
 import io.github.iamtoolino.coda.data.Album
 import io.github.iamtoolino.coda.data.AlbumListType
 import io.github.iamtoolino.coda.data.Artist
@@ -445,7 +446,7 @@ internal class CodaMediaLibraryCallback(
                     CarArtwork.cover(
                         context,
                         album.coverArt ?: album.id,
-                        800,
+                        ArtworkSizes.ALBUM_CARD,
                         account.cacheNamespace,
                     ),
                 )
@@ -473,7 +474,7 @@ internal class CodaMediaLibraryCallback(
                     ) ?: CarArtwork.cover(
                         context,
                         artist.coverArt,
-                        800,
+                        ArtworkSizes.ARTIST_THUMBNAIL,
                         account.cacheNamespace,
                     ),
                 )
@@ -491,7 +492,12 @@ internal class CodaMediaLibraryCallback(
                 .setTitle(playlist.name)
                 .setSubtitle(trackCount(playlist.songCount))
                 .setArtworkUri(
-                    CarArtwork.cover(context, playlist.coverArt, 800, account.cacheNamespace),
+                    CarArtwork.cover(
+                        context,
+                        playlist.coverArt,
+                        ArtworkSizes.PLAYLIST_THUMBNAIL,
+                        account.cacheNamespace,
+                    ),
                 )
                 .setIsBrowsable(true)
                 .setIsPlayable(true)
@@ -512,7 +518,7 @@ internal class CodaMediaLibraryCallback(
                     CarArtwork.cover(
                         context,
                         song.albumId ?: song.coverArt,
-                        800,
+                        ArtworkSizes.ALBUM_CARD,
                         account.cacheNamespace,
                     ),
                 )

@@ -7,7 +7,8 @@ Coda is a personal, album-oriented Android client for Navidrome/OpenSubsonic.
 - Navidrome is authoritative for albums, artists, playlists, favorites, searches, and saved queues.
 - Opening a playlist always fetches `getPlaylist` and shows a loading state instead of stale membership.
 - Home refreshes explicitly with pull-to-refresh.
-- Artwork may be cached persistently for responsive scrolling.
+- Artwork is cached persistently for responsive scrolling. The Connection screen provides an
+  explicit artwork refresh for server-side cover or artist-image replacements.
 - Library metadata is not mirrored into a local database.
 
 ## Navigation

@@ -53,10 +53,30 @@ presentation, destination controls, backgrounds, progress indicators, and the pe
 mini-player always use the same palette.
 
 Artwork extraction is asynchronous and cached by account namespace, extraction algorithm version,
-and canonical semantic identity. A prepare-then-commit gate prevents an obsolete artwork request
-from publishing after navigation has moved elsewhere. Pending destinations retain the last committed
-palette until their replacement is ready, avoiding an intermediate Brand transition. Monochrome
-extraction falls back to neutral grey; missing or unreadable artwork falls back to Brand teal.
+and canonical artwork source. It shares the same encoded hero entry as the visible artwork rather
+than downloading another component-specific copy. A prepare-then-commit gate prevents an obsolete
+artwork request from publishing after navigation has moved elsewhere. Pending destinations retain
+the last committed palette until their replacement is ready, avoiding an intermediate Brand
+transition. Monochrome extraction falls back to neutral grey; missing or unreadable artwork falls
+back to Brand teal.
+
+## Artwork
+
+Phone artwork uses four server-source buckets: 420 px for the high-volume Albums grid and playlist
+thumbnails, 500 px for artist cards and rows, 600 px for Home album cards and Android Auto album
+browsing, and 1200 px for heroes, Continue, Now Playing, playback metadata, and theme extraction.
+Callers resolve these through one policy instead of inventing component-specific sizes.
+
+Coil owns a decoded memory cache and a 512 MB encoded disk cache. A Navidrome cover's encoded key is
+the account namespace, manual-refresh generation, cover ID, and source size, so two surfaces asking
+for the same source share one disk entry. An external artist URL has one encoded entry even when it
+is displayed at multiple sizes. Playback uses Android Auto's already-persistent `content://`
+artwork and disables Coil disk writes for that source to avoid storing the same bytes twice.
+
+OpenSubsonic metadata does not provide a reliable artwork revision. The Connection screen therefore
+offers an explicit artwork refresh: it clears Coil memory/disk data, Android Auto artwork, and
+derived theme colors, then advances the persisted generation so in-flight old requests cannot
+repopulate visible stale entries. Disconnect performs the same cache cleanup for the old account.
 
 ## Playback
 
@@ -71,8 +91,8 @@ rather than a byte-based eviction policy. The queue defines its contents: whenev
 single cancellable worker fills the current track and next three sequentially and removes keys
 outside that window. Replacing, advancing, or clearing the queue recomputes the window immediately.
 The cache survives service/process recreation and is reused by the restored queue; disconnecting the
-account clears its entries. Phone artwork uses Coil's separate cache and Android Auto artwork uses
-the bounded car-artwork cache below.
+account clears its entries. Phone artwork uses Coil's separate cache described above and Android
+Auto artwork uses the bounded car-artwork cache below.
 
 Network changes do not interrupt the current track. Upcoming items are prepared off the main thread
 and rewritten in one ordered Media3 batch to original or Opus stream URLs according to the active

@@ -28,6 +28,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.font.FontWeight
 import coil3.imageLoader
+import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import coil3.request.SuccessResult
 import coil3.request.allowHardware
@@ -104,7 +105,12 @@ private object ArtworkColorCache {
     operator fun set(key: String, colors: ArtworkColors) {
         values[key] = colors
     }
+
+    @Synchronized
+    fun clear() = values.clear()
 }
+
+internal fun clearArtworkColorCache() = ArtworkColorCache.clear()
 
 @Composable
 fun CodaTheme(content: @Composable () -> Unit) {
@@ -127,22 +133,25 @@ internal fun RoutedCodaTheme(
             CodaThemeRequest.InheritPlayback -> Unit
             CodaThemeRequest.Brand -> committedColors = BrandColors
             is CodaThemeRequest.Artwork -> {
-                val cacheKey =
-                    "${AppGraph.cacheNamespace}:accent-v${CodaAccentExtractor.ALGORITHM_VERSION}:${request.identity}"
+                val cacheKey = "${AppGraph.cacheNamespace}:" +
+                    "accent-v${CodaAccentExtractor.ALGORITHM_VERSION}:${request.memoryCacheKey}"
                 val cached = ArtworkColorCache[cacheKey]
                 if (cached != null) {
                     if (commitGate.isCurrent(token)) committedColors = cached
                     return@LaunchedEffect
                 }
                 val colors = try {
-                    val imageRequest = ImageRequest.Builder(context)
+                    val requestBuilder = ImageRequest.Builder(context)
                         .data(request.artworkUrl)
                         .size(32, 32)
                         .allowHardware(false)
                         .bitmapConfig(Bitmap.Config.ARGB_8888)
                         .memoryCacheKey("accent-software:$cacheKey")
-                        .diskCacheKey("accent:$cacheKey")
-                        .build()
+                    val imageRequest = if (request.diskCacheKey == null) {
+                        requestBuilder.diskCachePolicy(CachePolicy.DISABLED).build()
+                    } else {
+                        requestBuilder.diskCacheKey(request.diskCacheKey).build()
+                    }
                     val result = context.imageLoader.execute(imageRequest) as? SuccessResult
                     currentCoroutineContext().ensureActive()
                     if (result == null) {

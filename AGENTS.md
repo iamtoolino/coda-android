@@ -71,6 +71,12 @@
   replacement, stop, and process start must never infer completion from playback position.
 - Artwork identity, album identity, and track identity are not interchangeable. Prefer canonical
   album artwork for playback, cache, and theme decisions.
+- Phone artwork uses the shared 420/500/600/1200 px source policy. Cache encoded Navidrome artwork
+  once per account, generation, cover ID, and source size rather than per composable; theme
+  extraction shares the hero source. Coil owns decoded memory and a 512 MB encoded disk cache.
+  Playback `content://` artwork is already backed by the separate car cache and must not be copied
+  into Coil's disk cache. Server artwork replacement is explicit: the Connection screen refresh
+  clears phone/car bytes, derived colors, and advances the cache generation.
 - Shared visual policy is resolved centrally. Brand teal is the default; the current playback
   artwork owns the theme across ordinary screens and Now Playing; a viewed album or playlist with
   explicit artwork temporarily owns the entire phone presentation, including the mini-player;

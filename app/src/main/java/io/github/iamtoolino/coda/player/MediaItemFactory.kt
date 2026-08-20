@@ -7,6 +7,7 @@ import androidx.media3.common.MediaMetadata
 import androidx.media3.common.util.UnstableApi
 import io.github.iamtoolino.coda.AppGraph
 import io.github.iamtoolino.coda.NavidromeSession
+import io.github.iamtoolino.coda.artwork.ArtworkSizes
 import io.github.iamtoolino.coda.data.Song
 
 internal fun Song.toPlayableMediaItem(context: Context): MediaItem =
@@ -30,7 +31,7 @@ internal fun Song.toPlayableMediaItem(
     val coverUri = CarArtwork.cover(
         context,
         albumId ?: coverArt,
-        size = 1_200,
+        size = ArtworkSizes.HERO,
         namespace = session.cacheNamespace,
     )
     val extras = Bundle().apply {

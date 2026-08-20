@@ -17,6 +17,8 @@ internal sealed interface CodaThemeRequest {
     data class Artwork(
         val identity: String,
         val artworkUrl: String,
+        val diskCacheKey: String? = null,
+        val memoryCacheKey: String = identity,
     ) : CodaThemeRequest
 }
 
