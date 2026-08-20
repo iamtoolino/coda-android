@@ -123,7 +123,10 @@ class NavidromeModelsTest {
     @Test
     fun `save queue posts repeated ids current song and millisecond position`() = runBlocking {
         var captured: Request? = null
-        val client = testClient { request -> captured = request }
+        val client = testClient(
+            queueClientName = "Coda on Galaxy S25",
+            onRequest = { request -> captured = request },
+        )
 
         client.savePlayQueue(listOf("song-1", "song-2", "song-3"), 1, 93_210)
 
@@ -133,6 +136,7 @@ class NavidromeModelsTest {
         assertEquals(listOf("song-1", "song-2", "song-3"), form.values("id"))
         assertEquals(listOf("song-2"), form.values("current"))
         assertEquals(listOf("93210"), form.values("position"))
+        assertEquals(listOf("Coda on Galaxy S25"), form.values("c"))
     }
 
     @Test
@@ -260,6 +264,7 @@ class NavidromeModelsTest {
     private fun testClient(
         responseJson: String =
             """{"subsonic-response":{"status":"ok","version":"1.16.1"}}""",
+        queueClientName: String = NavidromeClient.CLIENT_NAME,
         onRequest: (Request) -> Unit = {},
     ): NavidromeClient {
         val httpClient = OkHttpClient.Builder()
@@ -282,6 +287,7 @@ class NavidromeModelsTest {
             username = "user",
             password = "password",
             httpClient = httpClient,
+            queueClientName = queueClientName,
         )
     }
 

@@ -11,6 +11,7 @@ import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import io.github.iamtoolino.coda.AppGraph
 import io.github.iamtoolino.coda.NavidromeSession
+import io.github.iamtoolino.coda.data.NavidromeClient
 import io.github.iamtoolino.coda.data.PlayQueue
 import io.github.iamtoolino.coda.data.Song
 import kotlinx.coroutines.CoroutineScope
@@ -26,6 +27,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 internal fun playedSubmissionPoint(durationMs: Long): Long =
     durationMs.coerceAtLeast(0) * 95 / 100
@@ -50,6 +52,35 @@ internal suspend fun retryScrobble(
         retryDelayMs = (retryDelayMs * 2).coerceAtMost(30_000)
     }
     return false
+}
+
+internal enum class HandoffDisposition {
+    NONE,
+    RESTORE_PAUSED,
+    OFFER_EXTERNAL,
+}
+
+internal fun isAndroidQueue(changedBy: String?, ownClientName: String): Boolean =
+    normalizeClientName(changedBy) == normalizeClientName(ownClientName) ||
+        normalizeClientName(changedBy) == normalizeClientName(NavidromeClient.CLIENT_NAME) ||
+        normalizeClientName(changedBy) == normalizeClientName("Coda")
+
+private fun normalizeClientName(value: String?): String? = value
+    ?.trim()
+    ?.replace(Regex("\\s+"), " ")
+    ?.lowercase()
+
+internal fun handoffDisposition(
+    queue: PlayQueue?,
+    coldStart: Boolean,
+    localQueueEmpty: Boolean,
+    ownClientName: String,
+): HandoffDisposition = when {
+    queue == null || queue.entry.isEmpty() -> HandoffDisposition.NONE
+    isAndroidQueue(queue.changedBy, ownClientName) && coldStart && localQueueEmpty ->
+        HandoffDisposition.RESTORE_PAUSED
+    isAndroidQueue(queue.changedBy, ownClientName) -> HandoffDisposition.NONE
+    else -> HandoffDisposition.OFFER_EXTERNAL
 }
 
 data class QueueEntry(
@@ -96,6 +127,7 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
     private var controller: MediaController? = null
     private var progressJob: Job? = null
     private var saveScheduleJob: Job? = null
+    private var handoffRefreshJob: Job? = null
     private var nowPlayingScrobbleJob: Job? = null
     private val submissionScrobbleJobs = mutableSetOf<Job>()
     private var pendingPlayback: ((MediaController) -> Unit)? = null
@@ -103,6 +135,11 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
     private var progressTicks = 0
     private var playbackError: String? = null
     private var queueSnapshot: List<QueueEntry> = emptyList()
+    private var localPlaybackActive = false
+    private var pendingHandoffRefresh = false
+    private var coldStartRestorePending = true
+    private var handoffSessionGeneration: Long? = null
+    private var homeVisible = false
     @Volatile
     private var latestQueueSaveSequence = 0L
     private val queueSaveRequests = Channel<QueueSaveRequest>(Channel.CONFLATED)
@@ -110,6 +147,8 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
 
     private val _state = MutableStateFlow(PlaybackUiState())
     val state: StateFlow<PlaybackUiState> = _state.asStateFlow()
+    private val _handoffQueue = MutableStateFlow<PlayQueue?>(null)
+    val handoffQueue: StateFlow<PlayQueue?> = _handoffQueue.asStateFlow()
 
     init {
         controllerFuture.addListener(
@@ -120,7 +159,9 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
                 pendingPlayback?.invoke(connectedController)
                 pendingPlayback = null
                 refreshState(rebuildQueue = true)
+                localPlaybackActive = connectedController.hasLocalPlaybackIntent()
                 startProgressUpdates()
+                if (pendingHandoffRefresh) refreshHandoffQueue()
             },
             ContextCompat.getMainExecutor(context),
         )
@@ -138,25 +179,15 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
             )
             player.prepare()
             player.play()
-            saveQueueToServer(delayMs = 750)
         }
     }
 
     fun restore(queue: PlayQueue) {
         if (queue.entry.isEmpty()) return
-        val currentIndex = queue.currentIndex
-            ?: queue.entry.indexOfFirst { it.id == queue.current }.takeIf { it >= 0 }
-            ?: 0
+        _handoffQueue.value = null
+        coldStartRestorePending = false
         runWhenConnected { player ->
-            playbackError = null
-            val mobile = isMobileNetwork(context)
-            player.setMediaItems(
-                queue.entry.map { it.toPlayableMediaItem(context, mobile) },
-                currentIndex.coerceIn(queue.entry.indices),
-                queue.position ?: 0,
-            )
-            player.prepare()
-            player.play()
+            player.restoreQueue(queue, startPlayback = true)
         }
     }
 
@@ -172,7 +203,6 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
                 player.addMediaItems(mediaItems)
             }
             refreshState(rebuildQueue = true)
-            saveQueueToServer(delayMs = 250)
         }
     }
 
@@ -219,21 +249,21 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
         if (index in 0 until player.mediaItemCount) {
             player.removeMediaItem(index)
             refreshState(rebuildQueue = true)
-            saveQueueToServer(delayMs = 250)
         }
     }
 
     fun clearQueue() {
         controller?.clearMediaItems()
         refreshState(rebuildQueue = true)
-        saveQueueToServer(delayMs = 100)
     }
 
     fun disconnect(oldNamespace: String = AppGraph.cacheNamespace) {
-        saveScheduleJob?.cancel()
-        latestQueueSaveSequence++
-        queueSaveWorker.cancel()
-        queueSaveWorker = launchQueueSaveWorker()
+        cancelPendingQueueSaves()
+        handoffRefreshJob?.cancel()
+        pendingHandoffRefresh = false
+        coldStartRestorePending = true
+        handoffSessionGeneration = null
+        _handoffQueue.value = null
         nowPlayingScrobbleJob?.cancel()
         val pendingSubmissions = submissionScrobbleJobs.toList()
         submissionScrobbleJobs.clear()
@@ -247,17 +277,75 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
         refreshState(rebuildQueue = true)
     }
 
+    fun refreshHandoffQueue() {
+        val player = controller
+        if (player == null) {
+            pendingHandoffRefresh = true
+            return
+        }
+        pendingHandoffRefresh = false
+        if (player.hasLocalPlaybackIntent()) {
+            _handoffQueue.value = null
+            return
+        }
+        val session = AppGraph.sessionSnapshot() ?: return
+        if (handoffSessionGeneration != session.generation) {
+            handoffRefreshJob?.cancel()
+            handoffSessionGeneration = session.generation
+            coldStartRestorePending = true
+            _handoffQueue.value = null
+        }
+        handoffRefreshJob?.cancel()
+        handoffRefreshJob = scope.launch {
+            val result = withContext(Dispatchers.IO) {
+                runCatching { session.client.playQueue() }
+            }
+            if (result.isFailure || !AppGraph.isCurrent(session)) return@launch
+            val currentPlayer = controller ?: return@launch
+            if (currentPlayer.hasLocalPlaybackIntent()) {
+                _handoffQueue.value = null
+                return@launch
+            }
+            val queue = result.getOrNull()
+            val disposition = handoffDisposition(
+                queue = queue,
+                coldStart = coldStartRestorePending,
+                localQueueEmpty = currentPlayer.mediaItemCount == 0,
+                ownClientName = session.client.queueClientName,
+            )
+            coldStartRestorePending = false
+            when (disposition) {
+                HandoffDisposition.NONE -> _handoffQueue.value = null
+                HandoffDisposition.RESTORE_PAUSED -> {
+                    _handoffQueue.value = null
+                    currentPlayer.restoreQueue(requireNotNull(queue), startPlayback = false)
+                }
+                HandoffDisposition.OFFER_EXTERNAL -> _handoffQueue.value = queue
+            }
+        }
+    }
+
+    fun setHomeVisible(visible: Boolean) {
+        homeVisible = visible
+    }
+
+    fun onAppForegrounded() {
+        if (homeVisible) refreshHandoffQueue()
+    }
+
     private fun runWhenConnected(action: (MediaController) -> Unit) {
         val player = controller
         if (player != null) action(player) else pendingPlayback = action
     }
 
-    fun saveQueueToServer(delayMs: Long = 0) {
+    private fun saveQueueToServer(delayMs: Long = 0) {
+        if (controller?.hasLocalPlaybackIntent() != true) return
         val sequence = ++latestQueueSaveSequence
         saveScheduleJob?.cancel()
         saveScheduleJob = scope.launch {
             if (delayMs > 0) delay(delayMs)
             val player = controller ?: return@launch
+            if (!player.hasLocalPlaybackIntent()) return@launch
             val ids = (0 until player.mediaItemCount).map { player.getMediaItemAt(it).mediaId }
             if (ids.isNotEmpty() && player.currentMediaItemIndex !in ids.indices) return@launch
             val session = AppGraph.sessionSnapshot() ?: return@launch
@@ -271,6 +359,15 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
                 ),
             )
         }
+    }
+
+    private fun cancelPendingQueueSaves() {
+        saveScheduleJob?.cancel()
+        saveScheduleJob = null
+        latestQueueSaveSequence++
+        queueSaveWorker.cancel()
+        while (queueSaveRequests.tryReceive().isSuccess) Unit
+        queueSaveWorker = launchQueueSaveWorker()
     }
 
     private suspend fun saveQueueRequest(request: QueueSaveRequest) {
@@ -298,11 +395,40 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
         for (request in queueSaveRequests) saveQueueRequest(request)
     }
 
+    private fun MediaController.restoreQueue(queue: PlayQueue, startPlayback: Boolean) {
+        val currentIndex = queue.currentIndex
+            ?: queue.entry.indexOfFirst { it.id == queue.current }.takeIf { it >= 0 }
+            ?: 0
+        playbackError = null
+        val mobile = isMobileNetwork(context)
+        pause()
+        setMediaItems(
+            queue.entry.map { it.toPlayableMediaItem(context, mobile) },
+            currentIndex.coerceIn(queue.entry.indices),
+            queue.position ?: 0,
+        )
+        prepare()
+        if (startPlayback) play()
+    }
+
+    private fun Player.hasLocalPlaybackIntent(): Boolean =
+        mediaItemCount > 0 && playWhenReady && playbackState != Player.STATE_ENDED
+
     override fun onEvents(player: Player, events: Player.Events) {
         if (events.contains(Player.EVENT_MEDIA_ITEM_TRANSITION)) playbackError = null
         val rebuildQueue = events.contains(Player.EVENT_TIMELINE_CHANGED) ||
             events.contains(Player.EVENT_MEDIA_METADATA_CHANGED)
         refreshState(rebuildQueue = rebuildQueue)
+        val playbackActive = player.hasLocalPlaybackIntent()
+        if (playbackActive) _handoffQueue.value = null
+        if (playbackActive != localPlaybackActive) {
+            localPlaybackActive = playbackActive
+            if (playbackActive) {
+                saveQueueToServer()
+            } else {
+                cancelPendingQueueSaves()
+            }
+        }
         if (events.contains(Player.EVENT_MEDIA_ITEM_TRANSITION)) {
             submittedCurrentTrack = false
             nowPlayingScrobbleJob?.cancel()
@@ -310,12 +436,7 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
                 val eventTime = System.currentTimeMillis()
                 nowPlayingScrobbleJob = launchScrobble(songId, submission = false, eventTime)
             }
-        }
-        if (events.contains(Player.EVENT_MEDIA_ITEM_TRANSITION) ||
-            events.contains(Player.EVENT_IS_PLAYING_CHANGED) ||
-            events.contains(Player.EVENT_PLAYBACK_STATE_CHANGED)
-        ) {
-            saveQueueToServer(delayMs = 500)
+            if (playbackActive) saveQueueToServer()
         }
     }
 
@@ -415,6 +536,7 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
     fun release() {
         progressJob?.cancel()
         saveScheduleJob?.cancel()
+        handoffRefreshJob?.cancel()
         queueSaveRequests.close()
         queueSaveWorker.cancel()
         nowPlayingScrobbleJob?.cancel()

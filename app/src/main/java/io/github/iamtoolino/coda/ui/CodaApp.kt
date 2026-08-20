@@ -74,6 +74,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -85,6 +86,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -121,6 +125,7 @@ import io.github.iamtoolino.coda.data.Album
 import io.github.iamtoolino.coda.data.AlbumListType
 import io.github.iamtoolino.coda.data.AlbumPage
 import io.github.iamtoolino.coda.data.Artist
+import io.github.iamtoolino.coda.data.NavidromeClient
 import io.github.iamtoolino.coda.data.PlayQueue
 import io.github.iamtoolino.coda.data.Playlist
 import io.github.iamtoolino.coda.data.SearchResult
@@ -330,7 +335,6 @@ private data class HomeData(
     val recentArtists: List<Artist>,
     val recent: List<Album>,
     val playlists: List<Playlist>,
-    val queue: PlayQueue?,
 )
 
 @Composable
@@ -339,10 +343,25 @@ private fun HomeScreen(navController: NavHostController, playback: PlaybackConne
     var data by remember { mutableStateOf<HomeData?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
     var loading by remember { mutableStateOf(false) }
+    val handoffQueue by playback.handoffQueue.collectAsStateWithLifecycle()
+    val lifecycleOwner = LocalLifecycleOwner.current
     val listState = rememberRestorableLazyListState(
         contentReady = data != null || error != null || !AppGraph.navidrome.isConfigured,
         maxIndex = 9,
     )
+
+    LaunchedEffect(Unit) { playback.refreshHandoffQueue() }
+    DisposableEffect(playback) {
+        playback.setHomeVisible(true)
+        onDispose { playback.setHomeVisible(false) }
+    }
+    DisposableEffect(lifecycleOwner, playback) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) playback.refreshHandoffQueue()
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
 
     LaunchedEffect(generation) {
         loading = true
@@ -359,7 +378,6 @@ private fun HomeScreen(navController: NavHostController, playback: PlaybackConne
                 val artistsDeferred = async { AppGraph.navidrome.artists() }
                 val recentDeferred = async { AppGraph.navidrome.recentlyPlayedAlbums(20) }
                 val playlistsDeferred = async { AppGraph.navidrome.playlists() }
-                val queueDeferred = async { AppGraph.navidrome.playQueue() }
                 val newest = newestDeferred.await()
                 HomeData(
                     newest = newest,
@@ -371,7 +389,6 @@ private fun HomeScreen(navController: NavHostController, playback: PlaybackConne
                     ),
                     recent = recentDeferred.await(),
                     playlists = playlistsDeferred.await(),
-                    queue = queueDeferred.await(),
                 )
             }
         }.onSuccess { data = it }.onFailureUnlessCancelled { error = it.message }
@@ -380,7 +397,10 @@ private fun HomeScreen(navController: NavHostController, playback: PlaybackConne
 
     PullToRefreshBox(
         isRefreshing = loading && data != null,
-        onRefresh = { generation++ },
+        onRefresh = {
+            generation++
+            playback.refreshHandoffQueue()
+        },
         modifier = Modifier.fillMaxSize(),
     ) {
         LazyColumn(
@@ -408,7 +428,7 @@ private fun HomeScreen(navController: NavHostController, playback: PlaybackConne
             if (error != null && data != null) {
                 item { MessageCard("Refresh failed", error.orEmpty()) }
             }
-            data?.queue?.takeIf { it.entry.isNotEmpty() }?.let { queue ->
+            handoffQueue?.takeIf { it.entry.isNotEmpty() }?.let { queue ->
                 item { ContinueCard(queue) { playback.restore(queue) } }
             }
             data?.recentArtists?.takeIf { it.isNotEmpty() }?.let { artists ->
@@ -1891,7 +1911,9 @@ private fun ContinueCard(queue: PlayQueue, onClick: () -> Unit) {
             Spacer(Modifier.width(14.dp))
             Column(Modifier.weight(1f)) {
                 Text(
-                    queue.changedBy?.takeIf { it.isNotBlank() }?.let { "Continue from $it" }
+                    queue.changedBy?.takeIf { it.isNotBlank() }?.let {
+                        "Continue from ${handoffClientDisplayName(it)}"
+                    }
                         ?: "Continue playing",
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
@@ -1907,6 +1929,12 @@ private fun ContinueCard(queue: PlayQueue, onClick: () -> Unit) {
             }
         }
     }
+}
+
+private fun handoffClientDisplayName(client: String): String = when {
+    client.equals("CodaMac", ignoreCase = true) -> "Coda Mac"
+    client.equals(NavidromeClient.CLIENT_NAME, ignoreCase = true) -> "Coda Android"
+    else -> client
 }
 
 @Composable

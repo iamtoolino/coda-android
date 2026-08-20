@@ -22,6 +22,7 @@ class NavidromeClient(
     private val username: String,
     private val password: String,
     private val httpClient: OkHttpClient = OkHttpClient.Builder().build(),
+    internal val queueClientName: String = CLIENT_NAME,
 ) {
     private val baseUrl = serverUrl.trimEnd('/')
     private val json = Json { ignoreUnknownKeys = true }
@@ -154,7 +155,7 @@ class NavidromeClient(
 
     suspend fun savePlayQueue(songIds: List<String>, currentIndex: Int, positionMs: Long) {
         if (songIds.isEmpty()) {
-            callPost("savePlayQueue", emptyList())
+            callPost("savePlayQueue", emptyList(), queueClientName)
             return
         }
         val parameters = buildList<Pair<String, Any?>> {
@@ -162,7 +163,7 @@ class NavidromeClient(
             add("current" to songIds[currentIndex.coerceIn(songIds.indices)])
             add("position" to positionMs)
         }
-        callPost("savePlayQueue", parameters)
+        callPost("savePlayQueue", parameters, queueClientName)
     }
 
     fun coverArtUrl(id: String?, size: Int = 600): String? = id?.let {
@@ -198,6 +199,7 @@ class NavidromeClient(
     private suspend fun callPost(
         endpoint: String,
         parameters: List<Pair<String, Any?>>,
+        clientName: String = CLIENT_NAME,
     ): SubsonicResponse {
         check(isConfigured) { "Connect a Navidrome server first" }
         val salt = UUID.randomUUID().toString().replace("-", "").take(12)
@@ -207,7 +209,7 @@ class NavidromeClient(
             .add("t", token)
             .add("s", salt)
             .add("v", "1.16.1")
-            .add("c", "Coda")
+            .add("c", clientName)
             .add("f", "json")
             .apply {
                 parameters.forEach { (name, value) ->
@@ -260,7 +262,7 @@ class NavidromeClient(
             .addQueryParameter("t", token)
             .addQueryParameter("s", salt)
             .addQueryParameter("v", "1.16.1")
-            .addQueryParameter("c", "Coda")
+            .addQueryParameter("c", CLIENT_NAME)
             .addQueryParameter("f", "json")
             .apply {
                 parameters.forEach { (name, value) ->
@@ -279,6 +281,8 @@ class NavidromeClient(
     }
 
     companion object {
+        const val CLIENT_NAME = "CodaAndroid"
+
         internal fun normalizeServerUrl(value: String): String {
             val candidate = value.trim().trimEnd('/').let {
                 if (it.contains("://")) it else "https://$it"

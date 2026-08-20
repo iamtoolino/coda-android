@@ -4,6 +4,7 @@ import android.content.Context
 import io.github.iamtoolino.coda.data.CredentialStore
 import io.github.iamtoolino.coda.data.NavidromeClient
 import io.github.iamtoolino.coda.data.ServerCredentials
+import io.github.iamtoolino.coda.data.queueClientName
 import java.security.MessageDigest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,6 +20,7 @@ internal data class NavidromeSession(
 
 object AppGraph {
     private lateinit var credentialStore: CredentialStore
+    private var queueWriterName = NavidromeClient.CLIENT_NAME
     private var nextGeneration = 0L
     @Volatile
     private var session = NavidromeSession(
@@ -37,6 +39,7 @@ object AppGraph {
     fun initialize(context: Context) {
         if (::credentialStore.isInitialized) return
         credentialStore = CredentialStore(context.applicationContext)
+        queueWriterName = queueClientName(context.applicationContext)
         credentialStore.load()?.let(::useCredentials)
     }
 
@@ -78,7 +81,12 @@ object AppGraph {
     internal fun isCurrent(session: NavidromeSession): Boolean =
         this.session.generation == session.generation
 
-    private fun ServerCredentials.toClient() = NavidromeClient(serverUrl, username, password)
+    private fun ServerCredentials.toClient() = NavidromeClient(
+        serverUrl = serverUrl,
+        username = username,
+        password = password,
+        queueClientName = queueWriterName,
+    )
 
     private fun ServerCredentials.cacheNamespace(): String = MessageDigest.getInstance("SHA-256")
         .digest("$serverUrl\u0000$username".encodeToByteArray())

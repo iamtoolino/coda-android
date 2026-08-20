@@ -37,3 +37,12 @@ in total and 16 MB for any single compressed response.
 The OpenSubsonic `getPlayQueue` and `savePlayQueue` endpoints carry song order, current item, and
 position. Saving uses form POST to avoid URL-length limits on long queues. A conflated serial worker
 ensures an older save cannot finish after a newer one, while keeping only the latest pending state.
+Queue writes identify the installation as `Coda on <device name>` while other API calls retain the
+stable `CodaAndroid` identifier. Android writes once when playback starts/resumes or changes item and
+every 15 seconds while playing; pause, background, and queue-edit events do not write. Pending writes
+are cancelled when playback stops.
+
+Home performs opportunistic queue reads when it opens, refreshes, or returns to the foreground. A
+cold-start queue last written by Android is restored paused. A non-empty queue written by another
+client is exposed separately as a Continue candidate and never replaces the local paused queue until
+the user accepts it. Queue-read failures do not fail Home's library content.

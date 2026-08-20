@@ -30,8 +30,12 @@ Coda is a personal, album-oriented Android client for Navidrome/OpenSubsonic.
 
 ## Cross-client queue
 
-- Coda restores Navidrome's saved play queue and position from the Home screen.
-- Coda saves its queue on changes, pause/background, and periodically during playback.
+- On cold start, Coda restores its own last saved Navidrome queue and position without autoplaying.
+- A queue last written by another client is offered through the Home screen while Android is not
+  playing.
+- Coda saves when playback starts or resumes, when the current item changes, and every 15 seconds
+  while playback continues. Paused/background state and queue edits do not trigger writes.
+- Home checks for an external queue when opened, explicitly refreshed, or foregrounded while visible.
 - Queue state can be continued by another Navidrome client that supports the server-side play queue
   when both clients use the same user.
 

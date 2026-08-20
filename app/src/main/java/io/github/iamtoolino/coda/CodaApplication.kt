@@ -1,10 +1,10 @@
 package io.github.iamtoolino.coda
 
 import android.app.Application
+import coil3.imageLoader
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
-import coil3.imageLoader
 import io.github.iamtoolino.coda.player.CarArtwork
 import io.github.iamtoolino.coda.player.PlaybackConnection
 import kotlinx.coroutines.CoroutineScope
@@ -24,8 +24,8 @@ class CodaApplication : Application(), DefaultLifecycleObserver {
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
     }
 
-    override fun onStop(owner: LifecycleOwner) {
-        playback.saveQueueToServer()
+    override fun onStart(owner: LifecycleOwner) {
+        playback.onAppForegrounded()
     }
 
     fun clearArtworkCaches(namespace: String) {

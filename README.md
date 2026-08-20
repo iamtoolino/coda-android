@@ -71,11 +71,15 @@ bounded car-artwork cache described below. These are not part of the four-track 
 
 ## Queue handoff
 
-Coda reads and writes Navidrome's saved play queue. Queue order, current track, and playback position
-can therefore be continued by another Navidrome client that supports the same server-side queue.
+Coda reads and writes Navidrome's saved play queue. Queue order, current track, and approximate
+playback position can therefore be continued by another Navidrome client that supports the same
+server-side queue.
 
-Queue changes are saved after relevant playback actions and periodically while listening. Scrobbles
-are retried after transient failures, and a track is submitted as played after 95% playback.
+Android publishes a snapshot when playback starts or changes track and every 15 seconds while music
+continues. It does not overwrite the shared queue while paused. On Home, a queue written by another
+client appears as an explicit Continue card; Coda's own queue is restored paused after a cold start.
+Scrobbles are retried after transient failures, and a track is submitted as played after 95%
+playback.
 
 ## Android Auto
 
