@@ -17,9 +17,9 @@ authoritative specifications.
   require explicit scenarios and are not folded into the deterministic suite.
 - **Confirmed broken at this baseline:** none. Missing automation and untested device/server
   combinations are verification gaps, not claims that those paths are correct.
-- **Historical inputs:** `../android-accent-color-handoff.md`, `../queue-handoff-android.md`, and
-  `coda-android-lessons-learned.txt` explain prior decisions. They are not current specifications
-  where they disagree with product, architecture, `AGENTS.md`, or code.
+- **Historical inputs:** `../android-accent-color-handoff.md` and `../queue-handoff-android.md`
+  explain prior decisions. They are not current specifications where they disagree with product,
+  architecture, `AGENTS.md`, or code.
 - **Platform-specific:** Media3 service/session ownership, foreground-service behavior, Android Auto,
   Android Keystore, connectivity policy, system bars, and Android lifecycle behavior must remain
   native Android implementations rather than direct macOS ports.

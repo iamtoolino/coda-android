@@ -17,9 +17,9 @@
   activity is visible.
 - Keep solutions proportional to this hobby project's size and expected maintenance. Centralize a
   semantic decision when multiple consumers must agree; do not add generic layers with one caller.
-- The product contract is in `docs/product.md`, current ownership and data flow are in
-  `docs/architecture.md`, and historical rationale is in `docs/coda-android-lessons-learned.txt`.
-  Treat current code and those reviewed documents as authoritative over obsolete prototype behavior.
+- The product contract is in `docs/product.md`, and current ownership and data flow are in
+  `docs/architecture.md`. Treat current code and those reviewed documents as authoritative over
+  obsolete prototype behavior.
 
 ## Durable product and architecture rules
 
