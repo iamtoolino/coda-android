@@ -1,5 +1,8 @@
 # Coda queue handoff — Android implementation brief
 
+> Historical implementation input. Current behavior is defined by `docs/product.md`,
+> `docs/architecture.md`, `AGENTS.md`, and the reviewed Android code.
+
 This document describes the queue-handoff behavior currently implemented in Coda for macOS and how
 to reproduce it in Coda for Android. It is a cross-client continuation feature, not remote control:
 clients do not attempt to remain synchronized while they are simultaneously playing.

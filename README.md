@@ -132,7 +132,7 @@ Prerequisites:
 Clone the repository and build a debug APK:
 
 ```sh
-./gradlew assembleDebug
+./scripts/gradle.sh assembleDebug
 ```
 
 The APK is written to `app/build/outputs/apk/debug/app-debug.apk`.
@@ -140,8 +140,17 @@ The APK is written to `app/build/outputs/apk/debug/app-debug.apk`.
 Run the verification suite with:
 
 ```sh
-./gradlew testDebugUnitTest lintDebug assembleDebug
+./scripts/verify.sh
 ```
+
+With a booted emulator, run the credential-free Compose UI smoke test with an explicit serial:
+
+```sh
+./scripts/ui-test.sh emulator-5554
+```
+
+The current implementation and verification boundaries are recorded in
+[docs/development-baseline.md](docs/development-baseline.md).
 
 Runtime server credentials are entered inside the app. `local.properties` is used only by standard
 Android tooling when a local SDK path is required and must not contain Coda credentials.

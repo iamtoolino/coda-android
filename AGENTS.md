@@ -174,7 +174,13 @@
 - Use the repository wrapper so the JDK and Gradle cache are consistent:
 
   ```sh
-  ./scripts/gradle.sh testDebugUnitTest lintDebug assembleDebug
+  ./scripts/verify.sh
+  ```
+
+- Run the deterministic Compose smoke test on a booted emulator with an explicit serial:
+
+  ```sh
+  ./scripts/ui-test.sh emulator-5554
   ```
 
 - For documentation-only changes, run `git diff --check` and verify referenced commands and paths. A

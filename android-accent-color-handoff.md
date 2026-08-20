@@ -1,5 +1,8 @@
 # Coda accent-color extraction: Android handoff
 
+> Historical implementation input. Current behavior is defined by `docs/product.md`,
+> `docs/architecture.md`, `AGENTS.md`, and the reviewed Android code.
+
 Status: production behavior on macOS as of 2026-07-23  
 Algorithm version: 1  
 macOS source of truth: `Sources/CodaPlaybackSpike/ArtworkTreatment.swift`,

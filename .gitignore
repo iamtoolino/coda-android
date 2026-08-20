@@ -11,3 +11,16 @@ local.properties
 *.iml
 .DS_Store
 captures/
+*.apk
+*.aab
+*.apks
+*.hprof
+*.log
+*.db
+*.sqlite
+*.sqlite3
+secrets.properties
+keystore.properties
+reports/
+.cxx/
+.externalNativeBuild/

@@ -25,4 +25,4 @@ jobs:
         uses: gradle/actions/setup-gradle@v6
 
       - name: Test, lint, and build
-        run: ./gradlew testDebugUnitTest lintDebug assembleDebug
+        run: ./gradlew testDebugUnitTest lintDebug assembleDebug assembleDebugAndroidTest
