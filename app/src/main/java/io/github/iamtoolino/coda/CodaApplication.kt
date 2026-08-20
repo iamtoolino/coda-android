@@ -89,6 +89,6 @@ class CodaApplication : Application(), DefaultLifecycleObserver {
         const val ARTWORK_PREFERENCES = "artwork_cache"
         const val ARTWORK_GENERATION_KEY = "generation"
         const val ARTWORK_CACHE_DIRECTORY = "phone-artwork"
-        const val ARTWORK_DISK_CACHE_BYTES = 512L * 1024L * 1024L
+        const val ARTWORK_DISK_CACHE_BYTES = 10L * 1024L * 1024L * 1024L
     }
 }

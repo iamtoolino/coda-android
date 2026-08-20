@@ -67,7 +67,7 @@ thumbnails, 500 px for artist cards and rows, 600 px for Home album cards and An
 browsing, and 1200 px for heroes, Continue, Now Playing, playback metadata, and theme extraction.
 Callers resolve these through one policy instead of inventing component-specific sizes.
 
-Coil owns a decoded memory cache and a 512 MB encoded disk cache. A Navidrome cover's encoded key is
+Coil owns a decoded memory cache and a 10 GB encoded disk cache. A Navidrome cover's encoded key is
 the account namespace, manual-refresh generation, cover ID, and source size, so two surfaces asking
 for the same source share one disk entry. An external artist URL has one encoded entry even when it
 is displayed at multiple sizes. Playback uses Android Auto's already-persistent `content://`
