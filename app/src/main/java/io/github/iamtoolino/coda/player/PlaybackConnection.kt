@@ -29,31 +29,6 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-internal fun playedSubmissionPoint(durationMs: Long): Long =
-    durationMs.coerceAtLeast(0) * 95 / 100
-
-internal suspend fun retryScrobble(
-    maxAttempts: Int = 6,
-    initialDelayMs: Long = 1_000,
-    action: suspend () -> Unit,
-): Boolean {
-    require(maxAttempts > 0)
-    var retryDelayMs = initialDelayMs.coerceAtLeast(0)
-    repeat(maxAttempts) { attempt ->
-        try {
-            action()
-            return true
-        } catch (error: CancellationException) {
-            throw error
-        } catch (_: Throwable) {
-            if (attempt == maxAttempts - 1) return false
-        }
-        if (retryDelayMs > 0) delay(retryDelayMs)
-        retryDelayMs = (retryDelayMs * 2).coerceAtMost(30_000)
-    }
-    return false
-}
-
 internal enum class HandoffDisposition {
     NONE,
     RESTORE_PAUSED,
@@ -149,10 +124,7 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
     private var progressJob: Job? = null
     private var saveScheduleJob: Job? = null
     private var handoffRefreshJob: Job? = null
-    private var nowPlayingScrobbleJob: Job? = null
-    private val submissionScrobbleJobs = mutableSetOf<Job>()
     private var pendingPlayback: ((MediaController) -> Unit)? = null
-    private var submittedCurrentTrack = false
     private var progressTicks = 0
     private var playbackError: String? = null
     private var queueSnapshot: List<QueueEntry> = emptyList()
@@ -285,15 +257,12 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
         coldStartRestorePending = true
         handoffSessionGeneration = null
         _handoffQueue.value = null
-        nowPlayingScrobbleJob?.cancel()
-        val pendingSubmissions = submissionScrobbleJobs.toList()
-        submissionScrobbleJobs.clear()
-        pendingSubmissions.forEach(Job::cancel)
         pendingPlayback = null
         controller?.run {
             stop()
             clearMediaItems()
         }
+        PlaybackService.invalidateScrobbling()
         PlaybackService.clearTransientAudioCacheFor(oldNamespace)
         refreshState(rebuildQueue = true)
     }
@@ -450,15 +419,7 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
                 cancelPendingQueueSaves()
             }
         }
-        if (events.contains(Player.EVENT_MEDIA_ITEM_TRANSITION)) {
-            submittedCurrentTrack = false
-            nowPlayingScrobbleJob?.cancel()
-            player.currentMediaItem?.mediaId?.let { songId ->
-                val eventTime = System.currentTimeMillis()
-                nowPlayingScrobbleJob = launchScrobble(songId, submission = false, eventTime)
-            }
-            if (playbackActive) saveQueueToServer()
-        }
+        if (events.contains(Player.EVENT_MEDIA_ITEM_TRANSITION) && playbackActive) saveQueueToServer()
     }
 
     override fun onPlayerError(error: PlaybackException) {
@@ -533,21 +494,6 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
                 if (player?.isPlaying == true) {
                     progressTicks++
                     if (progressTicks % 30 == 0) saveQueueToServer()
-                    val duration = player.effectiveDurationMs()
-                    val submissionPoint = playedSubmissionPoint(duration)
-                    if (!submittedCurrentTrack && duration > 0 && player.currentPosition >= submissionPoint) {
-                        submittedCurrentTrack = true
-                        player.currentMediaItem?.mediaId?.let { songId ->
-                            val eventTime = System.currentTimeMillis()
-                            trackSubmissionScrobble(
-                                launchScrobble(
-                                    songId,
-                                    submission = true,
-                                    eventTime,
-                                ),
-                            )
-                        }
-                    }
                 }
                 delay(if (controller?.isPlaying == true) 500 else 1_500)
             }
@@ -560,10 +506,6 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
         handoffRefreshJob?.cancel()
         queueSaveRequests.close()
         queueSaveWorker.cancel()
-        nowPlayingScrobbleJob?.cancel()
-        val pendingSubmissions = submissionScrobbleJobs.toList()
-        submissionScrobbleJobs.clear()
-        pendingSubmissions.forEach(Job::cancel)
         pendingPlayback = null
         controller?.removeListener(this)
         controller?.release()
@@ -578,28 +520,6 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
             ?.getLong("durationMs")
             ?.coerceAtLeast(0)
             ?: 0
-    }
-
-    private fun launchScrobble(songId: String, submission: Boolean, eventTime: Long): Job? {
-        val session = AppGraph.sessionSnapshot() ?: return null
-        return scope.launch(Dispatchers.IO) {
-            retryScrobble {
-                if (!AppGraph.isCurrent(session)) throw CancellationException("Account changed")
-                session.client.scrobble(
-                    songId = songId,
-                    submission = submission,
-                    time = eventTime,
-                )
-            }
-        }
-    }
-
-    private fun trackSubmissionScrobble(job: Job?) {
-        if (job == null) return
-        submissionScrobbleJobs += job
-        job.invokeOnCompletion {
-            scope.launch { submissionScrobbleJobs -= job }
-        }
     }
 
     private data class QueueSaveRequest(

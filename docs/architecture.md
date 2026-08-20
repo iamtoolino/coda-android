@@ -72,6 +72,14 @@ the bounded car-artwork cache below.
 
 Network changes do not interrupt the current track. Upcoming items are rewritten to original or Opus stream URLs according to the active transport.
 
+`ScrobbleCoordinator` is owned by `PlaybackService`, beside the authoritative Media3 player used by
+the phone, notification, Bluetooth, and Android Auto. A pure policy state machine gives each loaded
+track a playback-occurrence identity. Media3 automatic transitions and repeat transitions submit
+the outgoing occurrence, while final `STATE_ENDED` submits the last queue item. Manual transitions,
+restoration, handoff, seeking, stopping, and playlist replacement never infer completion from a
+saved or current position. Now-playing and completed submissions retain bounded retry behavior and
+are cancelled when their account session becomes obsolete.
+
 ## Android Auto
 
 `PlaybackService` is exported as both a Media3 `MediaLibraryService` and a legacy-compatible `MediaBrowserService`. `CodaMediaLibraryCallback` exposes four car-safe roots: alphabetically bucketed artists, recently added albums, recently played albums, and playlists. Each node returns its complete intended contents because Android Auto does not paginate media-browser children. Search, album playback, and playlist playback resolve library IDs back into the same network-aware `MediaItem` factory used by the phone UI.

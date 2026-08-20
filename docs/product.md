@@ -60,6 +60,9 @@ Coda is a personal, album-oriented Android client for Navidrome/OpenSubsonic.
 - A rolling transient cache begins filling when a queue exists, with the current track followed by
   the next three. It survives process/service recreation, follows queue/current-item changes, and is
   cleared when the queue is emptied or the account disconnects.
+- Coda reports a track as played only when it genuinely finishes. Automatic advance, completion of
+  the final queue item, and completion before a repeat count; seeking near the end, manually
+  skipping, restoring Coda, or accepting a queue handoff do not.
 
 ## Cross-client queue
 

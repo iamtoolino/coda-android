@@ -65,6 +65,10 @@
   override or screen-local transaction flag. Publish optimistic ratings across every surface,
   serialize writes per album while conflating pending choices, and roll back only a failed latest
   revision. Session cancellation must not publish a rollback or failure.
+- Scrobbling belongs beside the authoritative player in `PlaybackService`, not to the phone UI.
+  Model each loaded track as a playback occurrence. Submit it as played only after a Media3 automatic
+  completion, repeat completion, or final `STATE_ENDED`; restore, handoff, seek, manual skip, queue
+  replacement, stop, and process start must never infer completion from playback position.
 - Artwork identity, album identity, and track identity are not interchangeable. Prefer canonical
   album artwork for playback, cache, and theme decisions.
 - Shared visual policy is resolved centrally. Brand teal is the default; the current playback

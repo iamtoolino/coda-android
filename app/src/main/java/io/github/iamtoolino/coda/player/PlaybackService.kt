@@ -26,6 +26,7 @@ import androidx.media3.session.MediaLibraryService.MediaLibrarySession
 import androidx.media3.session.MediaSession
 import io.github.iamtoolino.coda.AppGraph
 import java.io.File
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -45,7 +46,9 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
     private lateinit var snapshotStore: PlaybackSnapshotStore
     private lateinit var cache: SimpleCache
     private lateinit var cacheFactory: CacheDataSource.Factory
+    private lateinit var scrobbler: ScrobbleCoordinator
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val scrobbleScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private var prefetchJob: Job? = null
     private var snapshotJob: Job? = null
     @Volatile
@@ -93,10 +96,19 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
             )
             .setHandleAudioBecomingNoisy(true)
             .build()
-            .also {
-                it.setWakeMode(C.WAKE_MODE_NETWORK)
-                it.addListener(this)
+        scrobbler = ScrobbleCoordinator(scrobbleScope) { songId, submission, eventTime ->
+            val account = AppGraph.sessionSnapshot() ?: return@ScrobbleCoordinator null
+            suspend {
+                if (!AppGraph.isCurrent(account)) throw CancellationException("Account changed")
+                account.client.scrobble(
+                    songId = songId,
+                    submission = submission,
+                    time = eventTime,
+                )
             }
+        }
+        player.setWakeMode(C.WAKE_MODE_NETWORK)
+        player.addListener(this)
         restoreLocalSnapshot()
         libraryCallback = CodaMediaLibraryCallback(this, scope)
         val sessionBuilder = MediaLibrarySession.Builder(
@@ -184,6 +196,23 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
             persistLocalSnapshot()
         }
         if (events.contains(Player.EVENT_IS_PLAYING_CHANGED)) updateSnapshotTimer()
+    }
+
+    override fun onMediaItemTransition(mediaItem: androidx.media3.common.MediaItem?, reason: Int) {
+        scrobbler.transition(
+            songId = mediaItem?.mediaId,
+            transition = when (reason) {
+                Player.MEDIA_ITEM_TRANSITION_REASON_AUTO -> PlaybackTransition.AUTOMATIC
+                Player.MEDIA_ITEM_TRANSITION_REASON_REPEAT -> PlaybackTransition.REPEAT
+                Player.MEDIA_ITEM_TRANSITION_REASON_PLAYLIST_CHANGED ->
+                    PlaybackTransition.PLAYLIST_CHANGED
+                else -> PlaybackTransition.MANUAL
+            },
+        )
+    }
+
+    override fun onPlaybackStateChanged(playbackState: Int) {
+        if (playbackState == Player.STATE_ENDED) scrobbler.playbackEnded()
     }
 
     private fun maintainFourTrackWindow() {
@@ -298,11 +327,13 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
         activeCacheWriter?.cancel()
         prefetchJob?.cancel()
         snapshotJob?.cancel()
+        scrobbler.close()
         runCatching { connectivity.unregisterNetworkCallback(networkCallback) }
         session.release()
         player.release()
         cache.release()
         scope.cancel()
+        scrobbleScope.cancel()
         super.onDestroy()
     }
 
@@ -312,6 +343,10 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
 
         fun clearTransientAudioCacheFor(namespace: String) {
             activeInstance?.clearTransientAudioCache(namespace)
+        }
+
+        fun invalidateScrobbling() {
+            activeInstance?.scrobbler?.invalidate()
         }
     }
 }
