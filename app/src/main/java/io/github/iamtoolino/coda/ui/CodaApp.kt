@@ -914,20 +914,23 @@ private fun SearchScreen(
     var query by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue(""))
     }
-    var generation by rememberSaveable { mutableIntStateOf(0) }
-    var loadedQuery by remember { mutableStateOf("") }
-    var result by remember { mutableStateOf(SearchResult()) }
-    var loading by remember { mutableStateOf(false) }
-    var error by remember { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
+    val coordinator = remember(scope) {
+        SearchCoordinator(scope) { requestedQuery ->
+            AppGraph.withCurrentSession { search(requestedQuery) }
+        }
+    }
+    val state = coordinator.state
     val queryText = query.text
+    val result = state.result ?: SearchResult()
     val resultItemCount = 1 +
         result.artist.size + (if (result.artist.isNotEmpty()) 1 else 0) +
         (if (result.album.isNotEmpty()) 1 else 0) +
         result.song.size + (if (result.song.isNotEmpty()) 1 else 0)
     val listState = rememberRestorableLazyListState(
         contentReady = queryText.length < 2 ||
-            (loadedQuery == queryText && !loading) ||
-            error != null,
+            (state.loadedQuery == queryText && !state.isLoading) ||
+            state.errorMessage != null,
         maxIndex = (resultItemCount - 1).coerceAtLeast(0),
     )
 
@@ -938,25 +941,11 @@ private fun SearchScreen(
         keyboardController?.show()
     }
 
-    LaunchedEffect(queryText, generation) {
-        loading = false
-        error = null
-        if (queryText != loadedQuery) result = SearchResult()
-        if (queryText.length < 2) {
-            loadedQuery = queryText
-            return@LaunchedEffect
-        }
-        delay(350)
-        loading = true
-        runCatching { AppGraph.withCurrentSession { search(queryText) } }
-            .onSuccess { result = it; loadedQuery = queryText; error = null }
-            .onFailureUnlessCancelled { error = it.message }
-        loading = false
-    }
+    LaunchedEffect(coordinator, queryText) { coordinator.updateQuery(queryText) }
 
     PullToRefreshBox(
-        isRefreshing = loading && queryText == loadedQuery,
-        onRefresh = { if (queryText.length >= 2) generation++ },
+        isRefreshing = state.isLoading && queryText == state.loadedQuery,
+        onRefresh = { coordinator.refresh() },
         modifier = Modifier.fillMaxSize(),
     ) {
         LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
@@ -987,8 +976,8 @@ private fun SearchScreen(
                     )
                 }
             }
-            if (loading && result == SearchResult()) item { LoadingBlock() }
-            if (error != null) item { MessageCard("Search failed", error.orEmpty()) }
+            if (state.isLoading && result == SearchResult()) item { LoadingBlock() }
+            state.errorMessage?.let { error -> item { MessageCard("Search failed", error) } }
             if (result.artist.isNotEmpty()) {
                 item { SectionTitle("Artists") }
                 items(result.artist, key = { "artist-${it.id}" }) { artist ->

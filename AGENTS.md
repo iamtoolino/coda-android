@@ -56,6 +56,9 @@
 - Collection composables render coordinator state; they do not own request generations or publish
   suspended results directly. Preserve good content on same-key refresh, clear mismatched content
   when a collection key changes, and reject late completions from superseded loads.
+- Search text selection, focus, and keyboard behavior belong to Compose; query debounce, request
+  ownership, result identity, refresh retention, and stale-result rejection belong to
+  `SearchCoordinator`. Explicit refresh is immediate and must not repeat the typing debounce.
 - Artwork identity, album identity, and track identity are not interchangeable. Prefer canonical
   album artwork for playback, cache, and theme decisions.
 - Shared visual policy is resolved centrally. Brand teal is the default; the current playback

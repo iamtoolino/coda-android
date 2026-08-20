@@ -24,6 +24,11 @@ the same key retains good content, while changing an album view clears mismatche
 load cancels its predecessor and also uses a generation gate, so even a non-cooperative obsolete
 request cannot publish after a newer selection.
 
+`SearchCoordinator` owns debounced query execution independently of text-field selection and focus.
+Typing waits 350 ms before issuing a request; explicit refresh starts immediately and retains the
+last result for the same query. A changed query clears mismatched results. Cancellation propagates,
+and a request-generation gate rejects late results from superseded queries.
+
 `CredentialStore` encrypts the selected server and account with Android Keystore. `AppGraph`
 reconstructs the active `NavidromeClient` after a cold start, so no private server values are compiled
 into the APK. A non-secret hash of server URL and username namespaces transient caches so identifiers
