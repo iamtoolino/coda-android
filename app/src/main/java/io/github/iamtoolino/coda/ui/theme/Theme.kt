@@ -18,6 +18,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
@@ -91,6 +92,8 @@ private val NeutralColors = ArtworkColors(
     surfaceVariant = Color(0xFF242428),
 )
 
+private val GenericArtworkColors = artworkColors(CodaAccentExtractor.GENERIC_FALLBACK)
+
 private object ArtworkColorCache {
     private const val maxEntries = 80
     private val values = object : LinkedHashMap<String, ArtworkColors>(maxEntries, 0.75f, true) {
@@ -121,13 +124,15 @@ fun ArtworkTheme(
 ) {
     val context = LocalContext.current
     val sourceKey = artworkKey ?: artworkUrl
-    val cacheKey = sourceKey?.let { "${AppGraph.cacheNamespace}:$it" }
+    val cacheKey = sourceKey?.let {
+        "${AppGraph.cacheNamespace}:accent-v${CodaAccentExtractor.ALGORITHM_VERSION}:$it"
+    }
     if (artworkUrl == null || cacheKey == null) {
-        CodaMaterialTheme(NeutralColors, content)
+        CodaMaterialTheme(GenericArtworkColors, content)
         return
     }
     val initial = remember(cacheKey) {
-        ArtworkColorCache[cacheKey] ?: NeutralColors
+        ArtworkColorCache[cacheKey] ?: GenericArtworkColors
     }
     val extracted by produceState(initialValue = initial, artworkUrl, cacheKey) {
         ArtworkColorCache[cacheKey]?.let {
@@ -136,18 +141,25 @@ fun ArtworkTheme(
         }
         val request = ImageRequest.Builder(context)
             .data(artworkUrl)
-            .size(96, 96)
+            .size(32, 32)
             .allowHardware(false)
             .bitmapConfig(Bitmap.Config.ARGB_8888)
-            .memoryCacheKey("palette-software:$cacheKey")
-            .diskCacheKey("palette:$cacheKey")
+            .memoryCacheKey("accent-software:$cacheKey")
+            .diskCacheKey("accent:$cacheKey")
             .build()
         val result = runCatching { context.imageLoader.execute(request) as? SuccessResult }
-            .getOrNull() ?: return@produceState
-        val colors = runCatching {
-            val bitmap = result.image.toBitmap(96, 96, Bitmap.Config.ARGB_8888)
-            withContext(Dispatchers.Default) { extractArtworkColors(bitmap) }
-        }.getOrNull() ?: return@produceState
+            .getOrNull()
+        val accent = if (result == null) {
+            CodaAccentExtractor.GENERIC_FALLBACK
+        } else {
+            withContext(Dispatchers.Default) {
+                runCatching {
+                    val bitmap = result.image.toBitmap(32, 32, Bitmap.Config.ARGB_8888)
+                    CodaAccentExtractor.extractOrFallback(bitmap)
+                }.getOrDefault(CodaAccentExtractor.GENERIC_FALLBACK)
+            }
+        }
+        val colors = artworkColors(accent)
         ArtworkColorCache[cacheKey] = colors
         value = colors
     }
@@ -217,69 +229,19 @@ fun AdaptiveBackground(
     }
 }
 
-private data class ColorBucket(
-    var count: Int = 0,
-    var red: Long = 0,
-    var green: Long = 0,
-    var blue: Long = 0,
-)
-
-private fun extractArtworkColors(bitmap: Bitmap): ArtworkColors {
-    val pixels = IntArray(bitmap.width * bitmap.height)
-    bitmap.getPixels(pixels, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
-    val buckets = mutableMapOf<Int, ColorBucket>()
-    val hsv = FloatArray(3)
-    pixels.forEach { pixel ->
-        if (AndroidColor.alpha(pixel) < 180) return@forEach
-        AndroidColor.colorToHSV(pixel, hsv)
-        val saturation = hsv[1]
-        val value = hsv[2]
-        if (value < 0.14f || saturation < 0.15f) return@forEach
-        if (value > 0.94f && saturation < 0.42f) return@forEach
-        val hueBand = (hsv[0] / 18f).toInt().coerceIn(0, 19)
-        val saturationBand = (saturation * 5f).toInt().coerceIn(0, 4)
-        val valueBand = (value * 5f).toInt().coerceIn(0, 4)
-        val key = hueBand * 100 + saturationBand * 10 + valueBand
-        val bucket = buckets.getOrPut(key) { ColorBucket() }
-        bucket.count++
-        bucket.red += AndroidColor.red(pixel)
-        bucket.green += AndroidColor.green(pixel)
-        bucket.blue += AndroidColor.blue(pixel)
-    }
-    val selected = buckets.values.maxByOrNull { bucket ->
-        val color = AndroidColor.rgb(
-            (bucket.red / bucket.count).toInt(),
-            (bucket.green / bucket.count).toInt(),
-            (bucket.blue / bucket.count).toInt(),
-        )
-        AndroidColor.colorToHSV(color, hsv)
-        val warmBoost = when (hsv[0]) {
-            in 20f..75f -> 1.18f
-            in 180f..250f -> 0.96f
-            else -> 1f
-        }
-        val usableBrightness = 1f - kotlin.math.abs(hsv[2] - 0.64f) * 0.55f
-        bucket.count * (0.55f + hsv[1]) * usableBrightness * warmBoost
-    } ?: return NeutralColors
-    if (selected.count < pixels.size * 0.015f) return NeutralColors
-
-    val seed = AndroidColor.rgb(
-        (selected.red / selected.count).toInt(),
-        (selected.green / selected.count).toInt(),
-        (selected.blue / selected.count).toInt(),
+private fun artworkColors(extracted: CodaAccentColor): ArtworkColors {
+    val accent = Color(
+        red = extracted.red.toFloat(),
+        green = extracted.green.toFloat(),
+        blue = extracted.blue.toFloat(),
     )
-    AndroidColor.colorToHSV(seed, hsv)
+    val hsv = FloatArray(3)
+    AndroidColor.colorToHSV(accent.toArgb(), hsv)
     val hue = hsv[0]
     val seedSaturation = hsv[1]
     val isPurpleOrMagenta = hue in 255f..335f
     val saturationCap = if (isPurpleOrMagenta) 0.48f else 0.72f
-    val accentSaturation = seedSaturation.coerceIn(0.18f, saturationCap)
-    val accentValue = if (isPurpleOrMagenta) 0.84f else 0.90f
-    val accent = Color(
-        AndroidColor.HSVToColor(
-            floatArrayOf(hue, accentSaturation, accentValue),
-        ),
-    )
+    val containerSaturationSeed = seedSaturation.coerceIn(0.18f, saturationCap)
     val backgroundTop = Color(
         AndroidColor.HSVToColor(
             floatArrayOf(hue, (seedSaturation * 0.30f).coerceIn(0.08f, 0.24f), 0.13f),
@@ -292,7 +254,11 @@ private fun extractArtworkColors(bitmap: Bitmap): ArtworkColors {
     )
     val accentContainer = Color(
         AndroidColor.HSVToColor(
-            floatArrayOf(hue, (accentSaturation * 0.72f).coerceIn(0.24f, 0.50f), 0.30f),
+            floatArrayOf(
+                hue,
+                (containerSaturationSeed * 0.72f).coerceIn(0.24f, 0.50f),
+                0.30f,
+            ),
         ),
     )
     return ArtworkColors(
