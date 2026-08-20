@@ -1,6 +1,7 @@
 package io.github.iamtoolino.coda.data
 
 import java.security.MessageDigest
+import java.util.concurrent.TimeUnit
 import java.util.UUID
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -21,7 +22,7 @@ class NavidromeClient(
     serverUrl: String,
     private val username: String,
     private val password: String,
-    private val httpClient: OkHttpClient = OkHttpClient.Builder().build(),
+    private val httpClient: OkHttpClient = DEFAULT_HTTP_CLIENT,
     internal val queueClientName: String = CLIENT_NAME,
 ) {
     private val baseUrl = serverUrl.trimEnd('/')
@@ -63,15 +64,7 @@ class NavidromeClient(
             offset += page.size
             if (page.size < 500) break
         }
-        return if (type == AlbumListType.HIGHEST_RATED) {
-            result.sortedWith(
-                compareByDescending<Album> { it.userRating ?: 0 }
-                    .thenByDescending { it.created.orEmpty() }
-                    .thenBy { it.name.lowercase() },
-            )
-        } else {
-            result
-        }
+        return result
     }
 
     suspend fun allNewestAlbums(): List<Album> = allAlbums(AlbumListType.NEWEST)
@@ -282,6 +275,13 @@ class NavidromeClient(
 
     companion object {
         const val CLIENT_NAME = "CodaAndroid"
+        internal const val API_CALL_TIMEOUT_MILLIS = 20_000
+        internal val DEFAULT_HTTP_CLIENT: OkHttpClient = OkHttpClient.Builder()
+            .connectTimeout(10, TimeUnit.SECONDS)
+            .readTimeout(15, TimeUnit.SECONDS)
+            .writeTimeout(15, TimeUnit.SECONDS)
+            .callTimeout(API_CALL_TIMEOUT_MILLIS.toLong(), TimeUnit.MILLISECONDS)
+            .build()
 
         internal fun normalizeServerUrl(value: String): String {
             val candidate = value.trim().trimEnd('/').let {

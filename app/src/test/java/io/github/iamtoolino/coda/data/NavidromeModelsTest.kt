@@ -16,6 +16,14 @@ import okhttp3.ResponseBody.Companion.toResponseBody
 import okhttp3.HttpUrl.Companion.toHttpUrl
 
 class NavidromeModelsTest {
+    @Test
+    fun `default API client bounds complete calls`() {
+        assertEquals(
+            NavidromeClient.API_CALL_TIMEOUT_MILLIS,
+            NavidromeClient.DEFAULT_HTTP_CLIENT.callTimeoutMillis,
+        )
+    }
+
     private val json = Json { ignoreUnknownKeys = true }
 
     @Test
@@ -193,36 +201,6 @@ class NavidromeModelsTest {
         assertEquals("3000", url.queryParameter("fromYear"))
         assertEquals("0", url.queryParameter("toYear"))
         assertEquals("24", url.queryParameter("size"))
-    }
-
-    @Test
-    fun `highest rated albums put recent discoveries first within a rating`() = runBlocking {
-        val client = testClient(
-            responseJson = """
-                {
-                  "subsonic-response": {
-                    "status": "ok",
-                    "albumList2": {
-                      "album": [
-                        { "id": "older-five", "name": "Older", "userRating": 5,
-                          "created": "2024-01-01T00:00:00Z" },
-                        { "id": "new-four", "name": "Four", "userRating": 4,
-                          "created": "2026-01-01T00:00:00Z" },
-                        { "id": "newer-five", "name": "Newer", "userRating": 5,
-                          "created": "2026-02-01T00:00:00Z" }
-                      ]
-                    }
-                  }
-                }
-            """.trimIndent(),
-        )
-
-        val albums = client.allAlbums(AlbumListType.HIGHEST_RATED)
-
-        assertEquals(
-            listOf("newer-five", "older-five", "new-four"),
-            albums.map { it.id },
-        )
     }
 
     @Test

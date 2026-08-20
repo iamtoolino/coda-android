@@ -4,6 +4,13 @@
 
 `NavidromeClient` talks directly to the OpenSubsonic REST API using salted-token authentication. Screen state is held in Compose memory only and is refetched when its destination is opened or refreshed.
 
+The API client is shared across account sessions and gives each complete metadata call a finite
+20-second deadline in addition to connect/read/write timeouts. Phone UI requests run through
+`AppGraph.withCurrentSession`, which captures the active client and generation before suspension and
+rejects both successful and failed completions if the account changed before publication. An
+unreachable VPN route, stale DNS answer, or unresponsive server therefore resolves to a screen error
+instead of an indefinite loading state, and an old account cannot publish into a new session.
+
 `CredentialStore` encrypts the selected server and account with Android Keystore. `AppGraph`
 reconstructs the active `NavidromeClient` after a cold start, so no private server values are compiled
 into the APK. A non-secret hash of server URL and username namespaces transient caches so identifiers

@@ -31,7 +31,6 @@ data class Album(
 enum class AlbumListType(val apiValue: String) {
     NEWEST("newest"),
     RECENTLY_PLAYED("recent"),
-    HIGHEST_RATED("highest"),
     MOST_PLAYED("frequent"),
     ALPHABETICAL("alphabeticalByName"),
     RELEASE_YEAR("byYear"),

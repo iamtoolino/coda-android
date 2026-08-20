@@ -46,6 +46,10 @@
 - Every asynchronous server result belongs to an `AppGraph` account generation. After suspension
   and before publishing state or mutating a server, verify that the captured generation is current.
   Cancellation alone is not sufficient.
+- Phone UI server reads and mutations go through `AppGraph.withCurrentSession`; do not capture
+  `AppGraph.navidrome` directly across suspension. Metadata calls have a finite overall deadline so
+  an unreachable VPN, DNS answer, or server becomes an actionable error instead of an endless
+  loading state.
 - Artwork identity, album identity, and track identity are not interchangeable. Prefer canonical
   album artwork for playback, cache, and theme decisions.
 - Shared visual policy is resolved centrally. Brand teal is the default; the current playback

@@ -160,7 +160,6 @@ private enum class AlbumViewMode(
 ) {
     RECENTLY_ADDED("added", "Recently added", AlbumListType.NEWEST),
     RECENT_RELEASES("released", "Recent releases", AlbumListType.RELEASE_YEAR),
-    TOP_RATED("rated", "Top rated", AlbumListType.HIGHEST_RATED),
     MOST_PLAYED("played", "Most played", AlbumListType.MOST_PLAYED),
     RECENTLY_PLAYED("recent", "Recently played", AlbumListType.RECENTLY_PLAYED),
     ALPHABETICAL("az", "Albums A–Z", AlbumListType.ALPHABETICAL),
@@ -350,7 +349,6 @@ fun CodaApp() {
 
 private data class HomeData(
     val newest: List<Album>,
-    val topRated: List<Album>,
     val recentReleases: List<Album>,
     val recentArtists: List<Artist>,
     val recent: List<Album>,
@@ -387,29 +385,27 @@ private fun HomeScreen(navController: NavHostController, playback: PlaybackConne
         loading = true
         error = null
         runCatching {
-            coroutineScope {
-                val newestDeferred = async { AppGraph.navidrome.newestAlbums(24) }
-                val topRatedDeferred = async {
-                    AppGraph.navidrome.allAlbums(AlbumListType.HIGHEST_RATED).take(24)
+            AppGraph.withCurrentSession {
+                coroutineScope {
+                    val newestDeferred = async { newestAlbums(24) }
+                    val recentReleasesDeferred = async {
+                        albums(AlbumListType.RELEASE_YEAR, 24)
+                    }
+                    val artistsDeferred = async { artists() }
+                    val recentDeferred = async { recentlyPlayedAlbums(20) }
+                    val playlistsDeferred = async { playlists() }
+                    val newest = newestDeferred.await()
+                    HomeData(
+                        newest = newest,
+                        recentReleases = recentReleasesDeferred.await(),
+                        recentArtists = recentArtists(
+                            newestAlbums = newest,
+                            artists = artistsDeferred.await(),
+                        ),
+                        recent = recentDeferred.await(),
+                        playlists = playlistsDeferred.await(),
+                    )
                 }
-                val recentReleasesDeferred = async {
-                    AppGraph.navidrome.albums(AlbumListType.RELEASE_YEAR, 24)
-                }
-                val artistsDeferred = async { AppGraph.navidrome.artists() }
-                val recentDeferred = async { AppGraph.navidrome.recentlyPlayedAlbums(20) }
-                val playlistsDeferred = async { AppGraph.navidrome.playlists() }
-                val newest = newestDeferred.await()
-                HomeData(
-                    newest = newest,
-                    topRated = topRatedDeferred.await(),
-                    recentReleases = recentReleasesDeferred.await(),
-                    recentArtists = recentArtists(
-                        newestAlbums = newest,
-                        artists = artistsDeferred.await(),
-                    ),
-                    recent = recentDeferred.await(),
-                    playlists = playlistsDeferred.await(),
-                )
             }
         }.onSuccess { data = it }.onFailureUnlessCancelled { error = it.message }
         loading = false
@@ -473,18 +469,6 @@ private fun HomeScreen(navController: NavHostController, playback: PlaybackConne
                             navController.navigate(
                                 "albums/${AlbumViewMode.RECENTLY_ADDED.routeValue}",
                             )
-                        },
-                    )
-                }
-            }
-            data?.topRated?.takeIf { it.isNotEmpty() }?.let { albums ->
-                item {
-                    AlbumShelf(
-                        title = "Top rated albums",
-                        albums = albums,
-                        onAlbum = { navController.navigate("album/${Uri.encode(it.id)}") },
-                        onMore = {
-                            navController.navigate("albums/${AlbumViewMode.TOP_RATED.routeValue}")
                         },
                     )
                 }
@@ -574,7 +558,7 @@ private fun ArtistsScreen(navController: NavHostController) {
     val scope = rememberCoroutineScope()
     LaunchedEffect(generation) {
         loading = true
-        runCatching { AppGraph.navidrome.artists() }
+        runCatching { AppGraph.withCurrentSession { artists() } }
             .onSuccess { artists = it; error = null }
             .onFailureUnlessCancelled { error = it.message }
         loading = false
@@ -735,7 +719,7 @@ private fun AlbumsScreen(
     LaunchedEffect(mode, generation) {
         loading = true
         if (loadedMode != mode) albums = null
-        runCatching { AppGraph.navidrome.allAlbums(mode.listType) }
+        runCatching { AppGraph.withCurrentSession { allAlbums(mode.listType) } }
             .onSuccess {
                 albums = it
                 loadedMode = mode
@@ -827,7 +811,7 @@ private fun PlaylistsScreen(navController: NavHostController) {
     RemoteListScreen(
         title = "Playlists",
         onBack = { navController.popBackStack() },
-        loader = { AppGraph.navidrome.playlists() },
+        loader = { playlists() },
     ) { playlists ->
         items(playlists, key = { it.id }) { playlist ->
             PlaylistRow(playlist) {
@@ -923,7 +907,7 @@ private fun SearchScreen(
         }
         delay(350)
         loading = true
-        runCatching { AppGraph.navidrome.search(queryText) }
+        runCatching { AppGraph.withCurrentSession { search(queryText) } }
             .onSuccess { result = it; loadedQuery = queryText; error = null }
             .onFailureUnlessCancelled { error = it.message }
         loading = false
@@ -1006,7 +990,7 @@ private fun ArtistScreen(navController: NavHostController, id: String) {
     )
     LaunchedEffect(id, generation) {
         loading = true
-        runCatching { AppGraph.navidrome.artistAlbums(id) }
+        runCatching { AppGraph.withCurrentSession { artistAlbums(id) } }
             .onSuccess { data = it; error = null }
             .onFailureUnlessCancelled { error = it.message }
         loading = false
@@ -1094,7 +1078,7 @@ private fun AlbumScreen(
     )
     LaunchedEffect(id, generation) {
         loading = true
-        runCatching { AppGraph.navidrome.album(id) }
+        runCatching { AppGraph.withCurrentSession { album(id) } }
             .onSuccess { page = it; error = null }
             .onFailureUnlessCancelled { error = it.message }
         loading = false
@@ -1162,10 +1146,12 @@ private fun AlbumScreen(
                                         ratingUpdating = true
                                         scope.launch {
                                             runCatching {
-                                                AppGraph.navidrome.setAlbumRating(
-                                                    loaded.album.id,
-                                                    newRating,
-                                                )
+                                                AppGraph.withCurrentSession {
+                                                    setAlbumRating(
+                                                        loaded.album.id,
+                                                        newRating,
+                                                    )
+                                                }
                                             }.onFailureUnlessCancelled {
                                                 if (previousRating == 0) {
                                                     albumRatingOverrides.remove(ratingKey)
@@ -1219,7 +1205,7 @@ private fun PlaylistScreen(
     )
     LaunchedEffect(id, generation) {
         loading = true
-        runCatching { AppGraph.navidrome.playlist(id) }
+        runCatching { AppGraph.withCurrentSession { playlist(id) } }
             .onSuccess { playlist = it; error = null }
             .onFailureUnlessCancelled { error = it.message }
         loading = false
@@ -1375,7 +1361,7 @@ private fun PlaylistAlbumHeader(songs: List<Song>) {
 private fun <T> RemoteListScreen(
     title: String,
     onBack: (() -> Unit)? = null,
-    loader: suspend () -> List<T>,
+    loader: suspend NavidromeClient.() -> List<T>,
     content: androidx.compose.foundation.lazy.LazyListScope.(List<T>) -> Unit,
 ) {
     var generation by rememberSaveable { mutableIntStateOf(0) }
@@ -1388,7 +1374,7 @@ private fun <T> RemoteListScreen(
     )
     LaunchedEffect(generation) {
         loading = true
-        runCatching { loader() }
+        runCatching { AppGraph.withCurrentSession(loader) }
             .onSuccess { data = it; error = null }
             .onFailureUnlessCancelled { error = it.message }
         loading = false

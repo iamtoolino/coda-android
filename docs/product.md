@@ -12,7 +12,7 @@ Coda is a personal, album-oriented Android client for Navidrome/OpenSubsonic.
 
 ## Navigation
 
-- Home: Continue Playing, Artists, Recently Added, Top Rated, Recent Releases, Recently Played, and
+- Home: Continue Playing, Artists, Recently Added, Recent Releases, Recently Played, and
   Playlists.
 - Artists: alphabetical list; artist albums use oldest release first.
 - Albums: complete album grid ordered by date added, newest first.

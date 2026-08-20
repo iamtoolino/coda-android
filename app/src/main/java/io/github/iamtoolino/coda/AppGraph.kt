@@ -6,7 +6,10 @@ import io.github.iamtoolino.coda.data.NavidromeClient
 import io.github.iamtoolino.coda.data.ServerCredentials
 import io.github.iamtoolino.coda.data.queueClientName
 import java.security.MessageDigest
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -81,6 +84,16 @@ object AppGraph {
     internal fun isCurrent(session: NavidromeSession): Boolean =
         this.session.generation == session.generation
 
+    internal suspend fun <T> withCurrentSession(
+        request: suspend NavidromeClient.() -> T,
+    ): T {
+        val captured = sessionSnapshot() ?: error("Connect a Navidrome server first")
+        val result = runCatching { captured.client.request() }
+        currentCoroutineContext().ensureActive()
+        ensureSessionGeneration(captured.generation, session.generation)
+        return result.getOrThrow()
+    }
+
     private fun ServerCredentials.toClient() = NavidromeClient(
         serverUrl = serverUrl,
         username = username,
@@ -92,4 +105,8 @@ object AppGraph {
         .digest("$serverUrl\u0000$username".encodeToByteArray())
         .take(12)
         .joinToString("") { "%02x".format(it) }
+}
+
+internal fun ensureSessionGeneration(expected: Long, current: Long) {
+    if (expected != current) throw CancellationException("Navidrome account changed")
 }
