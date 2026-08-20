@@ -60,7 +60,11 @@ extraction falls back to neutral grey; missing or unreadable artwork falls back 
 
 ## Playback
 
-`PlaybackService` owns a Media3 `ExoPlayer` and `MediaLibrarySession`. `PlaybackConnection` is the UI-side `MediaController` and publishes a small `StateFlow` consumed by Compose.
+`PlaybackService` owns a Media3 `ExoPlayer` and `MediaLibrarySession`. `PlaybackConnection` is the
+UI-side `MediaController`. It publishes stable queue/metadata separately from the 500 ms playback
+progress tick, so only the visible mini-player or Now Playing controls recompose as position changes.
+Queue replacement, append, and handoff restoration prepare immutable Media3 items off the main
+thread and apply those mutations in user-action order.
 
 The player uses a Media3 `SimpleCache` as a transient audio cache with explicit resource eviction
 rather than a byte-based eviction policy. The queue defines its contents: whenever a queue exists, a
@@ -70,7 +74,9 @@ The cache survives service/process recreation and is reused by the restored queu
 account clears its entries. Phone artwork uses Coil's separate cache and Android Auto artwork uses
 the bounded car-artwork cache below.
 
-Network changes do not interrupt the current track. Upcoming items are rewritten to original or Opus stream URLs according to the active transport.
+Network changes do not interrupt the current track. Upcoming items are prepared off the main thread
+and rewritten in one ordered Media3 batch to original or Opus stream URLs according to the active
+transport.
 
 `ScrobbleCoordinator` is owned by `PlaybackService`, beside the authoritative Media3 player used by
 the phone, notification, Bluetooth, and Android Auto. A pure policy state machine gives each loaded
@@ -110,4 +116,6 @@ The playback service also persists an account-scoped local queue snapshot contai
 the current index, and position. It restores that snapshot synchronously before publishing a new
 MediaSession, so the phone UI, notifications, Bluetooth, and Android Auto all see the same paused
 queue after process death without waiting for the activity or network. The server queue remains the
-fallback when no local snapshot exists and the source for cross-client handoff.
+fallback when no local snapshot exists and the source for cross-client handoff. Song metadata is
+rebuilt only when the Media3 timeline changes; position-only saves reuse that immutable queue and go
+through a conflated background encoder/writer rather than serializing the complete queue on main.

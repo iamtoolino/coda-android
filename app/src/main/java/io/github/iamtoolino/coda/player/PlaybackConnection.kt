@@ -104,13 +104,16 @@ data class PlaybackUiState(
     val bitDepth: Int? = null,
     val samplingRate: Int? = null,
     val bitRate: Int? = null,
+    val error: String? = null,
+    val currentIndex: Int = -1,
+    val queue: List<QueueEntry> = emptyList(),
+)
+
+data class PlaybackProgressState(
     val isPlaying: Boolean = false,
     val positionMs: Long = 0,
     val durationMs: Long = 0,
     val isSeekable: Boolean = false,
-    val error: String? = null,
-    val currentIndex: Int = -1,
-    val queue: List<QueueEntry> = emptyList(),
 )
 
 @androidx.annotation.OptIn(markerClass = [UnstableApi::class])
@@ -128,6 +131,7 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
     private var progressTicks = 0
     private var playbackError: String? = null
     private var queueSnapshot: List<QueueEntry> = emptyList()
+    private var queueIdSnapshot: List<String> = emptyList()
     private var localPlaybackActive = false
     private var pendingHandoffRefresh = false
     private var coldStartRestorePending = true
@@ -137,9 +141,14 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
     private var latestQueueSaveSequence = 0L
     private val queueSaveRequests = Channel<QueueSaveRequest>(Channel.CONFLATED)
     private var queueSaveWorker = launchQueueSaveWorker()
+    private var queueMutationGeneration = 0L
+    private val queueMutationRequests = Channel<PreparedQueueMutation>(Channel.UNLIMITED)
+    private val queueMutationWorker = launchQueueMutationWorker()
 
     private val _state = MutableStateFlow(PlaybackUiState())
     val state: StateFlow<PlaybackUiState> = _state.asStateFlow()
+    private val _progress = MutableStateFlow(PlaybackProgressState())
+    val progress: StateFlow<PlaybackProgressState> = _progress.asStateFlow()
     private val _handoffQueue = MutableStateFlow<PlayQueue?>(null)
     val handoffQueue: StateFlow<PlayQueue?> = _handoffQueue.asStateFlow()
 
@@ -162,16 +171,15 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
 
     fun playSongs(items: List<Song>, startIndex: Int = 0) {
         if (items.isEmpty()) return
-        runWhenConnected { player ->
-            playbackError = null
-            val mobile = isMobileNetwork(context)
-            player.setMediaItems(
-                items.map { it.toPlayableMediaItem(context, mobile) },
-                startIndex.coerceIn(items.indices),
-                0,
+        runWhenConnected {
+            enqueueQueueMutation(
+                QueueMutation.Replace(
+                    songs = items,
+                    startIndex = startIndex.coerceIn(items.indices),
+                    positionMs = 0,
+                    startPlayback = true,
+                ),
             )
-            player.prepare()
-            player.play()
         }
     }
 
@@ -179,23 +187,15 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
         if (queue.entry.isEmpty()) return
         _handoffQueue.value = null
         coldStartRestorePending = false
-        runWhenConnected { player ->
-            player.restoreQueue(queue, startPlayback = true)
+        runWhenConnected {
+            enqueueRestore(queue, startPlayback = true)
         }
     }
 
     fun appendSongs(items: List<Song>) {
         if (items.isEmpty()) return
-        runWhenConnected { player ->
-            val mobile = isMobileNetwork(context)
-            val mediaItems = items.map { it.toPlayableMediaItem(context, mobile) }
-            if (player.mediaItemCount == 0) {
-                player.setMediaItems(mediaItems)
-                player.prepare()
-            } else {
-                player.addMediaItems(mediaItems)
-            }
-            refreshState(rebuildQueue = true)
+        runWhenConnected {
+            enqueueQueueMutation(QueueMutation.Append(items))
         }
     }
 
@@ -251,6 +251,8 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
     }
 
     fun disconnect(oldNamespace: String = AppGraph.cacheNamespace) {
+        queueMutationGeneration++
+        while (queueMutationRequests.tryReceive().isSuccess) Unit
         cancelPendingQueueSaves()
         handoffRefreshJob?.cancel()
         pendingHandoffRefresh = false
@@ -308,7 +310,7 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
                 HandoffDisposition.NONE -> _handoffQueue.value = null
                 HandoffDisposition.RESTORE_PAUSED -> {
                     _handoffQueue.value = null
-                    currentPlayer.restoreQueue(requireNotNull(queue), startPlayback = false)
+                    enqueueRestore(requireNotNull(queue), startPlayback = false)
                 }
                 HandoffDisposition.OFFER_EXTERNAL -> _handoffQueue.value = queue
             }
@@ -336,8 +338,10 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
             if (delayMs > 0) delay(delayMs)
             val player = controller ?: return@launch
             if (!player.hasLocalPlaybackIntent()) return@launch
-            val ids = (0 until player.mediaItemCount).map { player.getMediaItemAt(it).mediaId }
-            if (ids.isNotEmpty() && player.currentMediaItemIndex !in ids.indices) return@launch
+            val ids = queueIdSnapshot
+            if (ids.size != player.mediaItemCount || player.currentMediaItemIndex !in ids.indices) {
+                return@launch
+            }
             val session = AppGraph.sessionSnapshot() ?: return@launch
             queueSaveRequests.trySend(
                 QueueSaveRequest(
@@ -385,20 +389,53 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
         for (request in queueSaveRequests) saveQueueRequest(request)
     }
 
-    private fun MediaController.restoreQueue(queue: PlayQueue, startPlayback: Boolean) {
+    private fun enqueueRestore(queue: PlayQueue, startPlayback: Boolean) {
         val currentIndex = queue.currentIndex
             ?: queue.entry.indexOfFirst { it.id == queue.current }.takeIf { it >= 0 }
             ?: 0
-        playbackError = null
-        val mobile = isMobileNetwork(context)
-        pause()
-        setMediaItems(
-            queue.entry.map { it.toPlayableMediaItem(context, mobile) },
-            currentIndex.coerceIn(queue.entry.indices),
-            queue.position ?: 0,
+        enqueueQueueMutation(
+            QueueMutation.Replace(
+                songs = queue.entry,
+                startIndex = currentIndex.coerceIn(queue.entry.indices),
+                positionMs = queue.position ?: 0,
+                startPlayback = startPlayback,
+            ),
         )
-        prepare()
-        if (startPlayback) play()
+    }
+
+    private fun enqueueQueueMutation(mutation: QueueMutation) {
+        val session = AppGraph.sessionSnapshot() ?: return
+        queueMutationRequests.trySend(mutation.withSession(queueMutationGeneration, session))
+    }
+
+    private fun launchQueueMutationWorker(): Job = scope.launch {
+        for (request in queueMutationRequests) {
+            val mobile = isMobileNetwork(context)
+            val mediaItems = withContext(Dispatchers.Default) {
+                request.songs.map { it.toPlayableMediaItem(context, mobile, request.session) }
+            }
+            if (request.generation != queueMutationGeneration || !AppGraph.isCurrent(request.session)) {
+                continue
+            }
+            val player = controller ?: continue
+            playbackError = null
+            when (request) {
+                is PreparedQueueMutation.Replace -> {
+                    player.pause()
+                    player.setMediaItems(mediaItems, request.startIndex, request.positionMs)
+                    player.prepare()
+                    if (request.startPlayback) player.play()
+                }
+                is PreparedQueueMutation.Append -> {
+                    if (player.mediaItemCount == 0) {
+                        player.setMediaItems(mediaItems)
+                        player.prepare()
+                    } else {
+                        player.addMediaItems(mediaItems)
+                    }
+                }
+            }
+        }
     }
 
     private fun Player.hasLocalPlaybackIntent(): Boolean =
@@ -430,10 +467,15 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
     private fun refreshState(rebuildQueue: Boolean = false) {
         val player = controller ?: run {
             queueSnapshot = emptyList()
+            queueIdSnapshot = emptyList()
             _state.value = PlaybackUiState()
+            _progress.value = PlaybackProgressState()
             return
         }
-        if (rebuildQueue) queueSnapshot = player.queueEntries()
+        if (rebuildQueue) {
+            queueSnapshot = player.queueEntries()
+            queueIdSnapshot = queueSnapshot.map(QueueEntry::id)
+        }
         val item = player.currentMediaItem
         val metadata = item?.mediaMetadata
         val extras = metadata?.extras
@@ -451,16 +493,26 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
             bitDepth = extras?.takeIf { it.containsKey("bitDepth") }?.getInt("bitDepth"),
             samplingRate = extras?.takeIf { it.containsKey("samplingRate") }?.getInt("samplingRate"),
             bitRate = extras?.takeIf { it.containsKey("bitRate") }?.getInt("bitRate"),
-            isPlaying = player.isPlaying,
-            positionMs = player.currentPosition.coerceAtLeast(0),
-            durationMs = player.effectiveDurationMs(),
-            isSeekable = player.isCommandAvailable(Player.COMMAND_SEEK_IN_CURRENT_MEDIA_ITEM) &&
-                player.isCommandAvailable(Player.COMMAND_GET_CURRENT_MEDIA_ITEM) &&
-                player.isCurrentMediaItemSeekable,
             error = playbackError,
             currentIndex = player.currentMediaItemIndex,
             queue = queueSnapshot,
         )
+        refreshProgress(player)
+    }
+
+    private fun refreshProgress(player: Player? = controller) {
+        _progress.value = if (player == null) {
+            PlaybackProgressState()
+        } else {
+            PlaybackProgressState(
+                isPlaying = player.isPlaying,
+                positionMs = player.currentPosition.coerceAtLeast(0),
+                durationMs = player.effectiveDurationMs(),
+                isSeekable = player.isCommandAvailable(Player.COMMAND_SEEK_IN_CURRENT_MEDIA_ITEM) &&
+                    player.isCommandAvailable(Player.COMMAND_GET_CURRENT_MEDIA_ITEM) &&
+                    player.isCurrentMediaItemSeekable,
+            )
+        }
     }
 
     private fun Player.queueEntries(): List<QueueEntry> =
@@ -489,7 +541,7 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
         progressJob?.cancel()
         progressJob = scope.launch {
             while (isActive) {
-                refreshState()
+                refreshProgress()
                 val player = controller
                 if (player?.isPlaying == true) {
                     progressTicks++
@@ -506,6 +558,8 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
         handoffRefreshJob?.cancel()
         queueSaveRequests.close()
         queueSaveWorker.cancel()
+        queueMutationRequests.close()
+        queueMutationWorker.cancel()
         pendingPlayback = null
         controller?.removeListener(this)
         controller?.release()
@@ -529,4 +583,50 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
         val currentIndex: Int,
         val positionMs: Long,
     )
+
+    private sealed interface QueueMutation {
+        val songs: List<Song>
+
+        data class Replace(
+            override val songs: List<Song>,
+            val startIndex: Int,
+            val positionMs: Long,
+            val startPlayback: Boolean,
+        ) : QueueMutation
+
+        data class Append(override val songs: List<Song>) : QueueMutation
+
+        fun withSession(generation: Long, session: NavidromeSession): PreparedQueueMutation = when (this) {
+            is Replace -> PreparedQueueMutation.Replace(
+                songs,
+                startIndex,
+                positionMs,
+                startPlayback,
+                generation,
+                session,
+            )
+            is Append -> PreparedQueueMutation.Append(songs, generation, session)
+        }
+    }
+
+    private sealed interface PreparedQueueMutation {
+        val songs: List<Song>
+        val generation: Long
+        val session: NavidromeSession
+
+        data class Replace(
+            override val songs: List<Song>,
+            val startIndex: Int,
+            val positionMs: Long,
+            val startPlayback: Boolean,
+            override val generation: Long,
+            override val session: NavidromeSession,
+        ) : PreparedQueueMutation
+
+        data class Append(
+            override val songs: List<Song>,
+            override val generation: Long,
+            override val session: NavidromeSession,
+        ) : PreparedQueueMutation
+    }
 }

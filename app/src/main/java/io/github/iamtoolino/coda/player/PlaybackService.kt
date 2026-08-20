@@ -32,6 +32,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
@@ -51,6 +52,11 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
     private val scrobbleScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private var prefetchJob: Job? = null
     private var snapshotJob: Job? = null
+    private lateinit var snapshotWriteWorker: Job
+    private val snapshotWrites = Channel<PlaybackSnapshot?>(Channel.CONFLATED)
+    private var snapshotTemplate: PlaybackSnapshot? = null
+    private var variantRefreshJob: Job? = null
+    private var variantRefreshGeneration = 0L
     @Volatile
     private var audioCacheGeneration = 0L
     @Volatile
@@ -85,6 +91,11 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
             .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
 
         snapshotStore = PlaybackSnapshotStore(this)
+        snapshotWriteWorker = scope.launch {
+            for (snapshot in snapshotWrites) {
+                if (snapshot == null) snapshotStore.clear() else snapshotStore.save(snapshot)
+            }
+        }
         player = ExoPlayer.Builder(this)
             .setMediaSourceFactory(DefaultMediaSourceFactory(cacheFactory))
             .setAudioAttributes(
@@ -152,6 +163,7 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
     private fun restoreLocalSnapshot() {
         val account = AppGraph.sessionSnapshot() ?: return
         val snapshot = snapshotStore.load(account.cacheNamespace) ?: return
+        snapshotTemplate = snapshot
         val mobile = isMobileNetwork(this)
         player.setMediaItems(
             snapshot.songs.map { it.toPlayableMediaItem(this, mobile, account) },
@@ -161,10 +173,25 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
         player.prepare()
     }
 
-    private fun persistLocalSnapshot() {
+    private fun persistLocalSnapshot(rebuildQueue: Boolean = false) {
         val account = AppGraph.sessionSnapshot()
-        val snapshot = account?.let(player::playbackSnapshot)
-        if (snapshot == null) snapshotStore.clear() else snapshotStore.save(snapshot)
+        if (account == null || player.mediaItemCount == 0 ||
+            player.currentMediaItemIndex !in 0 until player.mediaItemCount
+        ) {
+            snapshotTemplate = null
+            snapshotWrites.trySend(null)
+            return
+        }
+        if (rebuildQueue || snapshotTemplate?.cacheNamespace != account.cacheNamespace) {
+            snapshotTemplate = player.playbackSnapshot(account)
+        }
+        val template = snapshotTemplate ?: return
+        snapshotWrites.trySend(
+            template.copy(
+                currentIndex = player.currentMediaItemIndex,
+                positionMs = player.currentPosition.coerceAtLeast(0),
+            ),
+        )
     }
 
     private fun updateSnapshotTimer() {
@@ -193,7 +220,7 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
             events.contains(Player.EVENT_PLAY_WHEN_READY_CHANGED) ||
             events.contains(Player.EVENT_IS_PLAYING_CHANGED)
         ) {
-            persistLocalSnapshot()
+            persistLocalSnapshot(rebuildQueue = events.contains(Player.EVENT_TIMELINE_CHANGED))
         }
         if (events.contains(Player.EVENT_IS_PLAYING_CHANGED)) updateSnapshotTimer()
     }
@@ -261,39 +288,49 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
             if (!::player.isInitialized || player.mediaItemCount == 0) return@post
             val start = (player.currentMediaItemIndex + 1).coerceAtLeast(0)
             val variant = if (mobile) "opus" else "raw"
-            val mismatched = (start until player.mediaItemCount).filter { index ->
-                val item = player.getMediaItemAt(index)
-                val namespace = item.mediaMetadata.extras?.getString("cacheNamespace")
-                if (namespace != account.cacheNamespace) return@filter false
-                val currentKey = item.localConfiguration?.customCacheKey
-                currentKey != streamCacheKey(namespace, item.mediaId, variant) &&
-                    !(mobile && currentKey == streamCacheKey(namespace, item.mediaId, "raw") &&
-                        isFullyCached(currentKey))
-            }
-            if (mismatched.isEmpty()) return@post
-            for (index in mismatched) {
-                val item = player.getMediaItemAt(index)
-                val extras = item.mediaMetadata.extras?.let(::Bundle) ?: Bundle()
-                val namespace = extras.getString("cacheNamespace") ?: continue
-                if (mobile) {
-                    extras.putString("codec", "opus")
-                    extras.remove("bitDepth")
-                    extras.remove("samplingRate")
-                    extras.remove("bitRate")
-                } else {
-                    extras.putString("codec", extras.getString("sourceCodec"))
-                    copyInt(extras, "sourceBitDepth", "bitDepth")
-                    copyInt(extras, "sourceSamplingRate", "samplingRate")
-                    copyInt(extras, "sourceBitRate", "bitRate")
+            val originals = (start until player.mediaItemCount).map(player::getMediaItemAt)
+            val generation = ++variantRefreshGeneration
+            variantRefreshJob?.cancel()
+            variantRefreshJob = scope.launch {
+                var changed = false
+                val replacements = originals.map { item ->
+                    val namespace = item.mediaMetadata.extras?.getString("cacheNamespace")
+                    val currentKey = item.localConfiguration?.customCacheKey
+                    val shouldReplace = namespace == account.cacheNamespace &&
+                        currentKey != streamCacheKey(namespace, item.mediaId, variant) &&
+                        !(mobile && currentKey == streamCacheKey(namespace, item.mediaId, "raw") &&
+                            isFullyCached(currentKey))
+                    if (!shouldReplace) return@map item
+                    changed = true
+                    val extras = item.mediaMetadata.extras?.let(::Bundle) ?: Bundle()
+                    if (mobile) {
+                        extras.putString("codec", "opus")
+                        extras.remove("bitDepth")
+                        extras.remove("samplingRate")
+                        extras.remove("bitRate")
+                    } else {
+                        extras.putString("codec", extras.getString("sourceCodec"))
+                        copyInt(extras, "sourceBitDepth", "bitDepth")
+                        copyInt(extras, "sourceSamplingRate", "samplingRate")
+                        copyInt(extras, "sourceBitRate", "bitRate")
+                    }
+                    item.buildUpon()
+                        .setUri(account.client.streamUrl(item.mediaId, mobile))
+                        .setCustomCacheKey(streamCacheKey(requireNotNull(namespace), item.mediaId, variant))
+                        .setMediaMetadata(item.mediaMetadata.buildUpon().setExtras(extras).build())
+                        .build()
                 }
-                val updated = item.buildUpon()
-                    .setUri(account.client.streamUrl(item.mediaId, mobile))
-                    .setCustomCacheKey(streamCacheKey(namespace, item.mediaId, variant))
-                    .setMediaMetadata(item.mediaMetadata.buildUpon().setExtras(extras).build())
-                    .build()
-                player.replaceMediaItem(index, updated)
+                if (!changed) return@launch
+                withContext(Dispatchers.Main.immediate) {
+                    if (generation != variantRefreshGeneration || !AppGraph.isCurrent(account) ||
+                        player.mediaItemCount < start + originals.size ||
+                        originals.indices.any { player.getMediaItemAt(start + it).mediaId != originals[it].mediaId }
+                    ) {
+                        return@withContext
+                    }
+                    player.replaceMediaItems(start, start + originals.size, replacements)
+                }
             }
-            maintainFourTrackWindow()
         }
     }
 
@@ -327,6 +364,9 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
         activeCacheWriter?.cancel()
         prefetchJob?.cancel()
         snapshotJob?.cancel()
+        variantRefreshJob?.cancel()
+        snapshotWrites.close()
+        if (::snapshotWriteWorker.isInitialized) snapshotWriteWorker.cancel()
         scrobbler.close()
         runCatching { connectivity.unregisterNetworkCallback(networkCallback) }
         session.release()

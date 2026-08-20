@@ -179,6 +179,8 @@
 - Focus on bitmap memory, artwork/network fan-out, Compose invalidation caused by playback ticks,
   large list scrolling, audio prefetch/cache eviction, repeated queue serialization, background
   work, wake locks, and battery/mobile-data impact.
+- Keep playback metadata/queue state separate from high-frequency position state. Rebuild immutable
+  queue snapshots only on timeline changes; position persistence must reuse them and encode off main.
 - Understand Coil, Media3, HTTP, car-artwork, and Navidrome server caches before adding another cache.
   Authenticated URL metadata and invalidation behavior are part of the design.
 - Profile before substantial performance refactors. Keep profiling artifacts and personal-library

@@ -274,6 +274,7 @@ fun CodaApp() {
                     if (!fullScreenPlayer && playbackState.currentSongId != null) {
                         MiniPlayer(
                             state = playbackState,
+                            playback = playback,
                             onOpen = { navController.navigate("now-playing") },
                             onToggle = playback::togglePlayPause,
                         )
@@ -1967,9 +1968,11 @@ private fun handoffClientDisplayName(client: String): String = when {
 @Composable
 private fun MiniPlayer(
     state: PlaybackUiState,
+    playback: PlaybackConnection,
     onOpen: () -> Unit,
     onToggle: () -> Unit,
 ) {
+    val progress by playback.progress.collectAsStateWithLifecycle()
     Column(
         modifier = Modifier
             .padding(horizontal = 10.dp, vertical = 4.dp)
@@ -2013,16 +2016,16 @@ private fun MiniPlayer(
             }
             IconButton(onClick = onToggle, modifier = Modifier.size(60.dp)) {
                 Icon(
-                    if (state.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                    if (state.isPlaying) "Pause" else "Play",
+                    if (progress.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                    if (progress.isPlaying) "Pause" else "Play",
                     modifier = Modifier.size(34.dp),
                 )
             }
         }
         LinearProgressIndicator(
             progress = {
-                if (state.durationMs > 0) {
-                    (state.positionMs.toFloat() / state.durationMs).coerceIn(0f, 1f)
+                if (progress.durationMs > 0) {
+                    (progress.positionMs.toFloat() / progress.durationMs).coerceIn(0f, 1f)
                 } else {
                     0f
                 }
@@ -2038,6 +2041,7 @@ private fun NowPlayingScreen(
     playback: PlaybackConnection,
     state: PlaybackUiState,
 ) {
+    val progress by playback.progress.collectAsStateWithLifecycle()
     AdaptiveBackground {
             BoxWithConstraints(
                 modifier = Modifier
@@ -2090,20 +2094,20 @@ private fun NowPlayingScreen(
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         SeekBar(
-                            positionMs = state.positionMs,
-                            durationMs = state.durationMs,
-                            enabled = state.isSeekable,
+                            positionMs = progress.positionMs,
+                            durationMs = progress.durationMs,
+                            enabled = progress.isSeekable,
                             onSeek = playback::seekTo,
                         )
                         Row(Modifier.fillMaxWidth()) {
                             Text(
-                                formatDurationMs(state.positionMs),
+                                formatDurationMs(progress.positionMs),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 fontSize = 14.sp,
                             )
                             Spacer(Modifier.weight(1f))
                             Text(
-                                "-${formatDurationMs((state.durationMs - state.positionMs).coerceAtLeast(0))}",
+                                "-${formatDurationMs((progress.durationMs - progress.positionMs).coerceAtLeast(0))}",
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 fontSize = 14.sp,
                             )
@@ -2182,12 +2186,12 @@ private fun NowPlayingScreen(
                                     .background(MaterialTheme.colorScheme.primary),
                             ) {
                                 Icon(
-                                    if (state.isPlaying) {
+                                    if (progress.isPlaying) {
                                         Icons.Default.Pause
                                     } else {
                                         Icons.Default.PlayArrow
                                     },
-                                    if (state.isPlaying) "Pause" else "Play",
+                                    if (progress.isPlaying) "Pause" else "Play",
                                     tint = MaterialTheme.colorScheme.onPrimary,
                                     modifier = Modifier.size(primaryControlIconSize),
                                 )
