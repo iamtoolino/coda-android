@@ -26,7 +26,9 @@ Coda is a personal, album-oriented Android client for Navidrome/OpenSubsonic.
 - The current track is highlighted in album, playlist, and queue views.
 - Playback begins progressively; it must not wait for a full-file download.
 - Wi-Fi/Ethernet streams the original file. Cellular requests Opus and leaves bitrate selection to the server.
-- A rolling transient cache contains the current track and next three tracks. It is cleared on a cold playback-service start.
+- A rolling transient cache begins filling when a queue exists, with the current track followed by
+  the next three. It survives process/service recreation, follows queue/current-item changes, and is
+  cleared when the queue is emptied or the account disconnects.
 
 ## Cross-client queue
 

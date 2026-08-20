@@ -49,6 +49,8 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
     private var prefetchJob: Job? = null
     private var snapshotJob: Job? = null
     @Volatile
+    private var audioCacheGeneration = 0L
+    @Volatile
     private var activeCacheWriter: CacheWriter? = null
     private val mainHandler = Handler(Looper.getMainLooper())
     private val connectivity by lazy { getSystemService(ConnectivityManager::class.java) }
@@ -64,7 +66,6 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
         super.onCreate()
         val databaseProvider = StandaloneDatabaseProvider(this)
         val transientCacheDirectory = File(cacheDir, "transient-audio")
-        transientCacheDirectory.deleteRecursively()
         cache = SimpleCache(transientCacheDirectory, NoOpCacheEvictor(), databaseProvider)
         activeInstance = this
         val upstreamFactory = DefaultDataSource.Factory(
@@ -186,25 +187,28 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
     }
 
     private fun maintainFourTrackWindow() {
-        if (!::player.isInitialized || player.mediaItemCount == 0) return
-        val current = player.currentMediaItemIndex.coerceAtLeast(0)
-        val last = (current + 3).coerceAtMost(player.mediaItemCount - 1)
-        val window = (current..last).mapNotNull { index ->
+        if (!::player.isInitialized) return
+        val window = audioCacheWindowIndices(
+            itemCount = player.mediaItemCount,
+            currentIndex = player.currentMediaItemIndex,
+        ).mapNotNull { index ->
             player.getMediaItemAt(index).localConfiguration
         }
         val keepKeys = window.mapNotNull { it.customCacheKey }.toSet()
-        val upcoming = window.drop(1).map { local -> local.uri to local.customCacheKey }
+        val targets = window.map { local -> local.uri to local.customCacheKey }
 
-        scope.launch {
-            cache.keys.filterNot(keepKeys::contains).forEach { cache.removeResource(it) }
-        }
-
+        val generation = ++audioCacheGeneration
         activeCacheWriter?.cancel()
         prefetchJob?.cancel()
         prefetchJob = scope.launch {
-            delay(5_000)
-            for ((uri, cacheKey) in upcoming) {
+            for (cacheKey in cache.keys.toList()) {
                 currentCoroutineContext().ensureActive()
+                if (generation != audioCacheGeneration) return@launch
+                if (cacheKey !in keepKeys) runCatching { cache.removeResource(cacheKey) }
+            }
+            for ((uri, cacheKey) in targets) {
+                currentCoroutineContext().ensureActive()
+                if (generation != audioCacheGeneration) return@launch
                 val dataSpec = DataSpec.Builder()
                     .setUri(uri)
                     .setKey(cacheKey)
@@ -276,11 +280,16 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
 
     private fun clearTransientAudioCache(namespace: String) {
         if (namespace.isBlank() || !::cache.isInitialized) return
+        val generation = ++audioCacheGeneration
         activeCacheWriter?.cancel()
         prefetchJob?.cancel()
-        scope.launch {
+        prefetchJob = scope.launch {
             val prefix = "stream:$namespace:"
-            cache.keys.filter { it.startsWith(prefix) }.forEach { cache.removeResource(it) }
+            for (cacheKey in cache.keys.filter { it.startsWith(prefix) }) {
+                currentCoroutineContext().ensureActive()
+                if (generation != audioCacheGeneration) return@launch
+                runCatching { cache.removeResource(cacheKey) }
+            }
         }
     }
 
@@ -305,4 +314,15 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
             activeInstance?.clearTransientAudioCache(namespace)
         }
     }
+}
+
+internal fun audioCacheWindowIndices(
+    itemCount: Int,
+    currentIndex: Int,
+    maximumSize: Int = 4,
+): List<Int> {
+    if (itemCount <= 0 || maximumSize <= 0) return emptyList()
+    val first = currentIndex.coerceIn(0, itemCount - 1)
+    val lastExclusive = (first + maximumSize).coerceAtMost(itemCount)
+    return (first until lastExclusive).toList()
 }

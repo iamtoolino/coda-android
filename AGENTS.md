@@ -33,9 +33,11 @@
   opening Home for correctness.
 - The car host may cold-start and control Coda without launching the phone UI. Preserve Media3
   playback resumption and `MediaButtonReceiver` behavior when changing the service or manifest.
-- The rolling audio cache contains the current track and next three tracks and is cleared on a cold
-  service start. It is not an offline library. Phone artwork and Android Auto artwork have separate
-  cache policies.
+- The queue defines the rolling audio cache. As soon as a non-empty queue exists, cache the current
+  track and then the next three sequentially. Preserve that bounded window across process/service
+  recreation, prune entries outside it when the queue or current item changes, and clear it when the
+  queue is emptied or the account disconnects. It is not an offline library. Phone artwork and
+  Android Auto artwork have separate cache policies.
 - Android Auto artwork uses local `content://` URIs so private and VPN-only servers work through the
   phone. Keep the car-artwork cache bounded and do not expose authenticated remote URLs to the host.
 - Queue handoff is an ownership protocol, not merely serialization. Playing locally claims the

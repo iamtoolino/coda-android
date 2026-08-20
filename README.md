@@ -58,13 +58,14 @@ Coda is online-first, not an offline download manager.
 - On cellular, Coda requests Opus transcoding. No bitrate is hardcoded in the app; the server's
   transcoding configuration decides the delivered bitrate.
 - Playback starts progressively rather than waiting for the complete track to download.
-- A transient **audio cache** keeps the current track and next three tracks. Upcoming tracks are
-  prefetched in the background, and old audio entries are discarded.
+- A transient **audio cache** begins filling as soon as a queue exists: the current track first,
+  followed by the next three. Entries outside that rolling window are discarded.
 - Changing between Wi-Fi and cellular does not interrupt the current track. Upcoming uncached tracks
   are switched to the appropriate stream variant.
 
-There is intentionally no permanent offline library. The transient audio cache is cleared when the
-playback service starts cold.
+There is intentionally no permanent offline library. The bounded audio window survives Android
+process/service recreation so prepared playback remains useful in poor reception, and is cleared
+when the queue is emptied or the account disconnects.
 
 Artwork uses separate caches: the phone UI maintains its own image cache, while Android Auto uses a
 bounded car-artwork cache described below. These are not part of the four-track audio window.

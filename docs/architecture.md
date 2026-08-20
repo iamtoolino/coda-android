@@ -15,9 +15,12 @@ old account's cached data in the background.
 `PlaybackService` owns a Media3 `ExoPlayer` and `MediaLibrarySession`. `PlaybackConnection` is the UI-side `MediaController` and publishes a small `StateFlow` consumed by Compose.
 
 The player uses a Media3 `SimpleCache` as a transient audio cache with explicit resource eviction
-rather than a byte-based eviction policy. Playback fills the current track while reading it, and a
-background `CacheWriter` fills the next three items after playback has started. Phone artwork uses
-Coil's separate cache and Android Auto artwork uses the bounded car-artwork cache below.
+rather than a byte-based eviction policy. The queue defines its contents: whenever a queue exists, a
+single cancellable worker fills the current track and next three sequentially and removes keys
+outside that window. Replacing, advancing, or clearing the queue recomputes the window immediately.
+The cache survives service/process recreation and is reused by the restored queue; disconnecting the
+account clears its entries. Phone artwork uses Coil's separate cache and Android Auto artwork uses
+the bounded car-artwork cache below.
 
 Network changes do not interrupt the current track. Upcoming items are rewritten to original or Opus stream URLs according to the active transport.
 
