@@ -1158,9 +1158,12 @@ private fun AlbumScreen(
     var error by remember(id) { mutableStateOf<String?>(null) }
     var generation by rememberSaveable(id) { mutableIntStateOf(0) }
     var loading by remember(id) { mutableStateOf(false) }
+    val discSections = remember(page?.songs) { albumDiscSections(page?.songs.orEmpty()) }
+    val showDiscHeaders = shouldShowDiscHeaders(discSections)
     val listState = rememberRestorableLazyListState(
         contentReady = page != null || error != null,
-        maxIndex = page?.songs?.size ?: 0,
+        maxIndex = (page?.songs?.size ?: 0) +
+            if (showDiscHeaders) discSections.size else 0,
     )
     LaunchedEffect(id, generation) {
         loading = true
@@ -1229,13 +1232,26 @@ private fun AlbumScreen(
                                 },
                             )
                         }
-                        itemsIndexed(loaded.songs, key = { _, song -> song.id }) { index, song ->
-                            SongRow(
-                                song,
-                                isPlaying = playbackState.currentSongId == song.id,
-                                showArtist = false,
-                                onClick = { playback.playSongs(loaded.songs, index) },
-                            )
+                        discSections.forEach { section ->
+                            if (showDiscHeaders) {
+                                item(key = "disc:${section.number}:${section.songs.first().index}") {
+                                    AlbumDiscHeader(section)
+                                }
+                            }
+                            items(
+                                items = section.songs,
+                                key = { it.value.id },
+                            ) { indexedSong ->
+                                val song = indexedSong.value
+                                SongRow(
+                                    song,
+                                    isPlaying = playbackState.currentSongId == song.id,
+                                    showArtist = false,
+                                    onClick = {
+                                        playback.playSongs(loaded.songs, indexedSong.index)
+                                    },
+                                )
+                            }
                         }
                     }
                 }
@@ -1922,6 +1938,29 @@ private fun SongRow(
             modifier = Modifier.width(52.dp),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.End,
+        )
+    }
+}
+
+@Composable
+private fun AlbumDiscHeader(section: AlbumDiscSection) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 18.dp, end = 18.dp, top = 24.dp, bottom = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = "DISC ${section.number}",
+            modifier = Modifier.weight(1f),
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Text(
+            text = formatCollectionDuration(section.duration),
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }
