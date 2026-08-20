@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -217,6 +218,10 @@ internal fun LoginScreen() {
         Button(
             onClick = ::requestSubmit,
             enabled = !loading && serverUrl.isNotBlank() && username.isNotBlank() && password.isNotBlank(),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFFD19433),
+                contentColor = Color(0xFF211708),
+            ),
             modifier = Modifier
                 .fillMaxWidth()
                 .height(52.dp),
@@ -225,7 +230,7 @@ internal fun LoginScreen() {
                 CircularProgressIndicator(
                     modifier = Modifier.height(22.dp),
                     strokeWidth = 2.dp,
-                    color = Color.White,
+                    color = Color(0xFF211708),
                 )
             } else {
                 Text("Connect")

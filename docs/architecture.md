@@ -10,6 +10,21 @@ into the APK. A non-secret hash of server URL and username namespaces transient 
 from two servers can never collide. Disconnecting invalidates the session immediately and clears the
 old account's cached data in the background.
 
+## Theme ownership
+
+`CodaThemeRouter` resolves semantic theme requests before the root Compose theme is applied. It
+chooses a foreground album or explicitly illustrated playlist first, otherwise current playback,
+otherwise Brand. Artist destinations and playlists without explicit artwork request inheritance
+rather than extracting a new palette. Because the resolved theme wraps the complete phone
+presentation, destination controls, backgrounds, progress indicators, and the persistent
+mini-player always use the same palette.
+
+Artwork extraction is asynchronous and cached by account namespace, extraction algorithm version,
+and canonical semantic identity. A prepare-then-commit gate prevents an obsolete artwork request
+from publishing after navigation has moved elsewhere. Pending destinations retain the last committed
+palette until their replacement is ready, avoiding an intermediate Brand transition. Monochrome
+extraction falls back to neutral grey; missing or unreadable artwork falls back to Brand teal.
+
 ## Playback
 
 `PlaybackService` owns a Media3 `ExoPlayer` and `MediaLibrarySession`. `PlaybackConnection` is the UI-side `MediaController` and publishes a small `StateFlow` consumed by Compose.

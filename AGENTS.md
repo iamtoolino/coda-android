@@ -48,9 +48,14 @@
   Cancellation alone is not sufficient.
 - Artwork identity, album identity, and track identity are not interchangeable. Prefer canonical
   album artwork for playback, cache, and theme decisions.
-- Shared visual policy needs a semantic owner. Distinguish brand, current playback, viewed album,
-  and foreground Now Playing contexts; guard asynchronous artwork/color results by identity and
-  retain the previous valid prepared theme while a replacement is loading.
+- Shared visual policy is resolved centrally. Brand teal is the default; the current playback
+  artwork owns the theme across ordinary screens and Now Playing; a viewed album or playlist with
+  explicit artwork temporarily owns the entire phone presentation, including the mini-player;
+  artist imagery and playlists without explicit artwork inherit playback or Brand. Never infer a
+  playlist theme from its first track. Guard asynchronous artwork/color results by account-scoped
+  identity and retain the previous committed theme while a replacement is loading so navigation
+  never flashes through Brand. Monochrome artwork resolves to neutral grey, and unreadable or absent
+  artwork resolves to Brand. Brand gold is reserved for the login Connect action.
 
 ## Git workflow
 

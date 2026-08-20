@@ -27,7 +27,11 @@ internal object CodaAccentExtractor {
     private const val WEIGHT_BASE = 0.45
     private const val OUTPUT_VALUE_FLOOR = 0.50
 
-    val GENERIC_FALLBACK = CodaAccentColor(red = 0.20, green = 0.72, blue = 0.76)
+    val GENERIC_FALLBACK = CodaAccentColor(
+        red = 43 / 255.0,
+        green = 122 / 255.0,
+        blue = 130 / 255.0,
+    )
     val MONOCHROME_FALLBACK = CodaAccentColor(red = 0.56, green = 0.58, blue = 0.60)
 
     private data class Bucket(

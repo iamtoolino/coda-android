@@ -134,7 +134,12 @@ import io.github.iamtoolino.coda.player.PlaybackConnection
 import io.github.iamtoolino.coda.player.PlaybackUiState
 import io.github.iamtoolino.coda.player.QueueEntry
 import io.github.iamtoolino.coda.ui.theme.AdaptiveBackground
-import io.github.iamtoolino.coda.ui.theme.ArtworkTheme
+import io.github.iamtoolino.coda.ui.theme.CodaThemeRequest
+import io.github.iamtoolino.coda.ui.theme.CodaThemeRouter
+import io.github.iamtoolino.coda.ui.theme.RegisterForegroundTheme
+import io.github.iamtoolino.coda.ui.theme.RoutedCodaTheme
+import io.github.iamtoolino.coda.ui.theme.rememberCodaThemeRouter
+import io.github.iamtoolino.coda.ui.theme.resolveThemeRequest
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -230,16 +235,27 @@ fun CodaApp() {
     val playbackState by playback.state.collectAsStateWithLifecycle()
     val credentials by AppGraph.credentials.collectAsStateWithLifecycle()
     if (credentials == null) {
-        ArtworkTheme(null, null) {
+        RoutedCodaTheme(CodaThemeRequest.Brand) {
             AdaptiveBackground { LoginScreen() }
         }
         return
     }
+    val themeRouter = rememberCodaThemeRouter()
     val navController = rememberNavController()
     val entry by navController.currentBackStackEntryAsState()
     val route = entry?.destination?.route.orEmpty()
     val fullScreenPlayer = route == "now-playing" || route == "queue"
-    ArtworkTheme(playbackState.artworkUrl, playbackState.artworkKey) {
+    val playbackThemeRequest = playbackState.artworkUrl?.let { artworkUrl ->
+        CodaThemeRequest.Artwork(
+            identity = "album:${playbackState.artworkKey ?: playbackState.currentSongId}",
+            artworkUrl = artworkUrl,
+        )
+    }
+    val themeRequest = resolveThemeRequest(
+        foreground = themeRouter.foregroundRequest,
+        playback = playbackThemeRequest,
+    )
+    RoutedCodaTheme(themeRequest) {
         AdaptiveBackground {
             Scaffold(
                 modifier = Modifier.fillMaxSize(),
@@ -297,23 +313,27 @@ fun CodaApp() {
                     composable(
                         route = "album/{id}",
                         arguments = listOf(navArgument("id") { type = NavType.StringType }),
-                    ) {
+                    ) { backStackEntry ->
                         AlbumScreen(
-                            navController,
-                            Uri.decode(it.arguments?.getString("id").orEmpty()),
-                            playback,
-                            playbackState,
+                            navController = navController,
+                            id = Uri.decode(backStackEntry.arguments?.getString("id").orEmpty()),
+                            playback = playback,
+                            playbackState = playbackState,
+                            themeRouter = themeRouter,
+                            themeOwner = backStackEntry.id,
                         )
                     }
                     composable(
                         route = "playlist/{id}",
                         arguments = listOf(navArgument("id") { type = NavType.StringType }),
-                    ) {
+                    ) { backStackEntry ->
                         PlaylistScreen(
-                            navController,
-                            Uri.decode(it.arguments?.getString("id").orEmpty()),
-                            playback,
-                            playbackState,
+                            navController = navController,
+                            id = Uri.decode(backStackEntry.arguments?.getString("id").orEmpty()),
+                            playback = playback,
+                            playbackState = playbackState,
+                            themeRouter = themeRouter,
+                            themeOwner = backStackEntry.id,
                         )
                     }
                     composable("now-playing") {
@@ -991,11 +1011,7 @@ private fun ArtistScreen(navController: NavHostController, id: String) {
             .onFailureUnlessCancelled { error = it.message }
         loading = false
     }
-    val artist = data?.first
-    val artworkUrl = artist?.artistImageUrl
-        ?: artist?.coverArt?.let { AppGraph.navidrome.coverArtUrl(it, size = 1_200) }
-    ArtworkTheme(artworkUrl, artist?.let { "artist:${it.id}" }) {
-        AdaptiveBackground {
+    AdaptiveBackground {
             PullToRefreshBox(
                 isRefreshing = loading && data != null,
                 onRefresh = { generation++ },
@@ -1053,7 +1069,6 @@ private fun ArtistScreen(navController: NavHostController, id: String) {
                     }
                 }
             }
-        }
     }
 }
 
@@ -1063,6 +1078,8 @@ private fun AlbumScreen(
     id: String,
     playback: PlaybackConnection,
     playbackState: PlaybackUiState,
+    themeRouter: CodaThemeRouter,
+    themeOwner: String,
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -1085,8 +1102,16 @@ private fun AlbumScreen(
     val album = page?.album
     val coverKey = album?.coverArt ?: album?.id
     val artworkUrl = coverKey?.let { AppGraph.navidrome.coverArtUrl(it, size = 1_200) }
-    ArtworkTheme(artworkUrl, coverKey?.let { "album:$it" }) {
-        AdaptiveBackground {
+    val themeRequest = when {
+        page == null && error == null -> CodaThemeRequest.Pending
+        album == null || artworkUrl == null -> CodaThemeRequest.Brand
+        else -> CodaThemeRequest.Artwork(
+            identity = "album:${album.id}",
+            artworkUrl = artworkUrl,
+        )
+    }
+    RegisterForegroundTheme(themeRouter, themeOwner, themeRequest)
+    AdaptiveBackground {
             PullToRefreshBox(
                 isRefreshing = loading && page != null,
                 onRefresh = { generation++ },
@@ -1170,7 +1195,6 @@ private fun AlbumScreen(
                     }
                 }
             }
-        }
     }
 }
 
@@ -1180,6 +1204,8 @@ private fun PlaylistScreen(
     id: String,
     playback: PlaybackConnection,
     playbackState: PlaybackUiState,
+    themeRouter: CodaThemeRouter,
+    themeOwner: String,
 ) {
     val context = LocalContext.current
     var playlist by remember(id) { mutableStateOf<Playlist?>(null) }
@@ -1199,12 +1225,20 @@ private fun PlaylistScreen(
         loading = false
     }
     val playlistCoverKey = playlist?.coverArt
-        ?: playlist?.entry?.firstOrNull()?.let { it.albumId ?: it.coverArt }
     val playlistArtworkUrl = playlistCoverKey?.let {
         AppGraph.navidrome.coverArtUrl(it, size = 1_200)
     }
-    ArtworkTheme(playlistArtworkUrl, playlistCoverKey?.let { "playlist:$id:$it" }) {
-        AdaptiveBackground {
+    val themeRequest = when {
+        playlist == null && error == null -> CodaThemeRequest.Pending
+        playlistCoverKey == null || playlistArtworkUrl == null ->
+            CodaThemeRequest.InheritPlayback
+        else -> CodaThemeRequest.Artwork(
+            identity = "playlist:$id:$playlistCoverKey",
+            artworkUrl = playlistArtworkUrl,
+        )
+    }
+    RegisterForegroundTheme(themeRouter, themeOwner, themeRequest)
+    AdaptiveBackground {
             PullToRefreshBox(
                 isRefreshing = loading && playlist != null,
                 onRefresh = { generation++ },
@@ -1266,7 +1300,6 @@ private fun PlaylistScreen(
                     }
                 }
             }
-        }
     }
 }
 
@@ -2011,8 +2044,7 @@ private fun NowPlayingScreen(
     playback: PlaybackConnection,
     state: PlaybackUiState,
 ) {
-    ArtworkTheme(state.artworkUrl, state.artworkKey ?: state.currentSongId) {
-        AdaptiveBackground {
+    AdaptiveBackground {
             BoxWithConstraints(
                 modifier = Modifier
                     .fillMaxSize()
@@ -2178,7 +2210,6 @@ private fun NowPlayingScreen(
                     }
                 }
             }
-        }
     }
 }
 

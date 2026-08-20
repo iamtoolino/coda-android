@@ -12,9 +12,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.produceState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -34,7 +36,10 @@ import coil3.toBitmap
 import io.github.iamtoolino.coda.AppGraph
 import io.github.iamtoolino.coda.R
 import java.util.LinkedHashMap
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
 
 private val Manrope = FontFamily(
@@ -82,17 +87,7 @@ private data class ArtworkColors(
     val surfaceVariant: Color,
 )
 
-private val NeutralColors = ArtworkColors(
-    accent = Color(0xFFC8C2B8),
-    onAccent = Color(0xFF201D19),
-    accentContainer = Color(0xFF3B3732),
-    onAccentContainer = Color(0xFFF0E9DF),
-    backgroundTop = Color(0xFF121214),
-    backgroundBottom = Color(0xFF09090B),
-    surfaceVariant = Color(0xFF242428),
-)
-
-private val GenericArtworkColors = artworkColors(CodaAccentExtractor.GENERIC_FALLBACK)
+private val BrandColors = artworkColors(CodaAccentExtractor.GENERIC_FALLBACK)
 
 private object ArtworkColorCache {
     private const val maxEntries = 80
@@ -113,57 +108,64 @@ private object ArtworkColorCache {
 
 @Composable
 fun CodaTheme(content: @Composable () -> Unit) {
-    CodaMaterialTheme(NeutralColors, content)
+    CodaMaterialTheme(BrandColors, content)
 }
 
 @Composable
-fun ArtworkTheme(
-    artworkUrl: String?,
-    artworkKey: String?,
+internal fun RoutedCodaTheme(
+    request: CodaThemeRequest,
     content: @Composable () -> Unit,
 ) {
     val context = LocalContext.current
-    val sourceKey = artworkKey ?: artworkUrl
-    val cacheKey = sourceKey?.let {
-        "${AppGraph.cacheNamespace}:accent-v${CodaAccentExtractor.ALGORITHM_VERSION}:$it"
-    }
-    if (artworkUrl == null || cacheKey == null) {
-        CodaMaterialTheme(GenericArtworkColors, content)
-        return
-    }
-    val initial = remember(cacheKey) {
-        ArtworkColorCache[cacheKey] ?: GenericArtworkColors
-    }
-    val extracted by produceState(initialValue = initial, artworkUrl, cacheKey) {
-        ArtworkColorCache[cacheKey]?.let {
-            value = it
-            return@produceState
-        }
-        val request = ImageRequest.Builder(context)
-            .data(artworkUrl)
-            .size(32, 32)
-            .allowHardware(false)
-            .bitmapConfig(Bitmap.Config.ARGB_8888)
-            .memoryCacheKey("accent-software:$cacheKey")
-            .diskCacheKey("accent:$cacheKey")
-            .build()
-        val result = runCatching { context.imageLoader.execute(request) as? SuccessResult }
-            .getOrNull()
-        val accent = if (result == null) {
-            CodaAccentExtractor.GENERIC_FALLBACK
-        } else {
-            withContext(Dispatchers.Default) {
-                runCatching {
-                    val bitmap = result.image.toBitmap(32, 32, Bitmap.Config.ARGB_8888)
-                    CodaAccentExtractor.extractOrFallback(bitmap)
-                }.getOrDefault(CodaAccentExtractor.GENERIC_FALLBACK)
+    val commitGate = remember { ThemeCommitGate() }
+    var committedColors by remember { mutableStateOf(BrandColors) }
+
+    LaunchedEffect(request) {
+        val token = commitGate.begin()
+        when (request) {
+            CodaThemeRequest.Pending -> Unit
+            CodaThemeRequest.InheritPlayback -> Unit
+            CodaThemeRequest.Brand -> committedColors = BrandColors
+            is CodaThemeRequest.Artwork -> {
+                val cacheKey =
+                    "${AppGraph.cacheNamespace}:accent-v${CodaAccentExtractor.ALGORITHM_VERSION}:${request.identity}"
+                val cached = ArtworkColorCache[cacheKey]
+                if (cached != null) {
+                    if (commitGate.isCurrent(token)) committedColors = cached
+                    return@LaunchedEffect
+                }
+                val colors = try {
+                    val imageRequest = ImageRequest.Builder(context)
+                        .data(request.artworkUrl)
+                        .size(32, 32)
+                        .allowHardware(false)
+                        .bitmapConfig(Bitmap.Config.ARGB_8888)
+                        .memoryCacheKey("accent-software:$cacheKey")
+                        .diskCacheKey("accent:$cacheKey")
+                        .build()
+                    val result = context.imageLoader.execute(imageRequest) as? SuccessResult
+                    currentCoroutineContext().ensureActive()
+                    if (result == null) {
+                        BrandColors
+                    } else {
+                        withContext(Dispatchers.Default) {
+                            val bitmap = result.image.toBitmap(32, 32, Bitmap.Config.ARGB_8888)
+                            artworkColors(CodaAccentExtractor.extractOrFallback(bitmap))
+                        }
+                    }
+                } catch (cancelled: CancellationException) {
+                    throw cancelled
+                } catch (_: Throwable) {
+                    BrandColors
+                }
+                currentCoroutineContext().ensureActive()
+                if (!commitGate.isCurrent(token)) return@LaunchedEffect
+                if (colors !== BrandColors) ArtworkColorCache[cacheKey] = colors
+                committedColors = colors
             }
         }
-        val colors = artworkColors(accent)
-        ArtworkColorCache[cacheKey] = colors
-        value = colors
     }
-    CodaMaterialTheme(extracted, content)
+    CodaMaterialTheme(committedColors, content)
 }
 
 @Composable
