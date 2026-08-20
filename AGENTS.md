@@ -50,6 +50,9 @@
   `AppGraph.navidrome` directly across suspension. Metadata calls have a finite overall deadline so
   an unreachable VPN, DNS answer, or server becomes an actionable error instead of an endless
   loading state.
+- Home sections load and fail independently. Keep their shells visible immediately, publish each
+  successful section without waiting for its siblings, retain good content during refresh, and use
+  only bounded network-error retries. One slow endpoint must not blank or block the rest of Home.
 - Artwork identity, album identity, and track identity are not interchangeable. Prefer canonical
   album artwork for playback, cache, and theme decisions.
 - Shared visual policy is resolved centrally. Brand teal is the default; the current playback

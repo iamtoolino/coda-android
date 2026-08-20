@@ -11,6 +11,13 @@ rejects both successful and failed completions if the account changed before pub
 unreachable VPN route, stale DNS answer, or unresponsive server therefore resolves to a screen error
 instead of an indefinite loading state, and an old account cannot publish into a new session.
 
+`HomeCoordinator` owns independent state and work for Artists, Recently Added, Recent Releases,
+Recently Played, and Playlists. It starts them concurrently, shares the newest-albums request needed
+by Artists and Recently Added, and publishes each result without waiting for unrelated sections.
+Previously loaded section content remains visible during refresh. Network `IOException`s receive two
+short backoff retries; cancellation and permanent response errors do not retry. Exhausted failures
+remain local to their section and can be retried individually.
+
 `CredentialStore` encrypts the selected server and account with Android Keystore. `AppGraph`
 reconstructs the active `NavidromeClient` after a cold start, so no private server values are compiled
 into the APK. A non-secret hash of server URL and username namespaces transient caches so identifiers

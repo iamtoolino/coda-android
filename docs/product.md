@@ -14,6 +14,10 @@ Coda is a personal, album-oriented Android client for Navidrome/OpenSubsonic.
 
 - Home: Continue Playing, Artists, Recently Added, Recent Releases, Recently Played, and
   Playlists.
+- Home renders every section immediately and fills sections independently as their requests finish.
+  A slow or failed section does not block successful sections; transient network failures receive
+  bounded automatic retries, and exhausted sections expose their own Retry action.
+- Refresh retains the last good content while each Home section updates independently.
 - Artists: alphabetical list; artist albums use oldest release first.
 - Albums: complete album grid ordered by date added, newest first.
 - Playlists: server order is retained exactly, with visual album headers only.

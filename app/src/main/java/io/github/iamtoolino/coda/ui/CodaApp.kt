@@ -141,8 +141,6 @@ import io.github.iamtoolino.coda.ui.theme.RoutedCodaTheme
 import io.github.iamtoolino.coda.ui.theme.rememberCodaThemeRouter
 import io.github.iamtoolino.coda.ui.theme.resolveThemeRequest
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -347,28 +345,21 @@ fun CodaApp() {
     }
 }
 
-private data class HomeData(
-    val newest: List<Album>,
-    val recentReleases: List<Album>,
-    val recentArtists: List<Artist>,
-    val recent: List<Album>,
-    val playlists: List<Playlist>,
-)
-
 @Composable
 private fun HomeScreen(navController: NavHostController, playback: PlaybackConnection) {
-    var generation by rememberSaveable { mutableIntStateOf(0) }
-    var data by remember { mutableStateOf<HomeData?>(null) }
-    var error by remember { mutableStateOf<String?>(null) }
-    var loading by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+    val home = remember(scope) { HomeCoordinator(scope) }
     val handoffQueue by playback.handoffQueue.collectAsStateWithLifecycle()
     val lifecycleOwner = LocalLifecycleOwner.current
     val listState = rememberRestorableLazyListState(
-        contentReady = data != null || error != null || !AppGraph.navidrome.isConfigured,
-        maxIndex = 9,
+        contentReady = true,
+        maxIndex = 6,
     )
 
-    LaunchedEffect(Unit) { playback.refreshHandoffQueue() }
+    LaunchedEffect(home) {
+        home.refreshAll()
+        playback.refreshHandoffQueue()
+    }
     DisposableEffect(playback) {
         playback.setHomeVisible(true)
         onDispose { playback.setHomeVisible(false) }
@@ -381,40 +372,10 @@ private fun HomeScreen(navController: NavHostController, playback: PlaybackConne
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
-    LaunchedEffect(generation) {
-        loading = true
-        error = null
-        runCatching {
-            AppGraph.withCurrentSession {
-                coroutineScope {
-                    val newestDeferred = async { newestAlbums(24) }
-                    val recentReleasesDeferred = async {
-                        albums(AlbumListType.RELEASE_YEAR, 24)
-                    }
-                    val artistsDeferred = async { artists() }
-                    val recentDeferred = async { recentlyPlayedAlbums(20) }
-                    val playlistsDeferred = async { playlists() }
-                    val newest = newestDeferred.await()
-                    HomeData(
-                        newest = newest,
-                        recentReleases = recentReleasesDeferred.await(),
-                        recentArtists = recentArtists(
-                            newestAlbums = newest,
-                            artists = artistsDeferred.await(),
-                        ),
-                        recent = recentDeferred.await(),
-                        playlists = playlistsDeferred.await(),
-                    )
-                }
-            }
-        }.onSuccess { data = it }.onFailureUnlessCancelled { error = it.message }
-        loading = false
-    }
-
     PullToRefreshBox(
-        isRefreshing = loading && data != null,
+        isRefreshing = home.isRefreshing,
         onRefresh = {
-            generation++
+            home.refreshAll()
             playback.refreshHandoffQueue()
         },
         modifier = Modifier.fillMaxSize(),
@@ -436,19 +397,16 @@ private fun HomeScreen(navController: NavHostController, playback: PlaybackConne
                     },
                 )
             }
-            if (loading && data == null) {
-                item { LoadingBlock() }
-            } else if (error != null && data == null) {
-                item { MessageCard("Could not load Home", error.orEmpty()) }
-            }
-            if (error != null && data != null) {
-                item { MessageCard("Refresh failed", error.orEmpty()) }
-            }
             handoffQueue?.takeIf { it.entry.isNotEmpty() }?.let { queue ->
-                item { ContinueCard(queue) { playback.restore(queue) } }
+                item(key = "continue") { ContinueCard(queue) { playback.restore(queue) } }
             }
-            data?.recentArtists?.takeIf { it.isNotEmpty() }?.let { artists ->
-                item {
+            item(key = "artists") {
+                HomeRemoteSection(
+                    title = "Artists",
+                    state = home.artists,
+                    onMore = { navController.navigate("artists") },
+                    onRetry = { home.retry(HomeSection.ARTISTS) },
+                ) { artists ->
                     ArtistShelf(
                         title = "Artists",
                         artists = artists,
@@ -459,8 +417,17 @@ private fun HomeScreen(navController: NavHostController, playback: PlaybackConne
                     )
                 }
             }
-            data?.newest?.let { albums ->
-                item {
+            item(key = "newest") {
+                HomeRemoteSection(
+                    title = "Recently added albums",
+                    state = home.newest,
+                    onMore = {
+                        navController.navigate(
+                            "albums/${AlbumViewMode.RECENTLY_ADDED.routeValue}",
+                        )
+                    },
+                    onRetry = { home.retry(HomeSection.NEWEST) },
+                ) { albums ->
                     AlbumShelf(
                         title = "Recently added albums",
                         albums = albums,
@@ -473,8 +440,17 @@ private fun HomeScreen(navController: NavHostController, playback: PlaybackConne
                     )
                 }
             }
-            data?.recentReleases?.takeIf { it.isNotEmpty() }?.let { albums ->
-                item {
+            item(key = "recent-releases") {
+                HomeRemoteSection(
+                    title = "Recent releases",
+                    state = home.recentReleases,
+                    onMore = {
+                        navController.navigate(
+                            "albums/${AlbumViewMode.RECENT_RELEASES.routeValue}",
+                        )
+                    },
+                    onRetry = { home.retry(HomeSection.RECENT_RELEASES) },
+                ) { albums ->
                     AlbumShelf(
                         title = "Recent releases",
                         albums = albums,
@@ -487,8 +463,17 @@ private fun HomeScreen(navController: NavHostController, playback: PlaybackConne
                     )
                 }
             }
-            data?.recent?.takeIf { it.isNotEmpty() }?.let { albums ->
-                item {
+            item(key = "recently-played") {
+                HomeRemoteSection(
+                    title = "Recently played",
+                    state = home.recentlyPlayed,
+                    onMore = {
+                        navController.navigate(
+                            "albums/${AlbumViewMode.RECENTLY_PLAYED.routeValue}",
+                        )
+                    },
+                    onRetry = { home.retry(HomeSection.RECENTLY_PLAYED) },
+                ) { albums ->
                     AlbumShelf(
                         title = "Recently played",
                         albums = albums,
@@ -501,10 +486,18 @@ private fun HomeScreen(navController: NavHostController, playback: PlaybackConne
                     )
                 }
             }
-            data?.playlists?.takeIf { it.isNotEmpty() }?.let { playlists ->
-                item {
+            item(key = "playlists") {
+                HomeRemoteSection(
+                    title = "Playlists",
+                    state = home.playlists,
+                    onMore = { navController.navigate("playlists") },
+                    onRetry = { home.retry(HomeSection.PLAYLISTS) },
+                ) { playlists ->
                     Column {
-                        HomeSectionHeader("Playlists")
+                        HomeSectionHeader(
+                            title = "Playlists",
+                            onClick = { navController.navigate("playlists") },
+                        )
                         playlists.forEach { playlist ->
                             PlaylistRow(playlist) {
                                 navController.navigate("playlist/${Uri.encode(playlist.id)}")
@@ -517,17 +510,73 @@ private fun HomeScreen(navController: NavHostController, playback: PlaybackConne
     }
 }
 
-private fun recentArtists(newestAlbums: List<Album>, artists: List<Artist>): List<Artist> {
-    val artistsById = artists.associateBy { it.id }
-    val artistsByName = artists.associateBy { it.name.lowercase() }
-    return newestAlbums.asSequence()
-        .mapNotNull { album ->
-            album.artistId?.let(artistsById::get)
-                ?: artistsByName[album.artist.lowercase()]
+@Composable
+private fun <T> HomeRemoteSection(
+    title: String,
+    state: HomeSectionState<T>,
+    onMore: (() -> Unit)?,
+    onRetry: () -> Unit,
+    content: @Composable (T) -> Unit,
+) {
+    val value = state.value
+    if (value == null) {
+        Column {
+            HomeSectionHeader(title, onMore)
+            HomeSectionStatus(title, state, hasContent = false, onRetry)
         }
-        .distinctBy { it.id }
-        .take(20)
-        .toList()
+    } else {
+        Column {
+            content(value)
+            HomeSectionStatus(title, state, hasContent = true, onRetry)
+        }
+    }
+}
+
+@Composable
+private fun <T> HomeSectionStatus(
+    title: String,
+    state: HomeSectionState<T>,
+    hasContent: Boolean,
+    onRetry: () -> Unit,
+) {
+    when {
+        state.isLoading && hasContent -> LinearProgressIndicator(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 4.dp),
+        )
+        state.isLoading -> Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(112.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            CircularProgressIndicator(Modifier.size(30.dp), strokeWidth = 3.dp)
+        }
+        state.errorMessage != null -> Row(
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(14.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .padding(start = 14.dp, top = 10.dp, bottom = 10.dp, end = 6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(Modifier.weight(1f)) {
+                Text("Could not load $title", fontWeight = FontWeight.Bold)
+                Text(
+                    state.errorMessage,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = 12.sp,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+            IconButton(onClick = onRetry) {
+                Icon(Icons.Default.Refresh, "Retry $title")
+            }
+        }
+    }
 }
 
 @Composable
