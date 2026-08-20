@@ -23,6 +23,15 @@ Coda is a personal, album-oriented Android client for Navidrome/OpenSubsonic.
 - Playlists: server order is retained exactly, with visual album headers only.
 - Search: artists, albums, and tracks.
 
+## Ratings
+
+- Five-star album ratings are written directly to Navidrome and shown consistently on album cards
+  and Album detail for the authenticated session.
+- Rating changes appear immediately. Rapid changes remain interactive and resolve to the latest
+  selection without allowing older server writes to finish last.
+- Tapping the selected rating clears it. If the latest write fails, Coda restores the last confirmed
+  rating and reports the failure.
+
 ## Visual theme
 
 - Coda uses an artwork-led dark theme with one consistent palette across the visible phone UI.

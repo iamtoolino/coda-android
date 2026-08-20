@@ -30,6 +30,13 @@ Typing waits 350 ms before issuing a request; explicit refresh starts immediatel
 last result for the same query. A changed query clears mismatched results. Cancellation propagates,
 and a request-generation gate rejects late results from superseded queries.
 
+`AlbumRatingCoordinator` is created once per authenticated Compose session and shared through a
+scoped composition local. Its state is keyed by album ID and overlays immutable server models across
+album cards and detail views. Selections publish optimistically with a monotonic per-album revision.
+Each album has one serial writer and one conflated pending transaction, preserving server order while
+allowing rapid changes. A failed latest transaction rolls back to the last confirmed rating and emits
+a UI failure event; obsolete failures and account-session cancellation publish nothing.
+
 `CredentialStore` encrypts the selected server and account with Android Keystore. `AppGraph`
 reconstructs the active `NavidromeClient` after a cold start, so no private server values are compiled
 into the APK. A non-secret hash of server URL and username namespaces transient caches so identifiers

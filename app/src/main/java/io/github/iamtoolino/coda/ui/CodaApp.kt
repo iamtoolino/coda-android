@@ -74,11 +74,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -144,12 +144,9 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-private val albumRatingOverrides = mutableStateMapOf<String, Int>()
 private val OverlayButtonBackground = Color.Black.copy(alpha = 0.46f)
 
 private fun accountCacheKey(value: String): String = "${AppGraph.cacheNamespace}:$value"
-
-private fun albumRatingKey(albumId: String): String = accountCacheKey("rating:$albumId")
 
 private enum class AlbumViewMode(
     val routeValue: String,
@@ -237,6 +234,19 @@ fun CodaApp() {
         }
         return
     }
+    val activeCredentials = requireNotNull(credentials)
+    val ratingScope = rememberCoroutineScope()
+    val ratings = remember(activeCredentials, ratingScope) {
+        AlbumRatingCoordinator(ratingScope) { albumId, rating ->
+            AppGraph.withCurrentSession { setAlbumRating(albumId, rating) }
+        }
+    }
+    DisposableEffect(ratings) { onDispose(ratings::close) }
+    LaunchedEffect(ratings, application) {
+        ratings.failures.collect {
+            Toast.makeText(application, "Could not update album rating", Toast.LENGTH_SHORT).show()
+        }
+    }
     val themeRouter = rememberCodaThemeRouter()
     val navController = rememberNavController()
     val entry by navController.currentBackStackEntryAsState()
@@ -253,8 +263,9 @@ fun CodaApp() {
         playback = playbackThemeRequest,
     )
     RoutedCodaTheme(themeRequest) {
-        AdaptiveBackground {
-            Scaffold(
+        CompositionLocalProvider(LocalAlbumRatingCoordinator provides ratings) {
+            AdaptiveBackground {
+                Scaffold(
                 modifier = Modifier.fillMaxSize(),
                 containerColor = Color.Transparent,
                 contentColor = MaterialTheme.colorScheme.onSurface,
@@ -292,13 +303,12 @@ fun CodaApp() {
                     composable("search") { SearchScreen(navController, playback, playbackState) }
                     composable("connection") {
                         ConnectionScreen(
-                            credentials = requireNotNull(credentials),
+                            credentials = activeCredentials,
                             onBack = { navController.popBackStack() },
                             onDisconnect = {
                                 val oldNamespace = AppGraph.cacheNamespace
                                 AppGraph.logout()
                                 playback.disconnect(oldNamespace)
-                                albumRatingOverrides.clear()
                                 application.clearArtworkCaches(oldNamespace)
                             },
                         )
@@ -339,6 +349,7 @@ fun CodaApp() {
                     composable("queue") {
                         QueueScreen(navController, playback, playbackState)
                     }
+                }
                 }
             }
         }
@@ -1095,12 +1106,11 @@ private fun AlbumScreen(
     themeOwner: String,
 ) {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
+    val ratings = LocalAlbumRatingCoordinator.current
     var page by remember(id) { mutableStateOf<AlbumPage?>(null) }
     var error by remember(id) { mutableStateOf<String?>(null) }
     var generation by rememberSaveable(id) { mutableIntStateOf(0) }
     var loading by remember(id) { mutableStateOf(false) }
-    var ratingUpdating by remember(id) { mutableStateOf(false) }
     val listState = rememberRestorableLazyListState(
         contentReady = page != null || error != null,
         maxIndex = page?.songs?.size ?: 0,
@@ -1138,6 +1148,10 @@ private fun AlbumScreen(
                     if (error != null) item { MessageCard("Could not load album", error.orEmpty()) }
                     page?.let { loaded ->
                         item {
+                            val ratingState = ratings.state(
+                                loaded.album.id,
+                                loaded.album.userRating,
+                            )
                             AlbumHero(
                                 page = loaded,
                                 onArtist = loaded.album.artistId?.let { artistId ->
@@ -1156,46 +1170,13 @@ private fun AlbumScreen(
                                         Toast.LENGTH_SHORT,
                                     ).show()
                                 },
-                                rating = albumRatingOverrides[albumRatingKey(loaded.album.id)]
-                                    ?: loaded.album.userRating
-                                    ?: 0,
-                                ratingUpdating = ratingUpdating,
+                                rating = ratingState.rating,
                                 onRate = { selectedRating ->
-                                    if (!ratingUpdating) {
-                                        val ratingKey = albumRatingKey(loaded.album.id)
-                                        val previousRating = albumRatingOverrides[ratingKey]
-                                            ?: loaded.album.userRating
-                                            ?: 0
-                                        val newRating = if (selectedRating == previousRating) {
-                                            0
-                                        } else {
-                                            selectedRating
-                                        }
-                                        albumRatingOverrides[ratingKey] = newRating
-                                        ratingUpdating = true
-                                        scope.launch {
-                                            runCatching {
-                                                AppGraph.withCurrentSession {
-                                                    setAlbumRating(
-                                                        loaded.album.id,
-                                                        newRating,
-                                                    )
-                                                }
-                                            }.onFailureUnlessCancelled {
-                                                if (previousRating == 0) {
-                                                    albumRatingOverrides.remove(ratingKey)
-                                                } else {
-                                                    albumRatingOverrides[ratingKey] = previousRating
-                                                }
-                                                Toast.makeText(
-                                                    context,
-                                                    "Could not update album rating",
-                                                    Toast.LENGTH_SHORT,
-                                                ).show()
-                                            }
-                                            ratingUpdating = false
-                                        }
-                                    }
+                                    ratings.select(
+                                        albumId = loaded.album.id,
+                                        serverRating = loaded.album.userRating,
+                                        selectedRating = selectedRating,
+                                    )
                                 },
                             )
                         }
@@ -1537,7 +1518,6 @@ private fun AlbumHero(
     onPlay: () -> Unit,
     onAppend: () -> Unit,
     rating: Int,
-    ratingUpdating: Boolean,
     onRate: (Int) -> Unit,
 ) {
     Column {
@@ -1595,7 +1575,6 @@ private fun AlbumHero(
                     (1..5).forEach { star ->
                         IconButton(
                             onClick = { onRate(star) },
-                            enabled = !ratingUpdating,
                             modifier = Modifier.size(34.dp),
                         ) {
                             Icon(
@@ -1605,9 +1584,7 @@ private fun AlbumHero(
                                     Icons.Default.StarBorder
                                 },
                                 contentDescription = "Rate $star stars",
-                                tint = MaterialTheme.colorScheme.primary.copy(
-                                    alpha = if (ratingUpdating) 0.58f else 1f,
-                                ),
+                                tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(23.dp),
                             )
                         }
@@ -1792,7 +1769,9 @@ private fun Cover(
     showRatingBadge: Boolean = true,
 ) {
     val url = AppGraph.navidrome.coverArtUrl(album.coverArt ?: album.id, size = size)
-    val rating = albumRatingOverrides[albumRatingKey(album.id)] ?: album.userRating ?: 0
+    val rating = LocalAlbumRatingCoordinator.current
+        .state(album.id, album.userRating)
+        .rating
     Box(modifier = modifier.background(MaterialTheme.colorScheme.surfaceVariant)) {
         if (url == null) {
             Icon(

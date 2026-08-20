@@ -61,6 +61,10 @@
 - Search text selection, focus, and keyboard behavior belong to Compose; query debounce, request
   ownership, result identity, refresh retention, and stale-result rejection belong to
   `SearchCoordinator`. Explicit refresh is immediate and must not repeat the typing debounce.
+- Album ratings belong to one authenticated-session `AlbumRatingCoordinator`, never a file-global
+  override or screen-local transaction flag. Publish optimistic ratings across every surface,
+  serialize writes per album while conflating pending choices, and roll back only a failed latest
+  revision. Session cancellation must not publish a rollback or failure.
 - Artwork identity, album identity, and track identity are not interchangeable. Prefer canonical
   album artwork for playback, cache, and theme decisions.
 - Shared visual policy is resolved centrally. Brand teal is the default; the current playback
