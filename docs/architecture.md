@@ -59,8 +59,12 @@ and canonical artwork source. It shares the same encoded hero entry as the visib
 than downloading another component-specific copy. A prepare-then-commit gate prevents an obsolete
 artwork request from publishing after navigation has moved elsewhere. Pending destinations retain
 the last committed palette until their replacement is ready, avoiding an intermediate Brand
-transition. Monochrome extraction falls back to neutral grey; missing or unreadable artwork falls
-back to Brand teal.
+transition. Once committed, the routed accent family interpolates through one synchronized 850 ms
+ease-in-out transition, so buttons, progress, ratings, and their foreground/container colors cannot
+animate on independent timelines. Background and surface colors retain the existing Material
+animation.
+Monochrome extraction falls back to neutral grey; missing or unreadable artwork falls back to Brand
+teal.
 
 ## Artwork
 

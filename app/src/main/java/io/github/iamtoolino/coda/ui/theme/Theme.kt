@@ -4,7 +4,11 @@ package io.github.iamtoolino.coda.ui.theme
 
 import android.graphics.Bitmap
 import android.graphics.Color as AndroidColor
+import androidx.compose.animation.animateColor
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -89,6 +93,8 @@ private data class ArtworkColors(
 )
 
 private val BrandColors = artworkColors(CodaAccentExtractor.GENERIC_FALLBACK)
+private const val ThemeTransitionDurationMillis = 850
+private val ThemeTransitionEasing = CubicBezierEasing(0.42f, 0f, 0.58f, 1f)
 
 private object ArtworkColorCache {
     private const val maxEntries = 80
@@ -179,16 +185,46 @@ internal fun RoutedCodaTheme(
 
 @Composable
 private fun CodaMaterialTheme(colors: ArtworkColors, content: @Composable () -> Unit) {
-    val accent by animateColorAsState(colors.accent, label = "artwork accent")
-    val onAccent by animateColorAsState(colors.onAccent, label = "on artwork accent")
-    val accentContainer by animateColorAsState(colors.accentContainer, label = "artwork container")
-    val onAccentContainer by animateColorAsState(
-        colors.onAccentContainer,
-        label = "on artwork container",
+    val transition = updateTransition(
+        targetState = colors,
+        label = "artwork theme",
     )
-    val backgroundTop by animateColorAsState(colors.backgroundTop, label = "artwork background")
-    val backgroundBottom by animateColorAsState(colors.backgroundBottom, label = "artwork surface")
-    val surfaceVariant by animateColorAsState(colors.surfaceVariant, label = "artwork surface variant")
+    val accent by transition.animateColor(
+        transitionSpec = {
+            tween(ThemeTransitionDurationMillis, easing = ThemeTransitionEasing)
+        },
+        label = "artwork accent",
+    ) { it.accent }
+    val onAccent by transition.animateColor(
+        transitionSpec = {
+            tween(ThemeTransitionDurationMillis, easing = ThemeTransitionEasing)
+        },
+        label = "on artwork accent",
+    ) { it.onAccent }
+    val accentContainer by transition.animateColor(
+        transitionSpec = {
+            tween(ThemeTransitionDurationMillis, easing = ThemeTransitionEasing)
+        },
+        label = "artwork container",
+    ) { it.accentContainer }
+    val onAccentContainer by transition.animateColor(
+        transitionSpec = {
+            tween(ThemeTransitionDurationMillis, easing = ThemeTransitionEasing)
+        },
+        label = "on artwork container",
+    ) { it.onAccentContainer }
+    val backgroundTop by animateColorAsState(
+        targetValue = colors.backgroundTop,
+        label = "artwork background",
+    )
+    val backgroundBottom by animateColorAsState(
+        targetValue = colors.backgroundBottom,
+        label = "artwork surface",
+    )
+    val surfaceVariant by animateColorAsState(
+        targetValue = colors.surfaceVariant,
+        label = "artwork surface variant",
+    )
     val colorScheme = darkColorScheme(
         primary = accent,
         onPrimary = onAccent,
