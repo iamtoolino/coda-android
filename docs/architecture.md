@@ -88,6 +88,10 @@ progress tick, so only the visible mini-player or Now Playing controls recompose
 Queue replacement, append, and handoff restoration prepare immutable Media3 items off the main
 thread and apply those mutations in user-action order.
 
+Playable Media3 items carry both album and artist IDs in their metadata, and the local playback
+snapshot preserves those IDs across service/process restoration. Now Playing navigation therefore
+uses the same restored authoritative queue metadata rather than resolving names back to library IDs.
+
 The player uses a Media3 `SimpleCache` as a transient audio cache with explicit resource eviction
 rather than a byte-based eviction policy. The queue defines its contents: whenever a queue exists, a
 single cancellable worker fills the current track and next three sequentially and removes keys

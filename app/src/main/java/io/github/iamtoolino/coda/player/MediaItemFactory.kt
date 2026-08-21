@@ -36,6 +36,7 @@ internal fun Song.toPlayableMediaItem(
     )
     val extras = Bundle().apply {
         putString("albumId", albumId)
+        putString("artistId", artistId)
         putString("coverArtId", albumId ?: coverArt)
         putString("cacheNamespace", session.cacheNamespace)
         putLong("durationMs", duration.coerceAtLeast(0) * 1_000L)

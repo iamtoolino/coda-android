@@ -114,6 +114,7 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -2154,6 +2155,16 @@ private fun NowPlayingScreen(
         ?.takeIf { ratingSeedState.key == albumId }
         ?.userRating
     val rating = albumId?.let { ratings.state(it, serverRating).rating }
+    val nextEntry = state.currentIndex
+        .takeIf { it >= 0 }
+        ?.plus(1)
+        ?.let(state.queue::getOrNull)
+    val remainingQueueCount = if (state.currentIndex in state.queue.indices) {
+        (state.queue.size - state.currentIndex - 1).coerceAtLeast(0)
+    } else {
+        state.queue.size
+    }
+    val streamQuality = qualityLabel(state)
     LaunchedEffect(ratingSeed, albumId) {
         if (albumId != null &&
             (ratingSeedState.key != albumId || ratingSeedState.value == null)
@@ -2232,7 +2243,7 @@ private fun NowPlayingScreen(
                         Text(
                             state.title,
                             modifier = Modifier.fillMaxWidth(),
-                            fontSize = if (veryCompact) 24.sp else 26.sp,
+                            fontSize = if (veryCompact) 24.sp else 28.sp,
                             fontWeight = FontWeight.Bold,
                             maxLines = 2,
                             overflow = TextOverflow.Ellipsis,
@@ -2241,8 +2252,18 @@ private fun NowPlayingScreen(
                         Spacer(Modifier.height(if (compact) 3.dp else 6.dp))
                         Text(
                             state.artist,
-                            modifier = Modifier.fillMaxWidth(),
-                            fontSize = 19.sp,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable(
+                                    enabled = state.artistId != null,
+                                    onClick = {
+                                        state.artistId?.let { artistId ->
+                                            navController.navigate("artist/${Uri.encode(artistId)}")
+                                        }
+                                    },
+                                )
+                                .padding(vertical = 3.dp),
+                            fontSize = 20.sp,
                             color = MaterialTheme.colorScheme.primary,
                             maxLines = 2,
                             overflow = TextOverflow.Ellipsis,
@@ -2250,8 +2271,18 @@ private fun NowPlayingScreen(
                         )
                         Text(
                             state.album,
-                            modifier = Modifier.fillMaxWidth(),
-                            fontSize = 15.sp,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable(
+                                    enabled = albumId != null,
+                                    onClick = {
+                                        albumId?.let { id ->
+                                            navController.navigate("album/${Uri.encode(id)}")
+                                        }
+                                    },
+                                )
+                                .padding(vertical = 3.dp),
+                            fontSize = 16.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 2,
                             overflow = TextOverflow.Ellipsis,
@@ -2260,22 +2291,9 @@ private fun NowPlayingScreen(
                         state.error?.let {
                             Spacer(Modifier.height(if (compact) 4.dp else 8.dp))
                             Text(it, color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
-                        } ?: qualityLabel(state)?.let {
-                            Spacer(Modifier.height(if (compact) 5.dp else 9.dp))
-                            Text(
-                                it,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.78f),
-                                fontSize = 11.sp,
-                            )
                         }
                         if (albumId != null && rating != null) {
                             Spacer(Modifier.height(if (compact) 7.dp else 12.dp))
-                            Text(
-                                "Album rating",
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold,
-                            )
                             AlbumRatingStars(
                                 rating = rating,
                                 onRate = { selectedRating ->
@@ -2285,11 +2303,15 @@ private fun NowPlayingScreen(
                                         selectedRating = selectedRating,
                                     )
                                 },
+                                buttonSize = 48.dp,
+                                iconSize = 40.dp,
                             )
                         }
                         if (state.queue.isNotEmpty()) {
                             Spacer(Modifier.height(if (compact) 7.dp else 14.dp))
-                            UpNextButton(
+                            QueuePreviewButton(
+                                remainingCount = remainingQueueCount,
+                                nextEntry = nextEntry,
                                 onOpenQueue = { navController.navigate("queue") },
                             )
                         }
@@ -2334,7 +2356,15 @@ private fun NowPlayingScreen(
                                 )
                             }
                         }
-                        Spacer(Modifier.height(if (compact) 8.dp else 20.dp))
+                        if (state.error == null && streamQuality != null) {
+                            Spacer(Modifier.height(if (compact) 4.dp else 8.dp))
+                            Text(
+                                streamQuality,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.78f),
+                                fontSize = 11.sp,
+                            )
+                        }
+                        Spacer(Modifier.height(if (compact) 5.dp else 10.dp))
                     }
                 }
             }
@@ -2407,28 +2437,65 @@ private fun SeekBar(
 }
 
 @Composable
-private fun UpNextButton(onOpenQueue: () -> Unit) {
-    Row(
+private fun QueuePreviewButton(
+    remainingCount: Int,
+    nextEntry: QueueEntry?,
+    onOpenQueue: () -> Unit,
+) {
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(10.dp))
             .clickable(onClick = onOpenQueue)
-            .padding(horizontal = 8.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
+            .padding(horizontal = 8.dp, vertical = 6.dp),
     ) {
-        Text(
-            "Up next",
-            modifier = Modifier.weight(1f),
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Icon(
-            Icons.Default.ChevronRight,
-            contentDescription = "Open queue",
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.size(20.dp),
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                "Queue · $remainingCount",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Icon(
+                Icons.Default.ChevronRight,
+                contentDescription = "Open queue",
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(20.dp),
+            )
+        }
+        nextEntry?.let { entry ->
+            Spacer(Modifier.height(4.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    entry.trackNumber?.toString()?.padStart(2, '0').orEmpty(),
+                    modifier = Modifier.width(38.dp),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = 14.sp,
+                )
+                Text(
+                    entry.title,
+                    modifier = Modifier.weight(1f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    fontSize = 16.sp,
+                )
+                if (entry.durationMs > 0) {
+                    Spacer(Modifier.width(12.dp))
+                    Text(
+                        formatDurationMs(entry.durationMs),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = 14.sp,
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -2439,12 +2506,14 @@ private fun AlbumRatingStars(
     rating: Int,
     onRate: (Int) -> Unit,
     modifier: Modifier = Modifier,
+    buttonSize: Dp = 34.dp,
+    iconSize: Dp = 23.dp,
 ) {
     Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
         (1..5).forEach { star ->
             IconButton(
                 onClick = { onRate(star) },
-                modifier = Modifier.size(34.dp),
+                modifier = Modifier.size(buttonSize),
             ) {
                 Icon(
                     imageVector = if (star <= rating) {
@@ -2454,7 +2523,7 @@ private fun AlbumRatingStars(
                     },
                     contentDescription = "Rate $star stars",
                     tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(23.dp),
+                    modifier = Modifier.size(iconSize),
                 )
             }
         }

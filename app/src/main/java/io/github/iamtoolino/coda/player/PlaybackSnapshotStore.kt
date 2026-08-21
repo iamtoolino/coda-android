@@ -72,6 +72,7 @@ private fun MediaItem.snapshotSong(): Song? {
         album = mediaMetadata.albumTitle?.toString().orEmpty(),
         artist = mediaMetadata.artist?.toString().orEmpty(),
         albumId = extras?.getString("albumId"),
+        artistId = extras?.getString("artistId"),
         coverArt = extras?.getString("coverArtId"),
         track = extras?.getInt("trackNumber")?.takeIf { extras.containsKey("trackNumber") },
         discNumber = extras?.getInt("discNumber")?.takeIf { extras.containsKey("discNumber") },

@@ -17,6 +17,7 @@ class PlaybackSnapshotStoreTest {
                     album = "Korn",
                     artist = "Korn",
                     albumId = "album-1",
+                    artistId = "artist-1",
                     coverArt = "cover-1",
                     track = 1,
                     duration = 258,
