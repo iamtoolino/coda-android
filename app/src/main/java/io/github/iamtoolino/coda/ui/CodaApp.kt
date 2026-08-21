@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -1640,44 +1641,35 @@ private fun AlbumHero(
                         heroFadeBrush(MaterialTheme.colorScheme.background),
                     ),
             )
-            Row(
-                modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .padding(18.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                RoundActionButton(
-                    icon = Icons.Default.PlayArrow,
-                    description = "Play album",
-                    primary = true,
-                    onClick = onPlay,
-                )
-                RoundActionButton(
-                    icon = Icons.AutoMirrored.Filled.PlaylistAdd,
-                    description = "Append album to queue",
-                    translucent = true,
-                    onClick = onAppend,
-                )
-            }
-            Box(
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(18.dp)
-                    .height(54.dp),
-            ) {
-                AlbumRatingStars(
-                    rating = rating,
-                    onRate = onRate,
-                    modifier = Modifier
-                        .align(Alignment.CenterEnd)
-                        .clip(RoundedCornerShape(20.dp))
-                        .background(OverlayButtonBackground)
-                        .padding(horizontal = 4.dp),
-                )
-            }
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 16.dp, end = 16.dp, top = 10.dp, bottom = 4.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            RoundActionButton(
+                icon = Icons.Default.PlayArrow,
+                description = "Play album",
+                primary = true,
+                onClick = onPlay,
+            )
+            RoundActionButton(
+                icon = Icons.AutoMirrored.Filled.PlaylistAdd,
+                description = "Append album to queue",
+                onClick = onAppend,
+            )
+            Spacer(Modifier.weight(1f))
+            AlbumRatingStars(
+                rating = rating,
+                onRate = onRate,
+                buttonSize = 40.dp,
+                iconSize = 28.dp,
+            )
         }
         Column(
-            modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 10.dp),
+            modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 6.dp, bottom = 8.dp),
         ) {
             Text(
                 page.album.name,
@@ -1932,6 +1924,7 @@ private fun SongRow(
             .fillMaxWidth()
             .background(if (isPlaying) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent)
             .clickable(onClick = onClick)
+            .heightIn(min = 48.dp)
             .padding(horizontal = 16.dp, vertical = 9.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -1965,11 +1958,11 @@ private fun AlbumDiscHeader(section: AlbumDiscSection) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 18.dp, end = 18.dp, top = 24.dp, bottom = 6.dp),
+            .padding(start = 56.dp, end = 16.dp, top = 12.dp, bottom = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            text = "DISC ${section.number}",
+            text = "Disc ${section.number}",
             modifier = Modifier.weight(1f),
             style = MaterialTheme.typography.labelLarge,
             fontWeight = FontWeight.Bold,
