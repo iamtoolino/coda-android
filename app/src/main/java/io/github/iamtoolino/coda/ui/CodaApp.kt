@@ -2111,6 +2111,7 @@ private fun MiniPlayer(
             ) {
                 Text(
                     state.title,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -2130,6 +2131,7 @@ private fun MiniPlayer(
                 Icon(
                     if (progress.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
                     if (progress.isPlaying) "Pause" else "Play",
+                    tint = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.size(34.dp),
                 )
             }
