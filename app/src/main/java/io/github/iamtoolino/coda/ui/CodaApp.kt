@@ -2461,13 +2461,6 @@ private fun QueuePreviewButton(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .height(1.dp)
-                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)),
-            )
-            Spacer(Modifier.width(12.dp))
             Text(
                 "Queue · $remainingCount",
                 fontSize = 13.sp,
