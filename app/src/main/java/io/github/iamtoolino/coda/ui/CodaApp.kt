@@ -1962,7 +1962,7 @@ private fun AlbumDiscHeader(section: AlbumDiscSection) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            text = "DISC ${section.number}",
+            text = "Disc ${section.number}",
             modifier = Modifier.weight(1f),
             style = MaterialTheme.typography.labelLarge,
             fontWeight = FontWeight.Bold,
