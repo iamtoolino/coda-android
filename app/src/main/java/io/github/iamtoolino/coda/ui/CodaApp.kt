@@ -2365,7 +2365,7 @@ private fun NowPlayingScreen(
                             }
                         }
                         if (state.error == null && streamQuality != null) {
-                            Spacer(Modifier.height(if (compact) 4.dp else 6.dp))
+                            Spacer(Modifier.height(if (compact) 8.dp else 14.dp))
                             Text(
                                 streamQuality,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.78f),
