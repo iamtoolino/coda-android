@@ -4,6 +4,11 @@ package io.github.iamtoolino.coda.ui
 
 import android.net.Uri
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -254,8 +259,16 @@ fun CodaApp() {
     val themeRouter = rememberCodaThemeRouter()
     val navController = rememberNavController()
     val entry by navController.currentBackStackEntryAsState()
+    val visibleEntries by navController.visibleEntries.collectAsStateWithLifecycle()
     val route = entry?.destination?.route.orEmpty()
-    val fullScreenPlayer = route == "now-playing" || route == "queue"
+    // The current entry changes at pop start; visible entries retain the outgoing player until its
+    // animation ends, preventing the scaffold bottom bar from resizing it mid-transition.
+    val fullScreenPlayerVisible = visibleEntries.any { visibleEntry ->
+        visibleEntry.destination.route == "now-playing" ||
+            visibleEntry.destination.route == "queue"
+    }
+    val returningFromFullScreen = fullScreenPlayerVisible &&
+        route != "now-playing" && route != "queue"
     val playbackThemeSource = localPlaybackArtworkSource(
         namespace = AppGraph.cacheNamespace,
         generation = artworkGeneration,
@@ -280,13 +293,130 @@ fun CodaApp() {
             LocalArtworkGeneration provides artworkGeneration,
         ) {
             AdaptiveBackground {
-                Scaffold(
-                modifier = Modifier.fillMaxSize(),
-                containerColor = Color.Transparent,
-                contentColor = MaterialTheme.colorScheme.onSurface,
-                contentWindowInsets = WindowInsets(0, 0, 0, 0),
-                bottomBar = {
-                    if (!fullScreenPlayer && playbackState.currentSongId != null) {
+                Box(Modifier.fillMaxSize()) {
+                    Scaffold(
+                        modifier = Modifier.fillMaxSize(),
+                        containerColor = Color.Transparent,
+                        contentColor = MaterialTheme.colorScheme.onSurface,
+                        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+                        bottomBar = {
+                            if (!fullScreenPlayerVisible && playbackState.currentSongId != null) {
+                                MiniPlayer(
+                                    state = playbackState,
+                                    playback = playback,
+                                    onOpen = { navController.navigate("now-playing") },
+                                    onToggle = playback::togglePlayPause,
+                                )
+                            }
+                        },
+                    ) { padding ->
+                        NavHost(
+                            navController = navController,
+                            startDestination = "home",
+                            modifier = Modifier.padding(padding),
+                        ) {
+                        composable("home") { HomeScreen(navController, playback) }
+                        composable("artists") { ArtistsScreen(navController) }
+                        composable("albums") {
+                            AlbumsScreen(navController, AlbumViewMode.RECENTLY_ADDED)
+                        }
+                        composable(
+                            route = "albums/{mode}",
+                            arguments = listOf(navArgument("mode") { type = NavType.StringType }),
+                        ) {
+                            AlbumsScreen(
+                                navController,
+                                AlbumViewMode.fromRoute(it.arguments?.getString("mode")),
+                            )
+                        }
+                        composable("playlists") { PlaylistsScreen(navController) }
+                        composable("search") { SearchScreen(navController, playback, playbackState) }
+                        composable("connection") {
+                            ConnectionScreen(
+                                credentials = activeCredentials,
+                                artworkRefreshing = artworkRefreshing,
+                                onBack = { navController.popBackStack() },
+                                onRefreshArtwork = {
+                                    if (!artworkRefreshing) {
+                                        val namespace = AppGraph.cacheNamespace
+                                        ratingScope.launch {
+                                            artworkRefreshing = true
+                                            runCatching {
+                                                application.refreshArtworkCaches(namespace)
+                                            }.onSuccess {
+                                                Toast.makeText(
+                                                    application,
+                                                    "Artwork refreshed",
+                                                    Toast.LENGTH_SHORT,
+                                                ).show()
+                                            }.onFailureUnlessCancelled {
+                                                Toast.makeText(
+                                                    application,
+                                                    "Could not refresh artwork",
+                                                    Toast.LENGTH_SHORT,
+                                                ).show()
+                                            }
+                                            artworkRefreshing = false
+                                        }
+                                    }
+                                },
+                                onDisconnect = {
+                                    val oldNamespace = AppGraph.cacheNamespace
+                                    AppGraph.logout()
+                                    playback.disconnect(oldNamespace)
+                                    application.clearArtworkCaches(oldNamespace)
+                                },
+                            )
+                        }
+                        composable(
+                            route = "artist/{id}",
+                            arguments = listOf(navArgument("id") { type = NavType.StringType }),
+                        ) { ArtistScreen(navController, Uri.decode(it.arguments?.getString("id").orEmpty())) }
+                        composable(
+                            route = "album/{id}",
+                            arguments = listOf(navArgument("id") { type = NavType.StringType }),
+                        ) { backStackEntry ->
+                            AlbumScreen(
+                                navController = navController,
+                                id = Uri.decode(backStackEntry.arguments?.getString("id").orEmpty()),
+                                playback = playback,
+                                playbackState = playbackState,
+                                themeRouter = themeRouter,
+                                themeOwner = backStackEntry.id,
+                            )
+                        }
+                        composable(
+                            route = "playlist/{id}",
+                            arguments = listOf(navArgument("id") { type = NavType.StringType }),
+                        ) { backStackEntry ->
+                            PlaylistScreen(
+                                navController = navController,
+                                id = Uri.decode(backStackEntry.arguments?.getString("id").orEmpty()),
+                                playback = playback,
+                                playbackState = playbackState,
+                                themeRouter = themeRouter,
+                                themeOwner = backStackEntry.id,
+                            )
+                        }
+                        composable("now-playing") {
+                            NowPlayingScreen(navController, playback, playbackState)
+                        }
+                        composable("queue") {
+                            QueueScreen(navController, playback, playbackState)
+                        }
+                        }
+                    }
+                    AnimatedVisibility(
+                        visible = returningFromFullScreen && playbackState.currentSongId != null,
+                        modifier = Modifier.align(Alignment.BottomCenter),
+                        enter = fadeIn(
+                            animationSpec = tween(durationMillis = 170, delayMillis = 110),
+                        ) + slideInVertically(
+                            animationSpec = tween(durationMillis = 170, delayMillis = 110),
+                            initialOffsetY = { height -> height / 2 },
+                        ),
+                        exit = ExitTransition.None,
+                    ) {
                         MiniPlayer(
                             state = playbackState,
                             playback = playback,
@@ -294,103 +424,6 @@ fun CodaApp() {
                             onToggle = playback::togglePlayPause,
                         )
                     }
-                },
-            ) { padding ->
-                NavHost(
-                    navController = navController,
-                    startDestination = "home",
-                    modifier = Modifier.padding(padding),
-                ) {
-                    composable("home") { HomeScreen(navController, playback) }
-                    composable("artists") { ArtistsScreen(navController) }
-                    composable("albums") {
-                        AlbumsScreen(navController, AlbumViewMode.RECENTLY_ADDED)
-                    }
-                    composable(
-                        route = "albums/{mode}",
-                        arguments = listOf(navArgument("mode") { type = NavType.StringType }),
-                    ) {
-                        AlbumsScreen(
-                            navController,
-                            AlbumViewMode.fromRoute(it.arguments?.getString("mode")),
-                        )
-                    }
-                    composable("playlists") { PlaylistsScreen(navController) }
-                    composable("search") { SearchScreen(navController, playback, playbackState) }
-                    composable("connection") {
-                        ConnectionScreen(
-                            credentials = activeCredentials,
-                            artworkRefreshing = artworkRefreshing,
-                            onBack = { navController.popBackStack() },
-                            onRefreshArtwork = {
-                                if (!artworkRefreshing) {
-                                    val namespace = AppGraph.cacheNamespace
-                                    ratingScope.launch {
-                                        artworkRefreshing = true
-                                        runCatching {
-                                            application.refreshArtworkCaches(namespace)
-                                        }.onSuccess {
-                                            Toast.makeText(
-                                                application,
-                                                "Artwork refreshed",
-                                                Toast.LENGTH_SHORT,
-                                            ).show()
-                                        }.onFailureUnlessCancelled {
-                                            Toast.makeText(
-                                                application,
-                                                "Could not refresh artwork",
-                                                Toast.LENGTH_SHORT,
-                                            ).show()
-                                        }
-                                        artworkRefreshing = false
-                                    }
-                                }
-                            },
-                            onDisconnect = {
-                                val oldNamespace = AppGraph.cacheNamespace
-                                AppGraph.logout()
-                                playback.disconnect(oldNamespace)
-                                application.clearArtworkCaches(oldNamespace)
-                            },
-                        )
-                    }
-                    composable(
-                        route = "artist/{id}",
-                        arguments = listOf(navArgument("id") { type = NavType.StringType }),
-                    ) { ArtistScreen(navController, Uri.decode(it.arguments?.getString("id").orEmpty())) }
-                    composable(
-                        route = "album/{id}",
-                        arguments = listOf(navArgument("id") { type = NavType.StringType }),
-                    ) { backStackEntry ->
-                        AlbumScreen(
-                            navController = navController,
-                            id = Uri.decode(backStackEntry.arguments?.getString("id").orEmpty()),
-                            playback = playback,
-                            playbackState = playbackState,
-                            themeRouter = themeRouter,
-                            themeOwner = backStackEntry.id,
-                        )
-                    }
-                    composable(
-                        route = "playlist/{id}",
-                        arguments = listOf(navArgument("id") { type = NavType.StringType }),
-                    ) { backStackEntry ->
-                        PlaylistScreen(
-                            navController = navController,
-                            id = Uri.decode(backStackEntry.arguments?.getString("id").orEmpty()),
-                            playback = playback,
-                            playbackState = playbackState,
-                            themeRouter = themeRouter,
-                            themeOwner = backStackEntry.id,
-                        )
-                    }
-                    composable("now-playing") {
-                        NowPlayingScreen(navController, playback, playbackState)
-                    }
-                    composable("queue") {
-                        QueueScreen(navController, playback, playbackState)
-                    }
-                }
                 }
             }
         }
