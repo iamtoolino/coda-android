@@ -1578,7 +1578,7 @@ private fun ArtistHero(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .aspectRatio(1.45f),
+            .aspectRatio(1f),
     ) {
         Artwork(
             source = artworkSource,
