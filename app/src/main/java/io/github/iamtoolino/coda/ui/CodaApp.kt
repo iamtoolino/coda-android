@@ -1965,7 +1965,7 @@ private fun AlbumDiscHeader(section: AlbumDiscSection) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 18.dp, end = 18.dp, top = 24.dp, bottom = 6.dp),
+            .padding(start = 18.dp, end = 18.dp, top = 12.dp, bottom = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
