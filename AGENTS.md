@@ -204,6 +204,18 @@
   inspect the signed APK/AAB and merged manifest, and keep local tag/package preparation separate
   from explicit approval to push or publish.
 
+### Debug layout labs
+
+- The album layout lab is temporary design tooling, not a product setting. Keep its ADB receiver and
+  manifest declaration under `app/src/debug`; the browser server must bind to loopback and require an
+  explicit device serial.
+- After a layout decision, bake the chosen structure and constants into the production UI and remove
+  rejected variants and tuning controls. Do not carry a general multi-layout framework forward.
+- Before any release candidate, either remove the lab completely or prove that every entry point is
+  disabled and excluded: inspect the merged release manifest for the receiver/action and verify the
+  release UI cannot consume tuning state. A debug-only assumption without checking the packaged
+  result is insufficient.
+
 ## Verification
 
 - Match verification effort to risk and report checks that were not run.

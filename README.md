@@ -151,6 +151,17 @@ With a booted emulator, run the credential-free Compose UI smoke test with an ex
 ./scripts/ui-test.sh emulator-5554
 ```
 
+Album-detail layout experiments can be controlled from a separate local browser window while a
+debug build is running on an emulator:
+
+```sh
+./scripts/layout-lab.sh emulator-5554
+```
+
+The lab binds only to `127.0.0.1`, targets the explicitly supplied device serial, and communicates
+with a receiver that exists only in debug builds. It is temporary design tooling, not a user-facing
+layout setting.
+
 The current implementation and verification boundaries are recorded in
 [docs/development-baseline.md](docs/development-baseline.md).
 

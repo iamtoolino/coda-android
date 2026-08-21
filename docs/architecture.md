@@ -85,6 +85,18 @@ offers an explicit artwork refresh: it clears Coil memory/disk data, Android Aut
 derived theme colors, then advances the persisted generation so in-flight old requests cannot
 repopulate visible stale entries. Disconnect performs the same cache cleanup for the old account.
 
+## Debug design tooling
+
+The album layout lab is an intentionally temporary debug seam. A loopback-only Python server serves a
+separate browser controller and translates validated layout/offset choices into explicit ADB
+broadcasts for one named device serial. `AlbumLayoutTuningReceiver` is declared only by the debug
+source set, and production UI ignores tuning state when `BuildConfig.DEBUG` is false. It is not an
+in-app setting and does not persist across process recreation.
+
+Once a layout is accepted, its reviewed constants and structure are folded into the production
+album detail and rejected variants and tuning controls are removed. Until then, release inspection
+must confirm that the receiver and its action are absent from the merged release manifest.
+
 ## Playback
 
 `PlaybackService` owns a Media3 `ExoPlayer` and `MediaLibrarySession`. `PlaybackConnection` is the

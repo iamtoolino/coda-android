@@ -16,6 +16,7 @@ import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -28,6 +29,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -128,6 +130,7 @@ import coil3.compose.AsyncImage
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import io.github.iamtoolino.coda.AppGraph
+import io.github.iamtoolino.coda.BuildConfig
 import io.github.iamtoolino.coda.CodaApplication
 import io.github.iamtoolino.coda.artwork.ArtworkSizes
 import io.github.iamtoolino.coda.artwork.ArtworkSource
@@ -1622,83 +1625,192 @@ private fun AlbumHero(
     rating: Int,
     onRate: (Int) -> Unit,
 ) {
-    Column {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(1f),
-        ) {
-            Cover(
-                page.album,
-                Modifier.fillMaxSize(),
-                size = ArtworkSizes.HERO,
-                showRatingBadge = false,
-            )
-            Box(
-                Modifier
-                    .fillMaxSize()
-                    .background(
-                        heroFadeBrush(MaterialTheme.colorScheme.background),
-                    ),
-            )
+    val tuning = if (BuildConfig.DEBUG && AlbumLayoutTuningStore.current.enabled) {
+        AlbumLayoutTuningStore.current
+    } else {
+        AlbumLayoutTuning()
+    }
+    when (tuning.variant) {
+        AlbumLayoutVariant.BELOW_ARTWORK -> Column {
+            AlbumHeroArtwork(page)
+            AlbumHeroCombinedControls(onPlay, onAppend, rating, onRate, tuning)
+            AlbumHeroMetadata(page, onArtist)
         }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 16.dp, end = 16.dp, top = 10.dp, bottom = 4.dp),
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            RoundActionButton(
-                icon = Icons.Default.PlayArrow,
-                description = "Play album",
-                primary = true,
-                onClick = onPlay,
-            )
-            RoundActionButton(
-                icon = Icons.AutoMirrored.Filled.PlaylistAdd,
-                description = "Append album to queue",
-                onClick = onAppend,
-            )
-            Spacer(Modifier.weight(1f))
-            AlbumRatingStars(
+        AlbumLayoutVariant.METADATA_FIRST -> Column {
+            AlbumHeroArtwork(page)
+            AlbumHeroMetadata(page, onArtist)
+            AlbumHeroCombinedControls(onPlay, onAppend, rating, onRate, tuning)
+        }
+        AlbumLayoutVariant.ARTWORK_OVERLAY -> Column {
+            AlbumHeroArtwork(page) {
+                AlbumHeroButtonGroup(
+                    onPlay = onPlay,
+                    onAppend = onAppend,
+                    translucentSecondary = true,
+                    modifier = Modifier
+                        .align(Alignment.BottomStart)
+                        .padding(18.dp)
+                        .offset(y = tuning.buttonsOffsetDp.dp),
+                )
+                AlbumHeroRating(
+                    rating = rating,
+                    onRate = onRate,
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(18.dp)
+                        .offset(y = tuning.ratingOffsetDp.dp),
+                )
+            }
+            AlbumHeroMetadata(page, onArtist)
+        }
+        AlbumLayoutVariant.MACOS_STACK -> Column {
+            AlbumHeroArtwork(page)
+            AlbumHeroMetadata(page, onArtist)
+            AlbumHeroRating(
                 rating = rating,
                 onRate = onRate,
-                buttonSize = 40.dp,
-                iconSize = 28.dp,
+                modifier = Modifier
+                    .padding(start = 16.dp, top = 6.dp)
+                    .offset(y = tuning.ratingOffsetDp.dp),
             )
-        }
-        Column(
-            modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 6.dp, bottom = 8.dp),
-        ) {
-            Text(
-                page.album.name,
-                fontSize = 30.sp,
-                lineHeight = 35.sp,
-                fontWeight = FontWeight.Bold,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-            )
-            Text(
-                page.album.artist,
-                modifier = Modifier.clickable(
-                    enabled = onArtist != null,
-                    onClick = { onArtist?.invoke() },
-                ),
-                fontSize = 18.sp,
-                color = MaterialTheme.colorScheme.primary,
-            )
-            Text(
-                listOfNotNull(
-                    page.album.releaseYearLabel().takeIf { it.isNotBlank() },
-                    "${page.songs.size} tracks",
-                    page.album.duration.takeIf { it > 0 }?.let(::formatCollectionDuration),
-                ).joinToString(" • "),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                fontSize = 13.sp,
+            AlbumHeroButtonGroup(
+                onPlay = onPlay,
+                onAppend = onAppend,
+                modifier = Modifier
+                    .padding(start = 16.dp, top = 8.dp, bottom = 8.dp)
+                    .offset(y = tuning.buttonsOffsetDp.dp),
             )
         }
     }
+}
+
+@Composable
+private fun AlbumHeroArtwork(
+    page: AlbumPage,
+    content: @Composable BoxScope.() -> Unit = {},
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .aspectRatio(1f),
+    ) {
+        Cover(
+            page.album,
+            Modifier.fillMaxSize(),
+            size = ArtworkSizes.HERO,
+            showRatingBadge = false,
+        )
+        Box(
+            Modifier
+                .fillMaxSize()
+                .background(heroFadeBrush(MaterialTheme.colorScheme.background)),
+        )
+        content()
+    }
+}
+
+@Composable
+private fun AlbumHeroMetadata(page: AlbumPage, onArtist: (() -> Unit)?) {
+    Column(
+        modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 6.dp, bottom = 8.dp),
+    ) {
+        Text(
+            page.album.name,
+            fontSize = 30.sp,
+            lineHeight = 35.sp,
+            fontWeight = FontWeight.Bold,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+        )
+        Text(
+            page.album.artist,
+            modifier = Modifier.clickable(
+                enabled = onArtist != null,
+                onClick = { onArtist?.invoke() },
+            ),
+            fontSize = 18.sp,
+            color = MaterialTheme.colorScheme.primary,
+        )
+        Text(
+            listOfNotNull(
+                page.album.releaseYearLabel().takeIf { it.isNotBlank() },
+                "${page.songs.size} tracks",
+                page.album.duration.takeIf { it > 0 }?.let(::formatCollectionDuration),
+            ).joinToString(" • "),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            fontSize = 13.sp,
+        )
+    }
+}
+
+@Composable
+private fun AlbumHeroCombinedControls(
+    onPlay: () -> Unit,
+    onAppend: () -> Unit,
+    rating: Int,
+    onRate: (Int) -> Unit,
+    tuning: AlbumLayoutTuning,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 16.dp, end = 16.dp, top = 10.dp, bottom = 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        AlbumHeroButtonGroup(
+            onPlay = onPlay,
+            onAppend = onAppend,
+            modifier = Modifier.offset(y = tuning.buttonsOffsetDp.dp),
+        )
+        Spacer(Modifier.weight(1f))
+        AlbumHeroRating(
+            rating = rating,
+            onRate = onRate,
+            modifier = Modifier.offset(y = tuning.ratingOffsetDp.dp),
+        )
+    }
+}
+
+@Composable
+private fun AlbumHeroButtonGroup(
+    onPlay: () -> Unit,
+    onAppend: () -> Unit,
+    modifier: Modifier = Modifier,
+    translucentSecondary: Boolean = false,
+) {
+    Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        RoundActionButton(
+            icon = Icons.Default.PlayArrow,
+            description = "Play album",
+            primary = true,
+            onClick = onPlay,
+        )
+        RoundActionButton(
+            icon = Icons.AutoMirrored.Filled.PlaylistAdd,
+            description = "Append album to queue",
+            translucent = translucentSecondary,
+            onClick = onAppend,
+        )
+    }
+}
+
+@Composable
+private fun AlbumHeroRating(
+    rating: Int,
+    onRate: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    AlbumRatingStars(
+        rating = rating,
+        onRate = onRate,
+        modifier = modifier
+            .clip(RoundedCornerShape(20.dp))
+            .background(OverlayButtonBackground)
+            .padding(horizontal = 4.dp),
+        buttonSize = 40.dp,
+        iconSize = 28.dp,
+    )
 }
 
 @Composable
