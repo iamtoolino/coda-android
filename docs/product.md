@@ -56,6 +56,8 @@ Coda is a personal, album-oriented Android client for Navidrome/OpenSubsonic.
 
 ## Playback
 
+- Now Playing keeps the artwork, codec details, album rating, and one direct Up Next link while the
+  full queue remains on its dedicated screen. The title is not prefixed with a track number.
 - Selecting an album track queues the full album and begins at that track.
 - Selecting a playlist track queues the full server playlist and begins at that track.
 - The current track is highlighted in album, playlist, and queue views.

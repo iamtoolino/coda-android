@@ -32,7 +32,9 @@ and a request-generation gate rejects late results from superseded queries.
 
 `AlbumRatingCoordinator` is created once per authenticated Compose session and shared through a
 scoped composition local. Its state is keyed by album ID and overlays immutable server models across
-album cards and detail views. Selections publish optimistically with a monotonic per-album revision.
+album cards, Album detail, and Now Playing. Now Playing resolves the current album's server rating
+through the session-safe detail lifecycle before feeding the shared coordinator. Selections publish
+optimistically with a monotonic per-album revision.
 Each album has one serial writer and one conflated pending transaction, preserving server order while
 allowing rapid changes. A failed latest transaction rolls back to the last confirmed rating and emits
 a UI failure event; obsolete failures and account-session cancellation publish nothing.

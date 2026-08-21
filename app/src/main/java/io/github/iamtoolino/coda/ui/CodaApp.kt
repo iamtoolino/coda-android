@@ -1663,32 +1663,15 @@ private fun AlbumHero(
                     .padding(18.dp)
                     .height(54.dp),
             ) {
-                Row(
+                AlbumRatingStars(
+                    rating = rating,
+                    onRate = onRate,
                     modifier = Modifier
                         .align(Alignment.CenterEnd)
                         .clip(RoundedCornerShape(20.dp))
                         .background(OverlayButtonBackground)
                         .padding(horizontal = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    (1..5).forEach { star ->
-                        IconButton(
-                            onClick = { onRate(star) },
-                            modifier = Modifier.size(34.dp),
-                        ) {
-                            Icon(
-                                imageVector = if (star <= rating) {
-                                    Icons.Default.Star
-                                } else {
-                                    Icons.Default.StarBorder
-                                },
-                                contentDescription = "Rate $star stars",
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(23.dp),
-                            )
-                        }
-                    }
-                }
+                )
             }
         }
         Column(
@@ -2156,6 +2139,28 @@ private fun NowPlayingScreen(
     state: PlaybackUiState,
 ) {
     val progress by playback.progress.collectAsStateWithLifecycle()
+    val ratings = LocalAlbumRatingCoordinator.current
+    val albumId = state.albumId
+    val ratingScope = rememberCoroutineScope()
+    val ratingSeed = remember(ratingScope) {
+        RemoteDetailCoordinator(ratingScope, "") { requestedAlbumId ->
+            AppGraph.withCurrentSession {
+                AlbumRatingSeed(album(requestedAlbumId).album.userRating)
+            }
+        }
+    }
+    val ratingSeedState = ratingSeed.state
+    val serverRating = ratingSeedState.value
+        ?.takeIf { ratingSeedState.key == albumId }
+        ?.userRating
+    val rating = albumId?.let { ratings.state(it, serverRating).rating }
+    LaunchedEffect(ratingSeed, albumId) {
+        if (albumId != null &&
+            (ratingSeedState.key != albumId || ratingSeedState.value == null)
+        ) {
+            ratingSeed.load(albumId)
+        }
+    }
     AdaptiveBackground {
             BoxWithConstraints(
                 modifier = Modifier
@@ -2169,11 +2174,6 @@ private fun NowPlayingScreen(
                     veryCompact -> maxWidth * 0.74f
                     compact -> maxWidth * 0.86f
                     else -> maxWidth
-                }
-                val upcomingCount = when {
-                    veryCompact -> 1
-                    compact -> 2
-                    else -> 3
                 }
                 val primaryControlSize = if (veryCompact) 64.dp else 72.dp
                 val primaryControlIconSize = if (veryCompact) 36.dp else 40.dp
@@ -2230,7 +2230,7 @@ private fun NowPlayingScreen(
                         }
                         Spacer(Modifier.height(if (compact) 7.dp else 12.dp))
                         Text(
-                            trackTitle(state),
+                            state.title,
                             modifier = Modifier.fillMaxWidth(),
                             fontSize = if (veryCompact) 24.sp else 26.sp,
                             fontWeight = FontWeight.Bold,
@@ -2243,7 +2243,7 @@ private fun NowPlayingScreen(
                             state.artist,
                             modifier = Modifier.fillMaxWidth(),
                             fontSize = 19.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = MaterialTheme.colorScheme.primary,
                             maxLines = 2,
                             overflow = TextOverflow.Ellipsis,
                             textAlign = TextAlign.Center,
@@ -2268,14 +2268,28 @@ private fun NowPlayingScreen(
                                 fontSize = 11.sp,
                             )
                         }
-                        val upcoming = state.queue.withIndex()
-                            .drop((state.currentIndex + 1).coerceAtLeast(0))
-                            .take(upcomingCount)
+                        if (albumId != null && rating != null) {
+                            Spacer(Modifier.height(if (compact) 7.dp else 12.dp))
+                            Text(
+                                "Album rating",
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                            )
+                            AlbumRatingStars(
+                                rating = rating,
+                                onRate = { selectedRating ->
+                                    ratings.select(
+                                        albumId = albumId,
+                                        serverRating = serverRating,
+                                        selectedRating = selectedRating,
+                                    )
+                                },
+                            )
+                        }
                         if (state.queue.isNotEmpty()) {
                             Spacer(Modifier.height(if (compact) 7.dp else 14.dp))
-                            UpNextList(
-                                entries = upcoming,
-                                onSelect = playback::skipTo,
+                            UpNextButton(
                                 onOpenQueue = { navController.navigate("queue") },
                             )
                         }
@@ -2393,65 +2407,55 @@ private fun SeekBar(
 }
 
 @Composable
-private fun UpNextList(
-    entries: List<IndexedValue<QueueEntry>>,
-    onSelect: (Int) -> Unit,
-    onOpenQueue: () -> Unit,
+private fun UpNextButton(onOpenQueue: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(10.dp))
+            .clickable(onClick = onOpenQueue)
+            .padding(horizontal = 8.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            "Up next",
+            modifier = Modifier.weight(1f),
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Icon(
+            Icons.Default.ChevronRight,
+            contentDescription = "Open queue",
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(20.dp),
+        )
+    }
+}
+
+private data class AlbumRatingSeed(val userRating: Int?)
+
+@Composable
+private fun AlbumRatingStars(
+    rating: Int,
+    onRate: (Int) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    Column(Modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(10.dp))
-                .clickable(onClick = onOpenQueue)
-                .padding(horizontal = 8.dp, vertical = 4.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                "Up next",
-                modifier = Modifier.weight(1f),
-                fontSize = 13.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Icon(
-                Icons.Default.ChevronRight,
-                contentDescription = "Open queue",
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(18.dp),
-            )
-        }
-        entries.forEach { indexedEntry ->
-            val entry = indexedEntry.value
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(40.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .clickable { onSelect(indexedEntry.index) }
-                    .padding(horizontal = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
+    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
+        (1..5).forEach { star ->
+            IconButton(
+                onClick = { onRate(star) },
+                modifier = Modifier.size(34.dp),
             ) {
-                Text(
-                    entry.trackNumber?.toString()?.padStart(2, '0') ?: "–",
-                    modifier = Modifier.width(34.dp),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    fontSize = 13.sp,
+                Icon(
+                    imageVector = if (star <= rating) {
+                        Icons.Default.Star
+                    } else {
+                        Icons.Default.StarBorder
+                    },
+                    contentDescription = "Rate $star stars",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(23.dp),
                 )
-                Text(
-                    entry.title,
-                    modifier = Modifier.weight(1f),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    fontSize = 14.sp,
-                )
-                if (entry.durationMs > 0) {
-                    Text(
-                        formatDurationMs(entry.durationMs),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontSize = 13.sp,
-                    )
-                }
             }
         }
     }
@@ -2610,10 +2614,6 @@ private fun formatDurationMs(milliseconds: Long): String {
     val seconds = milliseconds / 1_000
     return "%d:%02d".format(seconds / 60, seconds % 60)
 }
-
-private fun trackTitle(state: PlaybackUiState): String = state.trackNumber?.let { track ->
-    "${track.toString().padStart(2, '0')}. ${state.title}"
-} ?: state.title
 
 private fun qualityLabel(state: PlaybackUiState): String? {
     val codec = state.codec?.uppercase() ?: return null
