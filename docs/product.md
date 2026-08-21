@@ -53,9 +53,9 @@ Coda is a personal, album-oriented Android client for Navidrome/OpenSubsonic.
   artwork uses Brand teal.
 - While a replacement artwork palette is loading, Coda retains the previous valid palette rather
   than flashing through Brand.
-- Artwork accents used by buttons, progress, ratings, and their foreground/container colors
-  crossfade together with the same 850 ms ease-in-out motion used by Coda on macOS. The already
-  subtle background and surface colors retain Android's existing animation timing.
+- Every committed palette change crossfades together with the same 850 ms ease-in-out motion used
+  by Coda on macOS, keeping backgrounds, surfaces, controls, progress, and ratings on one visual
+  timeline.
 
 ## Playback
 

@@ -5,7 +5,6 @@ package io.github.iamtoolino.coda.ui.theme
 import android.graphics.Bitmap
 import android.graphics.Color as AndroidColor
 import androidx.compose.animation.animateColor
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
@@ -213,18 +212,24 @@ private fun CodaMaterialTheme(colors: ArtworkColors, content: @Composable () -> 
         },
         label = "on artwork container",
     ) { it.onAccentContainer }
-    val backgroundTop by animateColorAsState(
-        targetValue = colors.backgroundTop,
+    val backgroundTop by transition.animateColor(
+        transitionSpec = {
+            tween(ThemeTransitionDurationMillis, easing = ThemeTransitionEasing)
+        },
         label = "artwork background",
-    )
-    val backgroundBottom by animateColorAsState(
-        targetValue = colors.backgroundBottom,
+    ) { it.backgroundTop }
+    val backgroundBottom by transition.animateColor(
+        transitionSpec = {
+            tween(ThemeTransitionDurationMillis, easing = ThemeTransitionEasing)
+        },
         label = "artwork surface",
-    )
-    val surfaceVariant by animateColorAsState(
-        targetValue = colors.surfaceVariant,
+    ) { it.backgroundBottom }
+    val surfaceVariant by transition.animateColor(
+        transitionSpec = {
+            tween(ThemeTransitionDurationMillis, easing = ThemeTransitionEasing)
+        },
         label = "artwork surface variant",
-    )
+    ) { it.surfaceVariant }
     val colorScheme = darkColorScheme(
         primary = accent,
         onPrimary = onAccent,
