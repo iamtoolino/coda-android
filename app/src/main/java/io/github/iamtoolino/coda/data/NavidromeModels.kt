@@ -40,11 +40,14 @@ enum class AlbumListType(val apiValue: String) {
 data class Artist(
     val id: String,
     val name: String,
-    val albumCount: Int = 0,
+    val albumCount: Int? = null,
     val coverArt: String? = null,
     val artistImageUrl: String? = null,
     val genre: String? = null,
-)
+) {
+    val isAlbumArtistSearchResult: Boolean
+        get() = albumCount == null || albumCount > 0
+}
 
 @Serializable
 data class Song(

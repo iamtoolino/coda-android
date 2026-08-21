@@ -122,13 +122,14 @@ class NavidromeClient(
 
     suspend fun search(query: String): SearchResult {
         if (query.isBlank()) return SearchResult()
-        return call(
+        val result = call(
             "search3",
             "query" to query,
             "artistCount" to 20,
             "albumCount" to 40,
             "songCount" to 40,
         ).searchResult3 ?: SearchResult()
+        return result.copy(artist = result.artist.filter(Artist::isAlbumArtistSearchResult))
     }
 
     suspend fun playQueue(): PlayQueue? = call("getPlayQueue").playQueue

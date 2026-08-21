@@ -464,7 +464,9 @@ internal class CodaMediaLibraryCallback(
         .setMediaMetadata(
             MediaMetadata.Builder()
                 .setTitle(artist.name)
-                .setSubtitle(albumCount(artist.albumCount))
+                .apply {
+                    artist.albumCount?.let { setSubtitle(albumCount(it)) }
+                }
                 .setArtworkUri(
                     CarArtwork.external(
                         context,

@@ -24,7 +24,8 @@ Coda is a personal, album-oriented Android client for Navidrome/OpenSubsonic.
 - Multidisc album details separate discs with numbered headers and per-disc durations while keeping
   playback as one continuous album queue.
 - Playlists: server order is retained exactly, with visual album headers only.
-- Search: artists, albums, and tracks.
+- Search: artists, albums, and tracks. Artist results that explicitly report no albums are omitted;
+  servers that do not provide an album count remain compatible.
 
 ## Ratings
 
