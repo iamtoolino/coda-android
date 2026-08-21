@@ -2315,7 +2315,15 @@ private fun NowPlayingScreen(
                                 onOpenQueue = { navController.navigate("queue") },
                             )
                         }
-                        Spacer(Modifier.weight(1f))
+                        Spacer(
+                            Modifier.height(
+                                when {
+                                    veryCompact -> 18.dp
+                                    compact -> 24.dp
+                                    else -> 32.dp
+                                },
+                            ),
+                        )
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -2357,7 +2365,7 @@ private fun NowPlayingScreen(
                             }
                         }
                         if (state.error == null && streamQuality != null) {
-                            Spacer(Modifier.height(if (compact) 4.dp else 8.dp))
+                            Spacer(Modifier.height(if (compact) 4.dp else 6.dp))
                             Text(
                                 streamQuality,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.78f),
@@ -2451,34 +2459,34 @@ private fun QueuePreviewButton(
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End,
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(1.dp)
+                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)),
+            )
+            Spacer(Modifier.width(12.dp))
             Text(
                 "Queue · $remainingCount",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Icon(
                 Icons.Default.ChevronRight,
                 contentDescription = "Open queue",
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(20.dp),
+                modifier = Modifier.size(18.dp),
             )
         }
         nextEntry?.let { entry ->
-            Spacer(Modifier.height(4.dp))
+            Spacer(Modifier.height(8.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(
-                    entry.trackNumber?.toString()?.padStart(2, '0').orEmpty(),
-                    modifier = Modifier.width(38.dp),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    fontSize = 14.sp,
-                )
                 Text(
                     entry.title,
                     modifier = Modifier.weight(1f),
