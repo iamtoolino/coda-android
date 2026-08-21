@@ -42,6 +42,8 @@ Coda is a personal, album-oriented Android client for Navidrome/OpenSubsonic.
 - Brand teal (`#2B7A82`) is used before login and whenever no usable artwork-owned theme exists.
   The login Connect action uses Brand gold (`#D19433`).
 - Current playback artwork owns the theme on Home, artist screens, lists, and Now Playing.
+- Now Playing and Queue retain playback theme ownership for their complete visible lifetime,
+  including predictive-back gestures and cancelled gestures.
 - Opening an album temporarily applies that album's palette to the entire presentation, including
   its background, controls, progress indicators, and mini-player. Leaving the album restores the
   current playback palette.

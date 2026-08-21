@@ -25,9 +25,14 @@ internal sealed interface CodaThemeRequest {
 internal fun resolveThemeRequest(
     foreground: CodaThemeRequest?,
     playback: CodaThemeRequest?,
-): CodaThemeRequest = when (foreground) {
-    null, CodaThemeRequest.InheritPlayback -> playback ?: CodaThemeRequest.Brand
-    else -> foreground
+    playbackPresentationVisible: Boolean = false,
+): CodaThemeRequest = if (playbackPresentationVisible) {
+    playback ?: CodaThemeRequest.Brand
+} else {
+    when (foreground) {
+        null, CodaThemeRequest.InheritPlayback -> playback ?: CodaThemeRequest.Brand
+        else -> foreground
+    }
 }
 
 @Stable

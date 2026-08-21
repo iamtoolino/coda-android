@@ -287,6 +287,7 @@ fun CodaApp() {
     val themeRequest = resolveThemeRequest(
         foreground = themeRouter.foregroundRequest,
         playback = playbackThemeRequest,
+        playbackPresentationVisible = fullScreenPlayerVisible,
     )
     RoutedCodaTheme(themeRequest) {
         CompositionLocalProvider(

@@ -22,6 +22,18 @@ class CodaThemeRouterTest {
     }
 
     @Test
+    fun `visible playback presentation retains playback over revealed foreground`() {
+        assertEquals(
+            playback,
+            resolveThemeRequest(
+                foreground = viewedAlbum,
+                playback = playback,
+                playbackPresentationVisible = true,
+            ),
+        )
+    }
+
+    @Test
     fun `artist and uncovered playlist inherit playback`() {
         assertEquals(
             playback,

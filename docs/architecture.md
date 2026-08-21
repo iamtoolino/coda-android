@@ -52,7 +52,9 @@ chooses a foreground album or explicitly illustrated playlist first, otherwise c
 otherwise Brand. Artist destinations and playlists without explicit artwork request inheritance
 rather than extracting a new palette. Because the resolved theme wraps the complete phone
 presentation, destination controls, backgrounds, progress indicators, and the persistent
-mini-player always use the same palette.
+mini-player always use the same palette. While Now Playing or Queue remains in Navigation's visible
+entries, playback temporarily has absolute priority; a destination revealed by predictive back can
+reclaim ownership only after the playback presentation has fully disappeared.
 
 Artwork extraction is asynchronous and cached by account namespace, extraction algorithm version,
 and canonical artwork source. It shares the same encoded hero entry as the visible artwork rather
