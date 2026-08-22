@@ -170,4 +170,6 @@ rebuilt only when the Media3 timeline changes; position-only saves reuse that im
 through a conflated background encoder/writer rather than serializing the complete queue on main.
 Server restoration results carry their captured account generation through to the service. Account
 invalidation cancels and invalidates pending restoration, and the service rechecks the generation on
-the main thread immediately before mutating or preparing the player.
+the main thread immediately before mutating or preparing the player. Every playable item also carries
+that generation; the service rejects an obsolete or unidentified timeline before queue saving,
+snapshot publication, preparation, or prefetch can continue.

@@ -235,6 +235,15 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
     }
 
     override fun onEvents(player: Player, events: Player.Events) {
+        if (!player.timelineBelongsToCurrentAccount()) {
+            queueSync.invalidate()
+            scrobbler.invalidate()
+            snapshotTemplate = null
+            snapshotWrites.trySend(null)
+            player.stop()
+            player.clearMediaItems()
+            return
+        }
         queueSync.onPlayerEvents(
             hasPlaybackIntent = player.hasLocalPlaybackIntent(),
             isPlaying = player.isPlaying,
@@ -448,4 +457,22 @@ internal fun audioCacheWindowIndices(
     val first = currentIndex.coerceIn(0, itemCount - 1)
     val lastExclusive = (first + maximumSize).coerceAtMost(itemCount)
     return (first until lastExclusive).toList()
+}
+
+internal fun generationsBelongToCurrentAccount(
+    itemGenerations: List<Long?>,
+    currentGeneration: Long?,
+): Boolean = itemGenerations.isEmpty() ||
+    currentGeneration != null && itemGenerations.all { it == currentGeneration }
+
+private fun Player.timelineBelongsToCurrentAccount(): Boolean {
+    val generations = (0 until mediaItemCount).map { index ->
+        getMediaItemAt(index).mediaMetadata.extras?.let { extras ->
+            extras.getLong("accountGeneration").takeIf { extras.containsKey("accountGeneration") }
+        }
+    }
+    return generationsBelongToCurrentAccount(
+        itemGenerations = generations,
+        currentGeneration = AppGraph.sessionSnapshot()?.generation,
+    )
 }

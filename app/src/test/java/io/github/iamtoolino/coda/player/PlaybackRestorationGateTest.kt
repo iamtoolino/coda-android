@@ -26,4 +26,13 @@ class PlaybackRestorationGateTest {
         assertFalse(shouldApplyPlaybackRestoration(4L, 4L, 0, playWhenReady = true))
         assertFalse(shouldApplyPlaybackRestoration(4L, null, 0, playWhenReady = false))
     }
+
+    @Test
+    fun `service rejects missing and obsolete timeline generations`() {
+        assertTrue(generationsBelongToCurrentAccount(emptyList(), currentGeneration = null))
+        assertTrue(generationsBelongToCurrentAccount(listOf(5L, 5L), currentGeneration = 5L))
+        assertFalse(generationsBelongToCurrentAccount(listOf(4L), currentGeneration = 5L))
+        assertFalse(generationsBelongToCurrentAccount(listOf(null), currentGeneration = 5L))
+        assertFalse(generationsBelongToCurrentAccount(listOf(5L), currentGeneration = null))
+    }
 }

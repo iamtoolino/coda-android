@@ -39,6 +39,7 @@ internal fun Song.toPlayableMediaItem(
         putString("artistId", artistId)
         putString("coverArtId", albumId ?: coverArt)
         putString("cacheNamespace", session.cacheNamespace)
+        putLong("accountGeneration", session.generation)
         putLong("durationMs", duration.coerceAtLeast(0) * 1_000L)
         track?.let { putInt("trackNumber", it) }
         discNumber?.let { putInt("discNumber", it) }
