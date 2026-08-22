@@ -20,7 +20,7 @@ remain local to their section and can be retried individually.
 
 `RemoteResourceCoordinator` provides the keyed request lifecycle shared by collection and read-only
 detail specializations. `RemoteCollectionCoordinator` owns Artists, Albums, and Playlists, while the
-detail specialization owns Artist destination loading. Compose selects a key and renders immutable
+detail specialization owns Artist, Album, and Playlist destination loading. Compose selects a key and renders immutable
 coordinator state. Refreshing the same key retains good content; changing an album view or artist ID
 clears mismatched content. Each new load cancels its predecessor and also uses a generation gate, so
 even a non-cooperative obsolete request cannot publish after a newer selection.

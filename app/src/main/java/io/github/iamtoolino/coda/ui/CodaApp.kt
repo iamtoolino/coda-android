@@ -1189,10 +1189,15 @@ private fun AlbumScreen(
 ) {
     val context = LocalContext.current
     val ratings = LocalAlbumRatingCoordinator.current
-    var page by remember(id) { mutableStateOf<AlbumPage?>(null) }
-    var error by remember(id) { mutableStateOf<String?>(null) }
-    var generation by rememberSaveable(id) { mutableIntStateOf(0) }
-    var loading by remember(id) { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+    val coordinator = remember(scope) {
+        RemoteDetailCoordinator(scope, id) { requestedId ->
+            AppGraph.withCurrentSession { album(requestedId) }
+        }
+    }
+    val state = coordinator.state
+    val page = state.value.takeIf { state.key == id }
+    val error = state.errorMessage.takeIf { state.key == id }
     val discSections = remember(page?.songs) { albumDiscSections(page?.songs.orEmpty()) }
     val showDiscHeaders = shouldShowDiscHeaders(discSections)
     val listState = rememberRestorableLazyListState(
@@ -1200,13 +1205,7 @@ private fun AlbumScreen(
         maxIndex = (page?.songs?.size ?: 0) +
             if (showDiscHeaders) discSections.size else 0,
     )
-    LaunchedEffect(id, generation) {
-        loading = true
-        runCatching { AppGraph.withCurrentSession { album(id) } }
-            .onSuccess { page = it; error = null }
-            .onFailureUnlessCancelled { error = it.message }
-        loading = false
-    }
+    LaunchedEffect(coordinator, id) { coordinator.load(id) }
     val album = page?.album
     val coverKey = album?.coverArt ?: album?.id
     val artworkSource = navidromeCoverSource(coverKey, ArtworkSizes.HERO)
@@ -1223,8 +1222,8 @@ private fun AlbumScreen(
     RegisterForegroundTheme(themeRouter, themeOwner, themeRequest)
     AdaptiveBackground {
             PullToRefreshBox(
-                isRefreshing = loading && page != null,
-                onRefresh = { generation++ },
+                isRefreshing = state.isLoading && page != null,
+                onRefresh = { coordinator.load(id) },
                 modifier = Modifier.fillMaxSize(),
             ) {
                 LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
@@ -1304,22 +1303,21 @@ private fun PlaylistScreen(
     themeOwner: String,
 ) {
     val context = LocalContext.current
-    var playlist by remember(id) { mutableStateOf<Playlist?>(null) }
-    var error by remember(id) { mutableStateOf<String?>(null) }
-    var generation by rememberSaveable(id) { mutableIntStateOf(0) }
-    var loading by remember(id) { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+    val coordinator = remember(scope) {
+        RemoteDetailCoordinator(scope, id) { requestedId ->
+            AppGraph.withCurrentSession { playlist(requestedId) }
+        }
+    }
+    val state = coordinator.state
+    val playlist = state.value.takeIf { state.key == id }
+    val error = state.errorMessage.takeIf { state.key == id }
     val groups = remember(playlist?.entry) { playlistAlbumGroups(playlist?.entry.orEmpty()) }
     val listState = rememberRestorableLazyListState(
         contentReady = playlist != null || error != null,
         maxIndex = groups.sumOf { it.songs.size + 1 } + 1,
     )
-    LaunchedEffect(id, generation) {
-        loading = true
-        runCatching { AppGraph.withCurrentSession { playlist(id) } }
-            .onSuccess { playlist = it; error = null }
-            .onFailureUnlessCancelled { error = it.message }
-        loading = false
-    }
+    LaunchedEffect(coordinator, id) { coordinator.load(id) }
     val playlistCoverKey = playlist?.coverArt
     val playlistArtworkSource = navidromeCoverSource(playlistCoverKey, ArtworkSizes.HERO)
     val themeRequest = when {
@@ -1336,12 +1334,18 @@ private fun PlaylistScreen(
     RegisterForegroundTheme(themeRouter, themeOwner, themeRequest)
     AdaptiveBackground {
             PullToRefreshBox(
-                isRefreshing = loading && playlist != null,
-                onRefresh = { generation++ },
+                isRefreshing = state.isLoading && playlist != null,
+                onRefresh = { coordinator.load(id) },
                 modifier = Modifier.fillMaxSize(),
             ) {
                 LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
-                    item { DetailHeader(playlist?.name ?: "Playlist", navController) { generation++ } }
+                    item {
+                        DetailHeader(
+                            playlist?.name ?: "Playlist",
+                            navController,
+                            { coordinator.refresh() },
+                        )
+                    }
                     if (playlist == null && error == null) item { LoadingBlock() }
                     if (error != null) item { MessageCard("Could not load playlist", error.orEmpty()) }
                     playlist?.let { loaded ->

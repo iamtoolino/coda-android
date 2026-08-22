@@ -64,4 +64,19 @@ class RemoteResourceCoordinatorTest {
         assertEquals("fresh", coordinator.state.value)
         assertNull(coordinator.state.errorMessage)
     }
+
+    @Test
+    fun `exception without a message publishes a useful terminal error`() = runBlocking {
+        val coordinator = RemoteResourceCoordinator(
+            scope = CoroutineScope(coroutineContext),
+            initialKey = Unit,
+        ) {
+            throw IOException()
+        }
+
+        coordinator.load().join()
+
+        assertFalse(coordinator.state.isLoading)
+        assertEquals("Network request failed", coordinator.state.errorMessage)
+    }
 }
