@@ -49,6 +49,7 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
     private lateinit var cache: SimpleCache
     private lateinit var cacheFactory: CacheDataSource.Factory
     private lateinit var scrobbler: ScrobbleCoordinator
+    private lateinit var queueSync: SharedQueueSyncCoordinator
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val scrobbleScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private var prefetchJob: Job? = null
@@ -120,6 +121,19 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
                 )
             }
         }
+        queueSync = SharedQueueSyncCoordinator(
+            scope = scrobbleScope,
+            snapshot = player::sharedQueueSnapshot,
+            sessionSnapshot = AppGraph::sessionSnapshot,
+            isCurrentSession = AppGraph::isCurrent,
+            save = { account, queue ->
+                account.client.savePlayQueue(
+                    songIds = queue.songIds,
+                    currentIndex = queue.currentIndex,
+                    positionMs = queue.positionMs,
+                )
+            },
+        )
         player.setWakeMode(C.WAKE_MODE_NETWORK)
         player.addListener(this)
         restoreLocalSnapshot()
@@ -221,6 +235,11 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
     }
 
     override fun onEvents(player: Player, events: Player.Events) {
+        queueSync.onPlayerEvents(
+            hasPlaybackIntent = player.hasLocalPlaybackIntent(),
+            isPlaying = player.isPlaying,
+            mediaItemTransition = events.contains(Player.EVENT_MEDIA_ITEM_TRANSITION),
+        )
         if (events.contains(Player.EVENT_MEDIA_ITEM_TRANSITION) ||
             events.contains(Player.EVENT_TIMELINE_CHANGED) ||
             events.contains(Player.EVENT_PLAYBACK_STATE_CHANGED)
@@ -390,6 +409,7 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
         restorationJob?.cancel()
         snapshotWrites.close()
         if (::snapshotWriteWorker.isInitialized) snapshotWriteWorker.cancel()
+        queueSync.close()
         scrobbler.close()
         runCatching { connectivity.unregisterNetworkCallback(networkCallback) }
         session.release()
@@ -412,6 +432,7 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
             activeInstance?.run {
                 restorationJob?.cancel()
                 libraryCallback.invalidatePlaybackRestoration()
+                queueSync.invalidate()
                 scrobbler.invalidate()
             }
         }

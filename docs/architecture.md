@@ -96,6 +96,12 @@ progress tick, so only the visible mini-player or Now Playing controls recompose
 Queue replacement, append, and handoff restoration prepare immutable Media3 items off the main
 thread and apply those mutations in user-action order.
 
+The service also owns shared Navidrome queue saving beside the authoritative player. A conflated
+serial coordinator observes service-side playback intent and item transitions, captures immutable
+queue snapshots, writes every 15 seconds only while genuinely playing, and invalidates pending work
+on pause or account change. Android Auto, notifications, Bluetooth, and media-button cold starts use
+this path without depending on the phone `PlaybackConnection`.
+
 Playable Media3 items carry both album and artist IDs in their metadata, and the local playback
 snapshot preserves those IDs across service/process restoration. Now Playing navigation therefore
 uses the same restored authoritative queue metadata rather than resolving names back to library IDs.
@@ -145,7 +151,8 @@ ensures an older save cannot finish after a newer one, while keeping only the la
 Queue writes identify the installation as `Coda on <device name>` while other API calls retain the
 stable `CodaAndroid` identifier. Android writes once when playback starts/resumes or changes item and
 every 15 seconds while playing; pause, background, and queue-edit events do not write. Pending writes
-are cancelled when playback stops.
+are cancelled when playback stops. This writer belongs to `PlaybackService`; the phone controller
+only renders state and issues user-requested player commands.
 
 Home performs opportunistic queue reads when it opens, refreshes, or returns to the foreground. A
 cold-start queue last written by Android is restored paused. A non-empty queue written by another

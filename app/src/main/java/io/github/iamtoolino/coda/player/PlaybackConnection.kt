@@ -16,7 +16,6 @@ import io.github.iamtoolino.coda.data.NavidromeClient
 import io.github.iamtoolino.coda.data.PlayQueue
 import io.github.iamtoolino.coda.data.Song
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
@@ -127,22 +126,14 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
     ).buildAsync()
     private var controller: MediaController? = null
     private var progressJob: Job? = null
-    private var saveScheduleJob: Job? = null
     private var handoffRefreshJob: Job? = null
     private var pendingPlayback: ((MediaController) -> Unit)? = null
-    private var progressTicks = 0
     private var playbackError: String? = null
     private var queueSnapshot: List<QueueEntry> = emptyList()
-    private var queueIdSnapshot: List<String> = emptyList()
-    private var localPlaybackActive = false
     private var pendingHandoffRefresh = false
     private var coldStartRestorePending = true
     private var handoffSessionGeneration: Long? = null
     private var homeVisible = false
-    @Volatile
-    private var latestQueueSaveSequence = 0L
-    private val queueSaveRequests = Channel<QueueSaveRequest>(Channel.CONFLATED)
-    private var queueSaveWorker = launchQueueSaveWorker()
     private var queueMutationGeneration = 0L
     private val queueMutationRequests = Channel<PreparedQueueMutation>(Channel.UNLIMITED)
     private val queueMutationWorker = launchQueueMutationWorker()
@@ -163,7 +154,6 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
                 pendingPlayback?.invoke(connectedController)
                 pendingPlayback = null
                 refreshState(rebuildQueue = true)
-                localPlaybackActive = connectedController.hasLocalPlaybackIntent()
                 startProgressUpdates()
                 if (pendingHandoffRefresh) refreshHandoffQueue()
             },
@@ -255,7 +245,6 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
     fun disconnect(oldNamespace: String = AppGraph.cacheNamespace) {
         queueMutationGeneration++
         while (queueMutationRequests.tryReceive().isSuccess) Unit
-        cancelPendingQueueSaves()
         handoffRefreshJob?.cancel()
         pendingHandoffRefresh = false
         coldStartRestorePending = true
@@ -332,65 +321,6 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
         if (player != null) action(player) else pendingPlayback = action
     }
 
-    private fun saveQueueToServer(delayMs: Long = 0) {
-        if (controller?.hasLocalPlaybackIntent() != true) return
-        val sequence = ++latestQueueSaveSequence
-        saveScheduleJob?.cancel()
-        saveScheduleJob = scope.launch {
-            if (delayMs > 0) delay(delayMs)
-            val player = controller ?: return@launch
-            if (!player.hasLocalPlaybackIntent()) return@launch
-            val ids = queueIdSnapshot
-            if (ids.size != player.mediaItemCount || player.currentMediaItemIndex !in ids.indices) {
-                return@launch
-            }
-            val session = AppGraph.sessionSnapshot() ?: return@launch
-            queueSaveRequests.trySend(
-                QueueSaveRequest(
-                    sequence = sequence,
-                    session = session,
-                    songIds = ids,
-                    currentIndex = player.currentMediaItemIndex.coerceAtLeast(0),
-                    positionMs = player.currentPosition.coerceAtLeast(0),
-                ),
-            )
-        }
-    }
-
-    private fun cancelPendingQueueSaves() {
-        saveScheduleJob?.cancel()
-        saveScheduleJob = null
-        latestQueueSaveSequence++
-        queueSaveWorker.cancel()
-        while (queueSaveRequests.tryReceive().isSuccess) Unit
-        queueSaveWorker = launchQueueSaveWorker()
-    }
-
-    private suspend fun saveQueueRequest(request: QueueSaveRequest) {
-        var retryDelayMs = 1_000L
-        repeat(3) { attempt ->
-            if (request.sequence != latestQueueSaveSequence || !AppGraph.isCurrent(request.session)) return
-            try {
-                request.session.client.savePlayQueue(
-                    songIds = request.songIds,
-                    currentIndex = request.currentIndex,
-                    positionMs = request.positionMs,
-                )
-                return
-            } catch (error: CancellationException) {
-                throw error
-            } catch (_: Throwable) {
-                if (attempt == 2) return
-            }
-            delay(retryDelayMs)
-            retryDelayMs *= 2
-        }
-    }
-
-    private fun launchQueueSaveWorker(): Job = scope.launch(Dispatchers.IO) {
-        for (request in queueSaveRequests) saveQueueRequest(request)
-    }
-
     private fun enqueueRestore(queue: PlayQueue, startPlayback: Boolean) {
         val currentIndex = queue.currentIndex
             ?: queue.entry.indexOfFirst { it.id == queue.current }.takeIf { it >= 0 }
@@ -440,25 +370,12 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
         }
     }
 
-    private fun Player.hasLocalPlaybackIntent(): Boolean =
-        mediaItemCount > 0 && playWhenReady && playbackState != Player.STATE_ENDED
-
     override fun onEvents(player: Player, events: Player.Events) {
         if (events.contains(Player.EVENT_MEDIA_ITEM_TRANSITION)) playbackError = null
         val rebuildQueue = events.contains(Player.EVENT_TIMELINE_CHANGED) ||
             events.contains(Player.EVENT_MEDIA_METADATA_CHANGED)
         refreshState(rebuildQueue = rebuildQueue)
-        val playbackActive = player.hasLocalPlaybackIntent()
-        if (playbackActive) _handoffQueue.value = null
-        if (playbackActive != localPlaybackActive) {
-            localPlaybackActive = playbackActive
-            if (playbackActive) {
-                saveQueueToServer()
-            } else {
-                cancelPendingQueueSaves()
-            }
-        }
-        if (events.contains(Player.EVENT_MEDIA_ITEM_TRANSITION) && playbackActive) saveQueueToServer()
+        if (player.hasLocalPlaybackIntent()) _handoffQueue.value = null
     }
 
     override fun onPlayerError(error: PlaybackException) {
@@ -469,14 +386,12 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
     private fun refreshState(rebuildQueue: Boolean = false) {
         val player = controller ?: run {
             queueSnapshot = emptyList()
-            queueIdSnapshot = emptyList()
             _state.value = PlaybackUiState()
             _progress.value = PlaybackProgressState()
             return
         }
         if (rebuildQueue) {
             queueSnapshot = player.queueEntries()
-            queueIdSnapshot = queueSnapshot.map(QueueEntry::id)
         }
         val item = player.currentMediaItem
         val metadata = item?.mediaMetadata
@@ -545,11 +460,6 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
         progressJob = scope.launch {
             while (isActive) {
                 refreshProgress()
-                val player = controller
-                if (player?.isPlaying == true) {
-                    progressTicks++
-                    if (progressTicks % 30 == 0) saveQueueToServer()
-                }
                 delay(if (controller?.isPlaying == true) 500 else 1_500)
             }
         }
@@ -557,10 +467,7 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
 
     fun release() {
         progressJob?.cancel()
-        saveScheduleJob?.cancel()
         handoffRefreshJob?.cancel()
-        queueSaveRequests.close()
-        queueSaveWorker.cancel()
         queueMutationRequests.close()
         queueMutationWorker.cancel()
         pendingPlayback = null
@@ -578,14 +485,6 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
             ?.coerceAtLeast(0)
             ?: 0
     }
-
-    private data class QueueSaveRequest(
-        val sequence: Long,
-        val session: NavidromeSession,
-        val songIds: List<String>,
-        val currentIndex: Int,
-        val positionMs: Long,
-    )
 
     private sealed interface QueueMutation {
         val songs: List<Song>
