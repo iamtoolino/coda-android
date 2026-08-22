@@ -10,6 +10,7 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import io.github.iamtoolino.coda.AppGraph
+import io.github.iamtoolino.coda.CodaApplication
 import io.github.iamtoolino.coda.NavidromeSession
 import io.github.iamtoolino.coda.data.NavidromeClient
 import io.github.iamtoolino.coda.data.PlayQueue
@@ -265,8 +266,8 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
             stop()
             clearMediaItems()
         }
-        PlaybackService.invalidateScrobbling()
-        PlaybackService.clearTransientAudioCacheFor(oldNamespace)
+        PlaybackService.invalidateAccountState()
+        (context.applicationContext as CodaApplication).requestTransientAudioCleanup(oldNamespace)
         refreshState(rebuildQueue = true)
     }
 

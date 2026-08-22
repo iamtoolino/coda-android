@@ -25,6 +25,7 @@ import androidx.media3.session.MediaLibraryService
 import androidx.media3.session.MediaLibraryService.MediaLibrarySession
 import androidx.media3.session.MediaSession
 import io.github.iamtoolino.coda.AppGraph
+import io.github.iamtoolino.coda.CodaApplication
 import java.io.File
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -51,11 +52,13 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val scrobbleScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private var prefetchJob: Job? = null
+    private var cleanupJob: Job? = null
     private var snapshotJob: Job? = null
     private lateinit var snapshotWriteWorker: Job
     private val snapshotWrites = Channel<PlaybackSnapshot?>(Channel.CONFLATED)
     private var snapshotTemplate: PlaybackSnapshot? = null
     private var variantRefreshJob: Job? = null
+    private var restorationJob: Job? = null
     private var variantRefreshGeneration = 0L
     @Volatile
     private var audioCacheGeneration = 0L
@@ -76,7 +79,6 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
         val databaseProvider = StandaloneDatabaseProvider(this)
         val transientCacheDirectory = File(cacheDir, "transient-audio")
         cache = SimpleCache(transientCacheDirectory, NoOpCacheEvictor(), databaseProvider)
-        activeInstance = this
         val upstreamFactory = DefaultDataSource.Factory(
             this,
             DefaultHttpDataSource.Factory()
@@ -138,6 +140,8 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
             )
         }
         session = sessionBuilder.build()
+        activeInstance = this
+        (application as CodaApplication).transientAudioCleanup.resumePending()
         connectivity.registerDefaultNetworkCallback(networkCallback)
         restoreSavedQueue()
     }
@@ -145,11 +149,21 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaLibrarySession = session
 
     private fun restoreSavedQueue() {
-        scope.launch {
+        restorationJob?.cancel()
+        restorationJob = scope.launch {
             val restoration = runCatching { libraryCallback.loadPlaybackRestoration() }
                 .getOrNull() ?: return@launch
             withContext(Dispatchers.Main.immediate) {
-                if (player.mediaItemCount != 0 || player.playWhenReady) return@withContext
+                val currentGeneration = AppGraph.sessionSnapshot()?.generation
+                if (!shouldApplyPlaybackRestoration(
+                        restorationGeneration = restoration.session.generation,
+                        currentGeneration = currentGeneration,
+                        playerItemCount = player.mediaItemCount,
+                        playWhenReady = player.playWhenReady,
+                    ) || !AppGraph.isCurrent(restoration.session)
+                ) {
+                    return@withContext
+                }
                 player.setMediaItems(
                     restoration.mediaItems,
                     restoration.startIndex,
@@ -344,17 +358,24 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
         if (extras.containsKey(source)) extras.putInt(target, extras.getInt(source)) else extras.remove(target)
     }
 
-    private fun clearTransientAudioCache(namespace: String) {
-        if (namespace.isBlank() || !::cache.isInitialized) return
-        val generation = ++audioCacheGeneration
+    private fun clearTransientAudioCaches(namespaces: Set<String>) {
+        val requested = namespaces.filter(String::isNotBlank).toSet()
+        if (requested.isEmpty() || !::cache.isInitialized) return
+        ++audioCacheGeneration
         activeCacheWriter?.cancel()
         prefetchJob?.cancel()
-        prefetchJob = scope.launch {
-            val prefix = "stream:$namespace:"
-            for (cacheKey in cache.keys.filter { it.startsWith(prefix) }) {
-                currentCoroutineContext().ensureActive()
-                if (generation != audioCacheGeneration) return@launch
-                runCatching { cache.removeResource(cacheKey) }
+        cleanupJob?.cancel()
+        cleanupJob = scope.launch {
+            for (namespace in requested) {
+                var succeeded = true
+                val prefix = "stream:$namespace:"
+                for (cacheKey in cache.keys.filter { it.startsWith(prefix) }) {
+                    currentCoroutineContext().ensureActive()
+                    if (runCatching { cache.removeResource(cacheKey) }.isFailure) succeeded = false
+                }
+                if (succeeded) {
+                    (application as CodaApplication).transientAudioCleanup.complete(namespace)
+                }
             }
         }
     }
@@ -363,8 +384,10 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
         if (activeInstance === this) activeInstance = null
         activeCacheWriter?.cancel()
         prefetchJob?.cancel()
+        cleanupJob?.cancel()
         snapshotJob?.cancel()
         variantRefreshJob?.cancel()
+        restorationJob?.cancel()
         snapshotWrites.close()
         if (::snapshotWriteWorker.isInitialized) snapshotWriteWorker.cancel()
         scrobbler.close()
@@ -381,12 +404,16 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
         @Volatile
         var activeInstance: PlaybackService? = null
 
-        fun clearTransientAudioCacheFor(namespace: String) {
-            activeInstance?.clearTransientAudioCache(namespace)
+        fun clearTransientAudioCachesFor(namespaces: Set<String>) {
+            activeInstance?.clearTransientAudioCaches(namespaces)
         }
 
-        fun invalidateScrobbling() {
-            activeInstance?.scrobbler?.invalidate()
+        fun invalidateAccountState() {
+            activeInstance?.run {
+                restorationJob?.cancel()
+                libraryCallback.invalidatePlaybackRestoration()
+                scrobbler.invalidate()
+            }
         }
     }
 }

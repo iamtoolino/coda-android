@@ -43,7 +43,10 @@ a UI failure event; obsolete failures and account-session cancellation publish n
 reconstructs the active `NavidromeClient` after a cold start, so no private server values are compiled
 into the APK. A non-secret hash of server URL and username namespaces transient caches so identifiers
 from two servers can never collide. Disconnecting invalidates the session immediately and clears the
-old account's cached data in the background.
+old account's cached data in the background. Transient-audio deletion is recorded in a durable
+application-owned pending-cleanup ledger before work starts. An active playback service performs the
+deletion and acknowledges it only after success; an interrupted or inactive-service request is
+replayed the next time the service starts.
 
 ## Theme ownership
 
@@ -156,3 +159,6 @@ queue after process death without waiting for the activity or network. The serve
 fallback when no local snapshot exists and the source for cross-client handoff. Song metadata is
 rebuilt only when the Media3 timeline changes; position-only saves reuse that immutable queue and go
 through a conflated background encoder/writer rather than serializing the complete queue on main.
+Server restoration results carry their captured account generation through to the service. Account
+invalidation cancels and invalidates pending restoration, and the service rechecks the generation on
+the main thread immediately before mutating or preparing the player.

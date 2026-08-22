@@ -10,6 +10,9 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
 import io.github.iamtoolino.coda.player.CarArtwork
 import io.github.iamtoolino.coda.player.PlaybackConnection
+import io.github.iamtoolino.coda.player.PlaybackService
+import io.github.iamtoolino.coda.player.SharedPreferencesAudioCleanupLedger
+import io.github.iamtoolino.coda.player.TransientAudioCleanupCoordinator
 import io.github.iamtoolino.coda.ui.theme.clearArtworkColorCache
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -26,6 +29,8 @@ class CodaApplication : Application(), DefaultLifecycleObserver {
     private val _artworkGeneration = MutableStateFlow(0L)
     val artworkGeneration: StateFlow<Long> = _artworkGeneration.asStateFlow()
     lateinit var playback: PlaybackConnection
+        private set
+    internal lateinit var transientAudioCleanup: TransientAudioCleanupCoordinator
         private set
 
     override fun onCreate() {
@@ -45,8 +50,16 @@ class CodaApplication : Application(), DefaultLifecycleObserver {
         _artworkGeneration.value = artworkPreferences()
             .getLong(ARTWORK_GENERATION_KEY, 0L)
         AppGraph.initialize(this)
+        transientAudioCleanup = TransientAudioCleanupCoordinator(
+            SharedPreferencesAudioCleanupLedger(this),
+            PlaybackService::clearTransientAudioCachesFor,
+        )
         playback = PlaybackConnection(this)
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
+    }
+
+    internal fun requestTransientAudioCleanup(namespace: String) {
+        transientAudioCleanup.request(namespace)
     }
 
     override fun onStart(owner: LifecycleOwner) {

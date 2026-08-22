@@ -73,6 +73,26 @@ internal fun controllerAccess(
     else -> ControllerAccess.REJECTED
 }
 
+internal data class PlaybackRestoration(
+    val session: NavidromeSession,
+    val mediaItems: List<MediaItem>,
+    val startIndex: Int,
+    val startPositionMs: Long,
+) {
+    fun mediaItemsWithStartPosition() = MediaSession.MediaItemsWithStartPosition(
+        mediaItems,
+        startIndex,
+        startPositionMs,
+    )
+}
+
+internal fun shouldApplyPlaybackRestoration(
+    restorationGeneration: Long,
+    currentGeneration: Long?,
+    playerItemCount: Int,
+    playWhenReady: Boolean,
+): Boolean = restorationGeneration == currentGeneration && playerItemCount == 0 && !playWhenReady
+
 private fun transportPlayerCommands(): Player.Commands = Player.Commands.Builder()
     .add(Player.COMMAND_PLAY_PAUSE)
     .add(Player.COMMAND_PREPARE)
@@ -103,9 +123,14 @@ internal class CodaMediaLibraryCallback(
 ) : MediaLibrarySession.Callback {
     private val searchCache = BoundedSearchCache(MAX_CACHED_SEARCHES)
     private val restorationMutex = Mutex()
+    @Volatile
     private var restorationGeneration: Long? = null
+    @Volatile
     private var restorationLoaded = false
-    private var cachedRestoration: MediaSession.MediaItemsWithStartPosition? = null
+    @Volatile
+    private var cachedRestoration: PlaybackRestoration? = null
+    @Volatile
+    private var restorationEpoch = 0L
 
     override fun onConnect(
         session: MediaSession,
@@ -218,12 +243,24 @@ internal class CodaMediaLibraryCallback(
         controller: MediaSession.ControllerInfo,
         isForPlayback: Boolean,
     ): ListenableFuture<MediaSession.MediaItemsWithStartPosition> = asyncFuture {
-        checkNotNull(loadPlaybackRestoration()) { "No saved Coda queue is available" }
+        val restoration = checkNotNull(loadPlaybackRestoration()) {
+            "No saved Coda queue is available"
+        }
+        restoration.session.requireCurrent()
+        restoration.mediaItemsWithStartPosition()
     }
 
-    internal suspend fun loadPlaybackRestoration(): MediaSession.MediaItemsWithStartPosition? =
+    internal fun invalidatePlaybackRestoration(): Unit = synchronized(this) {
+        restorationEpoch++
+        restorationGeneration = null
+        restorationLoaded = false
+        cachedRestoration = null
+    }
+
+    internal suspend fun loadPlaybackRestoration(): PlaybackRestoration? =
         restorationMutex.withLock {
             val account = AppGraph.sessionSnapshot() ?: return@withLock null
+            val requestEpoch = restorationEpoch
             if (restorationGeneration != account.generation) {
                 restorationGeneration = account.generation
                 restorationLoaded = false
@@ -233,19 +270,26 @@ internal class CodaMediaLibraryCallback(
 
             val queue = account.client.playQueue()
             account.requireCurrent()
+            check(requestEpoch == restorationEpoch) { "Playback restoration was invalidated" }
             val start = savedQueueStart(queue, account.client.queueClientName)
-            cachedRestoration = start?.let {
+            val restoration = start?.let {
                 val mobile = isMobileNetwork(context)
-                MediaSession.MediaItemsWithStartPosition(
-                    requireNotNull(queue).entry.map { song ->
+                PlaybackRestoration(
+                    session = account,
+                    mediaItems = requireNotNull(queue).entry.map { song ->
                         song.toPlayableMediaItem(context, mobile, account)
                     },
-                    it.index,
-                    it.positionMs,
+                    startIndex = it.index,
+                    startPositionMs = it.positionMs,
                 )
             }
-            restorationLoaded = true
-            cachedRestoration
+            synchronized(this) {
+                account.requireCurrent()
+                check(requestEpoch == restorationEpoch) { "Playback restoration was invalidated" }
+                cachedRestoration = restoration
+                restorationLoaded = true
+                cachedRestoration
+            }
         }
 
     private suspend fun children(account: NavidromeSession, parentId: String): List<MediaItem> =
