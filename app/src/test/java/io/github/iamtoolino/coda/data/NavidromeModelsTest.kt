@@ -4,6 +4,7 @@ import kotlinx.serialization.json.Json
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertThrows
 import org.junit.Test
 import kotlinx.coroutines.runBlocking
 import okhttp3.FormBody
@@ -237,6 +238,64 @@ class NavidromeModelsTest {
         val albums = client.artistAlbums("artist-1").second
 
         assertEquals(listOf("album-early", "album-late", "album-undated"), albums.map { it.id })
+    }
+
+    @Test
+    fun `album pagination rejects a repeated full page`() {
+        var requests = 0
+        val firstPage = (0 until 500).toList()
+
+        val error = assertThrows(java.io.IOException::class.java) {
+            runBlocking {
+                collectAllPages(
+                    pageSize = 500,
+                    maximumPageRequests = 10,
+                    maximumItems = 10_000,
+                    itemId = Int::toString,
+                ) {
+                    requests++
+                    firstPage
+                }
+            }
+        }
+
+        assertEquals(2, requests)
+        assertEquals("Album pagination made no progress at offset 500", error.message)
+    }
+
+    @Test
+    fun `album pagination preserves valid large progress and final partial page`() = runBlocking {
+        val pages = ArrayDeque(
+            listOf(
+                (0 until 500).toList(),
+                (500 until 1_000).toList(),
+                listOf(1_000),
+            ),
+        )
+
+        val result = collectAllPages(
+            pageSize = 500,
+            maximumPageRequests = 10,
+            maximumItems = 10_000,
+            itemId = Int::toString,
+        ) { pages.removeFirst() }
+
+        assertEquals(1_001, result.size)
+        assertEquals(1_000, result.last())
+    }
+
+    @Test
+    fun `album pagination enforces a proportional item bound`() {
+        assertThrows(java.io.IOException::class.java) {
+            runBlocking {
+                collectAllPages(
+                    pageSize = 2,
+                    maximumPageRequests = 10,
+                    maximumItems = 3,
+                    itemId = Int::toString,
+                ) { offset -> listOf(offset, offset + 1) }
+            }
+        }
     }
 
     private fun testClient(

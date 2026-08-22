@@ -18,6 +18,43 @@ import okhttp3.Response
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 
+internal suspend fun <T> collectAllPages(
+    pageSize: Int,
+    maximumPageRequests: Int,
+    maximumItems: Int,
+    itemId: (T) -> String,
+    loadPage: suspend (offset: Int) -> List<T>,
+): List<T> {
+    require(pageSize > 0 && maximumPageRequests > 0 && maximumItems > 0)
+    val result = mutableListOf<T>()
+    val seenIds = mutableSetOf<String>()
+    val seenFullPages = mutableSetOf<List<String>>()
+    var offset = 0
+    repeat(maximumPageRequests) {
+        val page = loadPage(offset)
+        if (result.size + page.size > maximumItems) {
+            throw IOException("Album pagination exceeded $maximumItems items")
+        }
+        if (page.size == pageSize) {
+            val signature = page.map(itemId)
+            val madeProgress = signature.any { it !in seenIds }
+            if (!seenFullPages.add(signature) || !madeProgress) {
+                throw IOException("Album pagination made no progress at offset $offset")
+            }
+            seenIds += signature
+        } else {
+            page.forEach { seenIds += itemId(it) }
+        }
+        result += page
+        if (page.size < pageSize) return result
+        if (offset > Int.MAX_VALUE - page.size) {
+            throw IOException("Album pagination offset overflowed")
+        }
+        offset += page.size
+    }
+    throw IOException("Album pagination exceeded $maximumPageRequests requests")
+}
+
 class NavidromeClient(
     serverUrl: String,
     private val username: String,
@@ -56,15 +93,14 @@ class NavidromeClient(
     }
 
     suspend fun allAlbums(type: AlbumListType): List<Album> {
-        val result = mutableListOf<Album>()
-        var offset = 0
-        while (true) {
-            val page = albums(type = type, size = 500, offset = offset)
-            result += page
-            offset += page.size
-            if (page.size < 500) break
+        return collectAllPages(
+            pageSize = ALL_ALBUMS_PAGE_SIZE,
+            maximumPageRequests = MAX_ALL_ALBUM_PAGE_REQUESTS,
+            maximumItems = MAX_ALL_ALBUMS,
+            itemId = Album::id,
+        ) { offset ->
+            albums(type = type, size = ALL_ALBUMS_PAGE_SIZE, offset = offset)
         }
-        return result
     }
 
     suspend fun allNewestAlbums(): List<Album> = allAlbums(AlbumListType.NEWEST)
@@ -277,6 +313,9 @@ class NavidromeClient(
     companion object {
         const val CLIENT_NAME = "CodaAndroid"
         internal const val API_CALL_TIMEOUT_MILLIS = 20_000
+        private const val ALL_ALBUMS_PAGE_SIZE = 500
+        private const val MAX_ALL_ALBUM_PAGE_REQUESTS = 1_001
+        private const val MAX_ALL_ALBUMS = 500_000
         internal val DEFAULT_HTTP_CLIENT: OkHttpClient = OkHttpClient.Builder()
             .connectTimeout(10, TimeUnit.SECONDS)
             .readTimeout(15, TimeUnit.SECONDS)
