@@ -227,13 +227,24 @@ private fun rememberRestorableLazyGridState(
     contentReady: Boolean,
     maxIndex: Int,
     stateKey: String = "default",
+    canLoadMore: Boolean,
+    onNeedsMoreContent: () -> Unit,
 ): LazyGridState {
     var savedIndex by rememberSaveable(stateKey) { mutableIntStateOf(0) }
     var savedOffset by rememberSaveable(stateKey) { mutableIntStateOf(0) }
+    var restorationComplete by remember(stateKey) { mutableStateOf(false) }
     val state = remember(stateKey) { LazyGridState() }
-    LaunchedEffect(contentReady, maxIndex) {
-        if (!contentReady) return@LaunchedEffect
+    LaunchedEffect(contentReady, maxIndex, canLoadMore) {
+        if (!contentReady || restorationComplete) return@LaunchedEffect
+        if (savedIndex > maxIndex && canLoadMore) {
+            onNeedsMoreContent()
+            return@LaunchedEffect
+        }
         state.scrollToItem(savedIndex.coerceIn(0, maxIndex.coerceAtLeast(0)), savedOffset)
+        restorationComplete = true
+    }
+    LaunchedEffect(contentReady, restorationComplete) {
+        if (!contentReady || !restorationComplete) return@LaunchedEffect
         snapshotFlow { state.firstVisibleItemIndex to state.firstVisibleItemScrollOffset }
             .collect { (index, offset) ->
                 savedIndex = index
@@ -856,22 +867,49 @@ private fun AlbumsScreen(
     var mode by rememberSaveable { mutableStateOf(initialMode) }
     val scope = rememberCoroutineScope()
     val coordinator = remember(scope) {
-        RemoteCollectionCoordinator(scope, initialMode) { requestedMode ->
-            AppGraph.withCurrentSession { allAlbums(requestedMode.listType) }
+        AlbumPagingCoordinator(scope, initialMode.listType) { type, offset, size ->
+            AppGraph.withCurrentSession { albums(type = type, size = size, offset = offset) }
         }
     }
     val state = coordinator.state
-    val albums = state.value.takeIf { state.key == mode }
-    val error = state.errorMessage.takeIf { state.key == mode }
+    val albums = state.albums.takeIf { state.type == mode.listType }
+    val error = state.errorMessage.takeIf { state.type == mode.listType }
     val gridState = rememberRestorableLazyGridState(
-        contentReady = albums != null || error != null,
+        contentReady = albums != null,
         maxIndex = albums?.size ?: 0,
         stateKey = mode.routeValue,
+        canLoadMore = albums != null && !state.endReached && state.appendErrorMessage == null,
+        onNeedsMoreContent = { coordinator.loadNext() },
     )
-    LaunchedEffect(coordinator, mode) { coordinator.load(mode) }
+    LaunchedEffect(coordinator, mode) { coordinator.load(mode.listType) }
+    LaunchedEffect(coordinator, gridState, mode) {
+        snapshotFlow {
+            val pagingState = coordinator.state
+            AlbumPagePrefetchSnapshot(
+                type = pagingState.type,
+                lastVisibleAlbumIndex =
+                    (gridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0) - 1,
+                loadedAlbumCount = pagingState.albums?.size ?: 0,
+                isLoading = pagingState.isRefreshing || pagingState.isAppending,
+                endReached = pagingState.endReached,
+                hasAppendError = pagingState.appendErrorMessage != null,
+            )
+        }.collect { prefetch ->
+            if (prefetch.type == mode.listType && shouldLoadNextAlbumPage(
+                    lastVisibleAlbumIndex = prefetch.lastVisibleAlbumIndex,
+                    loadedAlbumCount = prefetch.loadedAlbumCount,
+                    isLoading = prefetch.isLoading,
+                    endReached = prefetch.endReached,
+                    hasAppendError = prefetch.hasAppendError,
+                )
+            ) {
+                coordinator.loadNext()
+            }
+        }
+    }
     PullToRefreshBox(
-        isRefreshing = state.isLoading && albums != null,
-        onRefresh = { coordinator.load(mode) },
+        isRefreshing = state.isRefreshing && albums != null,
+        onRefresh = { coordinator.load(mode.listType) },
         modifier = Modifier.fillMaxSize(),
     ) {
         LazyVerticalGrid(
@@ -910,7 +948,80 @@ private fun AlbumsScreen(
                     ) { navController.navigate("album/${Uri.encode(album.id)}") }
                 }
             }
+            if (state.type == mode.listType && state.isAppending) {
+                items(
+                    count = ALBUM_LOADING_PLACEHOLDERS,
+                    key = { "album-loading-$it" },
+                ) {
+                    AlbumLoadingPlaceholder()
+                }
+            }
+            state.appendErrorMessage?.takeIf { state.type == mode.listType }?.let { appendError ->
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    AlbumPageRetry(appendError, onRetry = { coordinator.loadNext() })
+                }
+            }
         }
+    }
+}
+
+private data class AlbumPagePrefetchSnapshot(
+    val type: AlbumListType,
+    val lastVisibleAlbumIndex: Int,
+    val loadedAlbumCount: Int,
+    val isLoading: Boolean,
+    val endReached: Boolean,
+    val hasAppendError: Boolean,
+)
+
+@Composable
+private fun AlbumLoadingPlaceholder() {
+    Column {
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .aspectRatio(1f)
+                .clip(RoundedCornerShape(14.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant),
+        )
+        Spacer(Modifier.height(8.dp))
+        Box(
+            Modifier
+                .fillMaxWidth(0.72f)
+                .height(16.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.surfaceVariant),
+        )
+        Spacer(Modifier.height(5.dp))
+        Box(
+            Modifier
+                .fillMaxWidth(0.5f)
+                .height(13.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)),
+        )
+    }
+}
+
+@Composable
+private fun AlbumPageRetry(message: String, onRetry: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .clickable(onClick = onRetry)
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            message,
+            modifier = Modifier.weight(1f),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+        )
+        Icon(Icons.Default.Refresh, "Retry loading more albums")
     }
 }
 

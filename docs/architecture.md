@@ -18,12 +18,14 @@ Previously loaded section content remains visible during refresh. Network `IOExc
 short backoff retries; cancellation and permanent response errors do not retry. Exhausted failures
 remain local to their section and can be retried individually.
 
-`RemoteResourceCoordinator` provides the keyed request lifecycle shared by collection and read-only
-detail specializations. `RemoteCollectionCoordinator` owns Artists, Albums, and Playlists, while the
-detail specialization owns Artist, Album, and Playlist destination loading. Compose selects a key and renders immutable
-coordinator state. Refreshing the same key retains good content; changing an album view or artist ID
-clears mismatched content. Each new load cancels its predecessor and also uses a generation gate, so
-even a non-cooperative obsolete request cannot publish after a newer selection.
+`RemoteResourceCoordinator` provides the keyed request lifecycle shared by ordinary collections and
+read-only detail specializations. `RemoteCollectionCoordinator` owns Artists and Playlists, while the
+detail specialization owns Artist, Album, and Playlist destination loading. The Albums screen uses an
+album-specific paging coordinator: it publishes the first server-sorted page immediately, appends the
+next page near the visible boundary, and treats a partial page as the end. Compose selects a key and
+renders immutable coordinator state. Refreshing the same key retains good content; changing an album
+view or artist ID clears mismatched content. Each new load cancels its predecessor and also uses a
+generation gate, so even a non-cooperative obsolete request cannot publish after a newer selection.
 
 `SearchCoordinator` owns debounced query execution independently of text-field selection and focus.
 Typing waits 350 ms before issuing a request; explicit refresh starts immediately and retains the
