@@ -27,8 +27,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
@@ -48,6 +50,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Album
 import androidx.compose.material.icons.filled.AccountCircle
@@ -128,6 +131,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -2310,8 +2314,8 @@ private fun NowPlayingScreen(
                     .navigationBarsPadding(),
             ) {
                 val screenRatio = maxHeight.value / maxWidth.value.coerceAtLeast(1f)
-                val veryCompact = screenRatio < 1.86f
-                val compact = screenRatio < 2.05f
+                val veryCompact = screenRatio < 1.95f
+                val compact = screenRatio < 2.2f
                 val artworkHeight = when {
                     veryCompact -> maxWidth * 0.74f
                     compact -> maxWidth * 0.86f
@@ -2373,9 +2377,17 @@ private fun NowPlayingScreen(
                         Spacer(Modifier.height(if (compact) 7.dp else 12.dp))
                         Text(
                             state.title,
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(max = if (veryCompact) 48.dp else 54.dp),
+                            autoSize = TextAutoSize.StepBased(
+                                minFontSize = 18.sp,
+                                maxFontSize = if (veryCompact) 24.sp else 28.sp,
+                                stepSize = 1.sp,
+                            ),
                             fontSize = if (veryCompact) 24.sp else 28.sp,
                             fontWeight = FontWeight.Bold,
+                            lineHeight = 1.16.em,
                             maxLines = 2,
                             overflow = TextOverflow.Ellipsis,
                             textAlign = TextAlign.Center,
@@ -2419,6 +2431,14 @@ private fun NowPlayingScreen(
                             overflow = TextOverflow.Ellipsis,
                             textAlign = TextAlign.Center,
                         )
+                        if (state.error == null && streamQuality != null) {
+                            Spacer(Modifier.height(if (compact) 2.dp else 4.dp))
+                            Text(
+                                streamQuality,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.78f),
+                                fontSize = 11.sp,
+                            )
+                        }
                         state.error?.let {
                             Spacer(Modifier.height(if (compact) 4.dp else 8.dp))
                             Text(it, color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
@@ -2472,7 +2492,7 @@ private fun NowPlayingScreen(
                             IconButton(
                                 onClick = playback::togglePlayPause,
                                 modifier = Modifier
-                                    .size(primaryControlSize)
+                                    .requiredSize(primaryControlSize)
                                     .clip(CircleShape)
                                     .background(MaterialTheme.colorScheme.primary),
                             ) {
@@ -2494,14 +2514,6 @@ private fun NowPlayingScreen(
                                     modifier = Modifier.size(38.dp),
                                 )
                             }
-                        }
-                        if (state.error == null && streamQuality != null) {
-                            Spacer(Modifier.height(if (compact) 8.dp else 14.dp))
-                            Text(
-                                streamQuality,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.78f),
-                                fontSize = 11.sp,
-                            )
                         }
                         Spacer(Modifier.height(if (compact) 5.dp else 10.dp))
                     }
@@ -2850,7 +2862,7 @@ private fun formatDurationMs(milliseconds: Long): String {
     return "%d:%02d".format(seconds / 60, seconds % 60)
 }
 
-private fun qualityLabel(state: PlaybackUiState): String? {
+internal fun qualityLabel(state: PlaybackUiState): String? {
     val codec = state.codec?.uppercase() ?: return null
     val parts = mutableListOf(codec)
     if (state.bitDepth != null && state.samplingRate != null) {
