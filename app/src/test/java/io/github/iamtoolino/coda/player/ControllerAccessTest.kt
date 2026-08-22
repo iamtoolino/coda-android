@@ -1,5 +1,6 @@
 package io.github.iamtoolino.coda.player
 
+import androidx.media3.common.Player
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -67,6 +68,18 @@ class ControllerAccessTest {
                 isMediaNotification = false,
                 isTrusted = true,
             ),
+        )
+    }
+
+    @Test
+    fun `recommendation broker can select a published item without general queue mutation`() {
+        val commands = restrictedPlayerCommandCodes(allowMediaItemSelection = true)
+
+        assertTrue(Player.COMMAND_SET_MEDIA_ITEM in commands)
+        assertFalse(Player.COMMAND_CHANGE_MEDIA_ITEMS in commands)
+        assertFalse(
+            Player.COMMAND_SET_MEDIA_ITEM in
+                restrictedPlayerCommandCodes(allowMediaItemSelection = false),
         )
     }
 

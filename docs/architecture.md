@@ -144,7 +144,8 @@ are cancelled when their account session becomes obsolete.
 The exported session authorizes controllers before exposing commands. Coda's own controller and the
 Media3-recognized Android Auto companion receive full library and playback access. The exact
 platform-trusted Google recommendation broker receives library browsing plus transport controls,
-but cannot mutate the queue. Media notification and other user-trusted system controllers receive
+and may select a published Coda library item so the widget can start it, but cannot otherwise mutate
+the queue or submit a direct playable URI. Media notification and other user-trusted system controllers receive
 transport and playback-state access without library browsing or queue mutation. Untrusted
 applications are rejected. The service remains exported so Android Auto, system controls, media
 buttons, and playback resumption can cold-start it.

@@ -115,27 +115,34 @@ internal fun shouldApplyPlaybackRestoration(
     playWhenReady: Boolean,
 ): Boolean = restorationGeneration == currentGeneration && playerItemCount == 0 && !playWhenReady
 
-private fun transportPlayerCommands(): Player.Commands = Player.Commands.Builder()
-    .add(Player.COMMAND_PLAY_PAUSE)
-    .add(Player.COMMAND_PREPARE)
-    .add(Player.COMMAND_STOP)
-    .add(Player.COMMAND_SEEK_TO_DEFAULT_POSITION)
-    .add(Player.COMMAND_SEEK_IN_CURRENT_MEDIA_ITEM)
-    .add(Player.COMMAND_SEEK_TO_PREVIOUS_MEDIA_ITEM)
-    .add(Player.COMMAND_SEEK_TO_PREVIOUS)
-    .add(Player.COMMAND_SEEK_TO_NEXT_MEDIA_ITEM)
-    .add(Player.COMMAND_SEEK_TO_NEXT)
-    .add(Player.COMMAND_SEEK_BACK)
-    .add(Player.COMMAND_SEEK_FORWARD)
-    .add(Player.COMMAND_SET_SHUFFLE_MODE)
-    .add(Player.COMMAND_SET_REPEAT_MODE)
-    .add(Player.COMMAND_GET_CURRENT_MEDIA_ITEM)
-    .add(Player.COMMAND_GET_TIMELINE)
-    .add(Player.COMMAND_GET_METADATA)
-    .add(Player.COMMAND_GET_AUDIO_ATTRIBUTES)
-    .add(Player.COMMAND_GET_VOLUME)
-    .add(Player.COMMAND_GET_DEVICE_VOLUME)
-    .add(Player.COMMAND_GET_TRACKS)
+internal fun restrictedPlayerCommandCodes(allowMediaItemSelection: Boolean): Set<Int> = buildSet {
+    add(Player.COMMAND_PLAY_PAUSE)
+    add(Player.COMMAND_PREPARE)
+    add(Player.COMMAND_STOP)
+    add(Player.COMMAND_SEEK_TO_DEFAULT_POSITION)
+    add(Player.COMMAND_SEEK_IN_CURRENT_MEDIA_ITEM)
+    add(Player.COMMAND_SEEK_TO_PREVIOUS_MEDIA_ITEM)
+    add(Player.COMMAND_SEEK_TO_PREVIOUS)
+    add(Player.COMMAND_SEEK_TO_NEXT_MEDIA_ITEM)
+    add(Player.COMMAND_SEEK_TO_NEXT)
+    add(Player.COMMAND_SEEK_BACK)
+    add(Player.COMMAND_SEEK_FORWARD)
+    add(Player.COMMAND_SET_SHUFFLE_MODE)
+    add(Player.COMMAND_SET_REPEAT_MODE)
+    add(Player.COMMAND_GET_CURRENT_MEDIA_ITEM)
+    add(Player.COMMAND_GET_TIMELINE)
+    add(Player.COMMAND_GET_METADATA)
+    add(Player.COMMAND_GET_AUDIO_ATTRIBUTES)
+    add(Player.COMMAND_GET_VOLUME)
+    add(Player.COMMAND_GET_DEVICE_VOLUME)
+    add(Player.COMMAND_GET_TRACKS)
+    if (allowMediaItemSelection) add(Player.COMMAND_SET_MEDIA_ITEM)
+}
+
+private fun restrictedPlayerCommands(allowMediaItemSelection: Boolean): Player.Commands =
+    Player.Commands.Builder().apply {
+        restrictedPlayerCommandCodes(allowMediaItemSelection).forEach(::add)
+    }
     .build()
 
 @androidx.annotation.OptIn(markerClass = [UnstableApi::class])
@@ -178,11 +185,11 @@ internal class CodaMediaLibraryCallback(
                 MediaSession.ConnectionResult.AcceptedResultBuilder(session).build()
             ControllerAccess.LIBRARY_TRANSPORT -> MediaSession.ConnectionResult.accept(
                 MediaSession.ConnectionResult.DEFAULT_SESSION_AND_LIBRARY_COMMANDS,
-                transportPlayerCommands(),
+                restrictedPlayerCommands(allowMediaItemSelection = true),
             )
             ControllerAccess.TRANSPORT -> MediaSession.ConnectionResult.accept(
                 MediaSession.ConnectionResult.DEFAULT_SESSION_COMMANDS,
-                transportPlayerCommands(),
+                restrictedPlayerCommands(allowMediaItemSelection = false),
             )
             ControllerAccess.REJECTED -> MediaSession.ConnectionResult.reject()
         }
@@ -278,7 +285,13 @@ internal class CodaMediaLibraryCallback(
         val account = AppGraph.sessionSnapshot()
             ?: return Futures.immediateFuture(emptyList())
         return asyncFuture {
-            mediaItems.flatMap { requested -> resolvePlayableItems(account, requested) }.also {
+            val allowDirectPlayableItem = !isRecommendationBroker(
+                packageName = controller.packageName,
+                isTrusted = controller.isTrusted,
+            )
+            mediaItems.flatMap { requested ->
+                resolvePlayableItems(account, requested, allowDirectPlayableItem)
+            }.also {
                 account.requireCurrent()
             }
         }
@@ -426,8 +439,10 @@ internal class CodaMediaLibraryCallback(
     private suspend fun resolvePlayableItems(
         account: NavidromeSession,
         requested: MediaItem,
+        allowDirectPlayableItem: Boolean,
     ): List<MediaItem> {
         if (requested.localConfiguration?.uri != null) {
+            if (!allowDirectPlayableItem) return emptyList()
             val itemNamespace = requested.mediaMetadata.extras?.getString("cacheNamespace")
             return listOf(requested).takeIf {
                 itemNamespace == null || itemNamespace == account.cacheNamespace
