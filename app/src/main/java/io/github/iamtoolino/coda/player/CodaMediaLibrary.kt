@@ -7,6 +7,7 @@ import android.os.Bundle
 import androidx.annotation.DrawableRes
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
+import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.LibraryResult
 import androidx.media3.session.MediaLibraryService
@@ -55,6 +56,46 @@ internal object CodaMediaIds {
         takeIf { startsWith(prefix) }?.removePrefix(prefix)?.takeIf(String::isNotBlank)
 }
 
+internal enum class ControllerAccess {
+    FULL_LIBRARY,
+    TRANSPORT,
+    REJECTED,
+}
+
+internal fun controllerAccess(
+    isOwnApp: Boolean,
+    isAutoCompanion: Boolean,
+    isMediaNotification: Boolean,
+    isTrusted: Boolean,
+): ControllerAccess = when {
+    isOwnApp || isAutoCompanion -> ControllerAccess.FULL_LIBRARY
+    isMediaNotification || isTrusted -> ControllerAccess.TRANSPORT
+    else -> ControllerAccess.REJECTED
+}
+
+private fun transportPlayerCommands(): Player.Commands = Player.Commands.Builder()
+    .add(Player.COMMAND_PLAY_PAUSE)
+    .add(Player.COMMAND_PREPARE)
+    .add(Player.COMMAND_STOP)
+    .add(Player.COMMAND_SEEK_TO_DEFAULT_POSITION)
+    .add(Player.COMMAND_SEEK_IN_CURRENT_MEDIA_ITEM)
+    .add(Player.COMMAND_SEEK_TO_PREVIOUS_MEDIA_ITEM)
+    .add(Player.COMMAND_SEEK_TO_PREVIOUS)
+    .add(Player.COMMAND_SEEK_TO_NEXT_MEDIA_ITEM)
+    .add(Player.COMMAND_SEEK_TO_NEXT)
+    .add(Player.COMMAND_SEEK_BACK)
+    .add(Player.COMMAND_SEEK_FORWARD)
+    .add(Player.COMMAND_SET_SHUFFLE_MODE)
+    .add(Player.COMMAND_SET_REPEAT_MODE)
+    .add(Player.COMMAND_GET_CURRENT_MEDIA_ITEM)
+    .add(Player.COMMAND_GET_TIMELINE)
+    .add(Player.COMMAND_GET_METADATA)
+    .add(Player.COMMAND_GET_AUDIO_ATTRIBUTES)
+    .add(Player.COMMAND_GET_VOLUME)
+    .add(Player.COMMAND_GET_DEVICE_VOLUME)
+    .add(Player.COMMAND_GET_TRACKS)
+    .build()
+
 @androidx.annotation.OptIn(markerClass = [UnstableApi::class])
 internal class CodaMediaLibraryCallback(
     private val context: Context,
@@ -65,6 +106,28 @@ internal class CodaMediaLibraryCallback(
     private var restorationGeneration: Long? = null
     private var restorationLoaded = false
     private var cachedRestoration: MediaSession.MediaItemsWithStartPosition? = null
+
+    override fun onConnect(
+        session: MediaSession,
+        controller: MediaSession.ControllerInfo,
+    ): MediaSession.ConnectionResult {
+        val access = controllerAccess(
+            isOwnApp = controller.uid == context.applicationInfo.uid &&
+                controller.packageName == context.packageName,
+            isAutoCompanion = session.isAutoCompanionController(controller),
+            isMediaNotification = session.isMediaNotificationController(controller),
+            isTrusted = controller.isTrusted,
+        )
+        return when (access) {
+            ControllerAccess.FULL_LIBRARY ->
+                MediaSession.ConnectionResult.AcceptedResultBuilder(session).build()
+            ControllerAccess.TRANSPORT -> MediaSession.ConnectionResult.accept(
+                MediaSession.ConnectionResult.DEFAULT_SESSION_COMMANDS,
+                transportPlayerCommands(),
+            )
+            ControllerAccess.REJECTED -> MediaSession.ConnectionResult.reject()
+        }
+    }
 
     override fun onGetLibraryRoot(
         session: MediaLibrarySession,

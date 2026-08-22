@@ -121,6 +121,12 @@ are cancelled when their account session becomes obsolete.
 
 `PlaybackService` is exported as both a Media3 `MediaLibraryService` and a legacy-compatible `MediaBrowserService`. `CodaMediaLibraryCallback` exposes four car-safe roots: alphabetically bucketed artists, recently added albums, recently played albums, and playlists. Each node returns its complete intended contents because Android Auto does not paginate media-browser children. Search, album playback, and playlist playback resolve library IDs back into the same network-aware `MediaItem` factory used by the phone UI.
 
+The exported session authorizes controllers before exposing commands. Coda's own controller and the
+Media3-recognized Android Auto companion receive library and playback access. Media notification and
+other user-trusted system controllers receive transport and playback-state access without library
+browsing or queue mutation. Untrusted applications are rejected. The service remains exported so
+Android Auto, system controls, media buttons, and playback resumption can cold-start it.
+
 Android Auto supplies the driving UI. Coda supplies browse metadata, artwork, the playback queue, and the shared media session. The service can be cold-started by the car host without launching `MainActivity`.
 
 Remote artwork is represented to Android Auto as a local `content://` URI. `CarArtworkProvider`
