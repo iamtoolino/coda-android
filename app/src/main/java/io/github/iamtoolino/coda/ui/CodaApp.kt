@@ -11,6 +11,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Arrangement
@@ -75,7 +76,6 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -101,6 +101,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -108,7 +113,11 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.disabled
+import androidx.compose.ui.semantics.ProgressBarRangeInfo
+import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.setProgress
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.text.font.FontWeight
@@ -2407,46 +2416,84 @@ internal fun SeekBar(
     } else {
         MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.42f)
     }
-    Slider(
-        value = fraction,
-        onValueChange = { targetFraction ->
-            onSeek((targetFraction.coerceIn(0f, 1f) * safeDuration).toLong())
-        },
-        enabled = effectiveEnabled,
+    Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(48.dp)
-            .semantics { contentDescription = "Playback position" }
+            .onKeyEvent { event ->
+                if (!effectiveEnabled || event.type != KeyEventType.KeyDown) {
+                    false
+                } else {
+                    val stepMs = 5_000L.coerceAtMost(safeDuration)
+                    when (event.key) {
+                        Key.DirectionLeft, Key.DirectionDown -> {
+                            onSeek((positionMs - stepMs).coerceIn(0L, safeDuration))
+                            true
+                        }
+
+                        Key.DirectionRight, Key.DirectionUp -> {
+                            onSeek((positionMs + stepMs).coerceIn(0L, safeDuration))
+                            true
+                        }
+
+                        else -> false
+                    }
+                }
+            }
+            .pointerInput(safeDuration, effectiveEnabled) {
+                if (!effectiveEnabled) return@pointerInput
+                awaitEachGesture {
+                    val down = awaitFirstDown()
+
+                    fun seekAt(x: Float) {
+                        val targetFraction = (x / size.width).coerceIn(0f, 1f)
+                        onSeek((targetFraction * safeDuration).toLong())
+                    }
+
+                    seekAt(down.position.x)
+                    do {
+                        val event = awaitPointerEvent()
+                        val change = event.changes.firstOrNull { it.id == down.id } ?: break
+                        if (change.pressed) {
+                            seekAt(change.position.x)
+                            change.consume()
+                        }
+                    } while (change.pressed)
+                }
+            }
+            .focusable(enabled = effectiveEnabled)
+            .semantics {
+                contentDescription = "Playback position"
+                progressBarRangeInfo = ProgressBarRangeInfo(fraction, 0f..1f)
+                if (effectiveEnabled) {
+                    setProgress { targetFraction ->
+                        onSeek((targetFraction.coerceIn(0f, 1f) * safeDuration).toLong())
+                        true
+                    }
+                } else {
+                    disabled()
+                }
+            }
             .testTag("playbackSeekBar"),
-        thumb = {
+        contentAlignment = Alignment.CenterStart,
+    ) {
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .height(5.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.16f)),
+        )
+        if (fraction > 0f) {
             Box(
                 Modifier
-                    .size(8.dp)
+                    .fillMaxWidth(fraction)
+                    .height(5.dp)
                     .clip(CircleShape)
                     .background(activeColor),
             )
-        },
-        track = { sliderState ->
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(5.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.16f)),
-                contentAlignment = Alignment.CenterStart,
-            ) {
-                if (sliderState.value > 0f) {
-                    Box(
-                        Modifier
-                            .fillMaxWidth(sliderState.value.coerceIn(0f, 1f))
-                            .height(5.dp)
-                            .clip(CircleShape)
-                            .background(activeColor),
-                    )
-                }
-            }
-        },
-    )
+        }
+    }
 }
 
 @Composable
