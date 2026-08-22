@@ -81,8 +81,8 @@ server-side queue.
 Android publishes a snapshot when playback starts or changes track and every 15 seconds while music
 continues. It does not overwrite the shared queue while paused. On Home, a queue written by another
 client appears as an explicit Continue card; Coda's own queue is restored paused after a cold start.
-Scrobbles are retried after transient failures, and a track is submitted as played after 95%
-playback.
+Scrobbles are retried after transient failures, and a track is submitted as played only after a
+genuine Media3 completion. Seeking near the end or manually skipping does not count as completion.
 
 ## Android Auto
 

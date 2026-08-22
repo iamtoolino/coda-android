@@ -47,4 +47,8 @@ export CODA_SIGNING_STORE_PASSWORD
 export CODA_SIGNING_KEY_ALIAS
 export CODA_SIGNING_KEY_PASSWORD
 
-"$ROOT_DIR/scripts/gradle.sh" :app:testReleaseUnitTest :app:assembleRelease
+"$ROOT_DIR/scripts/gradle.sh" \
+  :app:testReleaseUnitTest \
+  :app:lintRelease \
+  :app:processReleaseMainManifest \
+  :app:assembleRelease
