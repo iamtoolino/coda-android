@@ -93,6 +93,8 @@ repopulate visible stale entries. Disconnect performs the same cache cleanup for
 `PlaybackService` owns a Media3 `ExoPlayer` and `MediaLibrarySession`. `PlaybackConnection` is the
 UI-side `MediaController`. It publishes stable queue/metadata separately from the 500 ms playback
 progress tick, so only the visible mini-player or Now Playing controls recompose as position changes.
+The phone bridge reconnects with bounded exponential backoff after an initial connection failure or
+session disconnection; this affects UI availability only, never service-owned playback behavior.
 Queue replacement, append, and handoff restoration prepare immutable Media3 items off the main
 thread and apply those mutations in user-action order.
 

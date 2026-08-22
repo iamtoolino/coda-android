@@ -9,6 +9,7 @@ import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
+import com.google.common.util.concurrent.ListenableFuture
 import io.github.iamtoolino.coda.AppGraph
 import io.github.iamtoolino.coda.CodaApplication
 import io.github.iamtoolino.coda.NavidromeSession
@@ -120,11 +121,14 @@ data class PlaybackProgressState(
 @androidx.annotation.OptIn(markerClass = [UnstableApi::class])
 class PlaybackConnection(private val context: Context) : Player.Listener {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
-    private val controllerFuture = MediaController.Builder(
+    private val sessionToken = SessionToken(
         context,
-        SessionToken(context, ComponentName(context, PlaybackService::class.java)),
-    ).buildAsync()
+        ComponentName(context, PlaybackService::class.java),
+    )
+    private var controllerFuture: ListenableFuture<MediaController>? = null
     private var controller: MediaController? = null
+    private var reconnectJob: Job? = null
+    private var released = false
     private var progressJob: Job? = null
     private var handoffRefreshJob: Job? = null
     private var pendingPlayback: ((MediaController) -> Unit)? = null
@@ -145,11 +149,42 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
     private val _handoffQueue = MutableStateFlow<PlayQueue?>(null)
     val handoffQueue: StateFlow<PlayQueue?> = _handoffQueue.asStateFlow()
 
+    private val controllerListener = object : MediaController.Listener {
+        override fun onDisconnected(disconnectedController: MediaController) {
+            if (controller !== disconnectedController || released) return
+            disconnectedController.removeListener(this@PlaybackConnection)
+            controller = null
+            progressJob?.cancel()
+            refreshState(rebuildQueue = true)
+            scheduleConnection(attempt = 0)
+        }
+    }
+
     init {
-        controllerFuture.addListener(
+        connect(attempt = 0)
+    }
+
+    private fun connect(attempt: Int) {
+        if (released || controller != null) return
+        val future = MediaController.Builder(context, sessionToken)
+            .setListener(controllerListener)
+            .buildAsync()
+        controllerFuture = future
+        future.addListener(
             {
-                val connectedController = runCatching { controllerFuture.get() }.getOrNull()
-                    ?: return@addListener
+                if (released || controllerFuture !== future) {
+                    MediaController.releaseFuture(future)
+                    return@addListener
+                }
+                val connectedController = runCatching { future.get() }.getOrNull()
+                if (connectedController == null) {
+                    controllerFuture = null
+                    MediaController.releaseFuture(future)
+                    scheduleConnection(attempt + 1)
+                    return@addListener
+                }
+                controllerFuture = null
+                reconnectJob?.cancel()
                 controller = connectedController.also { it.addListener(this) }
                 pendingPlayback?.invoke(connectedController)
                 pendingPlayback = null
@@ -159,6 +194,15 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
             },
             ContextCompat.getMainExecutor(context),
         )
+    }
+
+    private fun scheduleConnection(attempt: Int) {
+        if (released || controller != null || reconnectJob?.isActive == true) return
+        reconnectJob = scope.launch {
+            val retryDelay = (1_000L * (1 shl attempt.coerceAtMost(5))).coerceAtMost(30_000L)
+            delay(retryDelay)
+            connect(attempt)
+        }
     }
 
     fun playSongs(items: List<Song>, startIndex: Int = 0) {
@@ -466,13 +510,18 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
     }
 
     fun release() {
+        released = true
+        reconnectJob?.cancel()
         progressJob?.cancel()
         handoffRefreshJob?.cancel()
         queueMutationRequests.close()
         queueMutationWorker.cancel()
         pendingPlayback = null
+        controllerFuture?.let { MediaController.releaseFuture(it) }
+        controllerFuture = null
         controller?.removeListener(this)
         controller?.release()
+        controller = null
         scope.cancel()
     }
 
