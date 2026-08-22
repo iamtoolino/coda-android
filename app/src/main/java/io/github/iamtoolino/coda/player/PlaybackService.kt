@@ -142,7 +142,7 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
             this,
             player,
             libraryCallback,
-        )
+        ).setPeriodicPositionUpdateEnabled(false)
         packageManager.getLaunchIntentForPackage(packageName)?.let { launchIntent ->
             sessionBuilder.setSessionActivity(
                 PendingIntent.getActivity(

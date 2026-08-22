@@ -81,8 +81,9 @@ teal.
 ## Artwork
 
 Phone artwork uses four server-source buckets: 420 px for the high-volume Albums grid and playlist
-thumbnails, 500 px for artist cards and rows, 600 px for Home album cards and Android Auto browsing
-and playback metadata, and 1200 px for phone heroes, Continue, Now Playing, and theme extraction.
+thumbnails, 500 px for artist cards and rows, 600 px for Home album cards, and 1200 px for phone
+heroes, Continue, Now Playing, and theme extraction. Android Auto requests 320 px browse thumbnails
+and 600 px playback metadata artwork.
 Callers resolve these through one policy instead of inventing component-specific sizes.
 
 Coil owns a decoded memory cache and a 10 GB encoded disk cache. A Navidrome cover's encoded key is
@@ -149,6 +150,11 @@ applications are rejected. The service remains exported so Android Auto, system 
 buttons, and playback resumption can cold-start it.
 
 Android Auto supplies the driving UI. Coda supplies browse metadata, artwork, the playback queue, and the shared media session. The service can be cold-started by the car host without launching `MainActivity`.
+
+The session does not push periodic position corrections while a track is playing. Controllers
+extrapolate progress from the published position and playback speed, while Play/Pause, seeks,
+buffering, errors, and item transitions still publish immediately. This prevents Android Auto's
+queue screen from repeatedly re-anchoring itself to the current item during manual scrolling.
 
 Remote artwork is represented to Android Auto as a local `content://` URI. `CarArtworkProvider`
 downloads it through Coda's authenticated phone connection and keeps a bounded disk cache, which

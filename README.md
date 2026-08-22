@@ -103,8 +103,9 @@ system controllers limited to transport controls.
 Android Auto requires local artwork URIs. Coda downloads private server artwork through the phone's
 own connection, keeps a separate 128 MB **car-artwork cache**, and exposes it to the car through a
 local content provider. This also works when Navidrome is reachable only through a phone VPN such as
-Tailscale. Cache misses use bounded background downloads and a local pipe, so slow server-side image
-resizing does not block the car host or discard the original artwork request.
+Tailscale. Browse thumbnails request 320 px sources while playback artwork requests 600 px. Cache
+misses use bounded background downloads and a local pipe, so slow server-side image resizing does
+not block the car host or discard the original artwork request.
 
 ## Login and privacy
 

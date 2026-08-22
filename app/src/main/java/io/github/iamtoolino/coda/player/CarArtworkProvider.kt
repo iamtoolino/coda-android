@@ -195,7 +195,6 @@ class CarArtworkProvider : ContentProvider() {
 
         if (!file.isFile || file.length() == 0L) {
             val download = downloads[resolved.cacheKey] ?: startDownload(
-                uri = uri,
                 resolved = resolved,
                 destination = file,
                 directory = directory,
@@ -249,7 +248,6 @@ class CarArtworkProvider : ContentProvider() {
     }
 
     private fun startDownload(
-        uri: Uri,
         resolved: CarArtwork.ResolvedArtwork,
         destination: File,
         directory: File,
@@ -260,7 +258,6 @@ class CarArtworkProvider : ContentProvider() {
             try {
                 if (!destination.isFile || destination.length() == 0L) {
                     download(resolved, destination, directory, context)
-                    context.contentResolver.notifyChange(uri, null)
                 }
             } finally {
                 downloads.remove(resolved.cacheKey, task)

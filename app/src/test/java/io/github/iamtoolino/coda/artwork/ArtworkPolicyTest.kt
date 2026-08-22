@@ -8,6 +8,7 @@ import org.junit.Test
 class ArtworkPolicyTest {
     @Test
     fun `phone and car use the consolidated source sizes`() {
+        assertEquals(320, ArtworkSizes.CAR_BROWSE_THUMBNAIL)
         assertEquals(420, ArtworkSizes.PLAYLIST_THUMBNAIL)
         assertEquals(420, ArtworkSizes.ALBUM_GRID)
         assertEquals(500, ArtworkSizes.ARTIST_THUMBNAIL)

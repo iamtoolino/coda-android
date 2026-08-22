@@ -1,6 +1,7 @@
 package io.github.iamtoolino.coda.artwork
 
 internal object ArtworkSizes {
+    const val CAR_BROWSE_THUMBNAIL = 320
     const val PLAYLIST_THUMBNAIL = 420
     const val ALBUM_GRID = 420
     const val ARTIST_THUMBNAIL = 500
