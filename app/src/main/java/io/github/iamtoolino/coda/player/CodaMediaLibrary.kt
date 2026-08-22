@@ -1,3 +1,5 @@
+@file:androidx.annotation.OptIn(markerClass = [androidx.media3.common.util.UnstableApi::class])
+
 package io.github.iamtoolino.coda.player
 
 import android.content.ContentResolver
