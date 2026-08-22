@@ -268,13 +268,15 @@ fun CodaApp() {
         return
     }
     val activeCredentials = requireNotNull(credentials)
-    val ratingScope = rememberCoroutineScope()
+    val sessionScope = rememberCoroutineScope()
     var artworkRefreshing by remember { mutableStateOf(false) }
-    val ratings = remember(activeCredentials, ratingScope) {
-        AlbumRatingCoordinator(ratingScope) { albumId, rating ->
+    val ratings = remember(activeCredentials, sessionScope) {
+        AlbumRatingCoordinator(sessionScope) { albumId, rating ->
             AppGraph.withCurrentSession { setAlbumRating(albumId, rating) }
         }
     }
+    val home = remember(activeCredentials, sessionScope) { HomeCoordinator(sessionScope) }
+    LaunchedEffect(home) { home.refreshAll() }
     DisposableEffect(ratings) { onDispose(ratings::close) }
     LaunchedEffect(ratings, application) {
         ratings.failures.collect {
@@ -341,7 +343,7 @@ fun CodaApp() {
                             startDestination = "home",
                             modifier = Modifier.padding(padding),
                         ) {
-                        composable("home") { HomeScreen(navController, playback) }
+                        composable("home") { HomeScreen(navController, playback, home) }
                         composable("artists") { ArtistsScreen(navController) }
                         composable("albums") {
                             AlbumsScreen(navController, AlbumViewMode.RECENTLY_ADDED)
@@ -365,7 +367,7 @@ fun CodaApp() {
                                 onRefreshArtwork = {
                                     if (!artworkRefreshing) {
                                         val namespace = AppGraph.cacheNamespace
-                                        ratingScope.launch {
+                                        sessionScope.launch {
                                             artworkRefreshing = true
                                             runCatching {
                                                 application.refreshArtworkCaches(namespace)
@@ -457,9 +459,12 @@ fun CodaApp() {
 }
 
 @Composable
-private fun HomeScreen(navController: NavHostController, playback: PlaybackConnection) {
+private fun HomeScreen(
+    navController: NavHostController,
+    playback: PlaybackConnection,
+    home: HomeCoordinator,
+) {
     val scope = rememberCoroutineScope()
-    val home = remember(scope) { HomeCoordinator(scope) }
     val handoffQueue by playback.handoffQueue.collectAsStateWithLifecycle()
     val lifecycleOwner = LocalLifecycleOwner.current
     val listState = rememberRestorableLazyListState(
@@ -467,10 +472,7 @@ private fun HomeScreen(navController: NavHostController, playback: PlaybackConne
         maxIndex = 6,
     )
 
-    LaunchedEffect(home) {
-        home.refreshAll()
-        playback.refreshHandoffQueue()
-    }
+    LaunchedEffect(playback) { playback.refreshHandoffQueue() }
     DisposableEffect(playback) {
         playback.setHomeVisible(true)
         onDispose { playback.setHomeVisible(false) }

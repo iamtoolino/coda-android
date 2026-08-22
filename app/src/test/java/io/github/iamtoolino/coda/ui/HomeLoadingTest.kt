@@ -7,6 +7,8 @@ import java.io.IOException
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.yield
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -113,5 +115,72 @@ class HomeLoadingTest {
         assertEquals("section failed", coordinator.recentReleases.errorMessage)
         assertFalse(coordinator.recentReleases.isLoading)
         assertTrue(coordinator.newest.errorMessage == null)
+    }
+
+    @Test
+    fun `recent artists are capped to the home shelf limit`() {
+        val artists = (0 until HOME_SHELF_ITEM_LIMIT + 5).map { index ->
+            Artist(id = "artist-$index", name = "Artist $index")
+        }
+        val newest = artists.map { artist ->
+            Album(
+                id = "album-${artist.id}",
+                name = "Album ${artist.name}",
+                artist = artist.name,
+                artistId = artist.id,
+            )
+        }
+
+        val result = recentArtists(newest, artists)
+
+        assertEquals(HOME_SHELF_ITEM_LIMIT, result.size)
+        assertEquals(artists.take(HOME_SHELF_ITEM_LIMIT), result)
+    }
+
+    @Test
+    fun `artist retry reuses an already loaded newest album shelf`() = runBlocking {
+        var newestRequests = 0
+        var artistRequests = 0
+        val coordinator = HomeCoordinator(
+            scope = CoroutineScope(coroutineContext),
+            dataSource = object : HomeDataSource {
+                override suspend fun newestAlbums(): List<Album> {
+                    newestRequests++
+                    return listOf(
+                        Album(
+                            id = "album",
+                            name = "Newest",
+                            artist = "Artist",
+                            artistId = "artist",
+                        ),
+                    )
+                }
+
+                override suspend fun artists(): List<Artist> {
+                    artistRequests++
+                    if (artistRequests == 1) throw IOException("temporary")
+                    return listOf(Artist(id = "artist", name = "Artist"))
+                }
+
+                override suspend fun recentReleases() = emptyList<Album>()
+
+                override suspend fun recentlyPlayed() = emptyList<Album>()
+
+                override suspend fun playlists() = emptyList<Playlist>()
+            },
+        )
+
+        coordinator.refreshAll().join()
+        assertEquals(1, newestRequests)
+        assertEquals("temporary", coordinator.artists.errorMessage)
+
+        coordinator.retry(HomeSection.ARTISTS)
+        withTimeout(1_000L) {
+            while (coordinator.artists.isLoading) yield()
+        }
+
+        assertEquals(1, newestRequests)
+        assertEquals(2, artistRequests)
+        assertEquals("artist", coordinator.artists.value?.single()?.id)
     }
 }

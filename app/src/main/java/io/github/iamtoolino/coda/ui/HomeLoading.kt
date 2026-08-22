@@ -59,6 +59,8 @@ internal enum class HomeSection {
     PLAYLISTS,
 }
 
+internal const val HOME_SHELF_ITEM_LIMIT = 12
+
 internal interface HomeDataSource {
     suspend fun newestAlbums(): List<Album>
     suspend fun artists(): List<Artist>
@@ -68,15 +70,20 @@ internal interface HomeDataSource {
 }
 
 private object LiveHomeDataSource : HomeDataSource {
-    override suspend fun newestAlbums(): List<Album> = request { newestAlbums(24) }
+    override suspend fun newestAlbums(): List<Album> = request {
+        newestAlbums(HOME_SHELF_ITEM_LIMIT).take(HOME_SHELF_ITEM_LIMIT)
+    }
 
     override suspend fun artists(): List<Artist> = request { artists() }
 
     override suspend fun recentReleases(): List<Album> = request {
-        albums(AlbumListType.RELEASE_YEAR, 24)
+        albums(AlbumListType.RELEASE_YEAR, HOME_SHELF_ITEM_LIMIT)
+            .take(HOME_SHELF_ITEM_LIMIT)
     }
 
-    override suspend fun recentlyPlayed(): List<Album> = request { recentlyPlayedAlbums(20) }
+    override suspend fun recentlyPlayed(): List<Album> = request {
+        recentlyPlayedAlbums(HOME_SHELF_ITEM_LIMIT).take(HOME_SHELF_ITEM_LIMIT)
+    }
 
     override suspend fun playlists(): List<Playlist> = request { playlists() }
 
@@ -158,10 +165,12 @@ internal class HomeCoordinator(
                 artists = artists.loading()
                 sectionJobs[section] = scope.launch {
                     supervisorScope {
-                        val newestRequest = async { requestResult(dataSource::newestAlbums) }
                         val artistsRequest = async { requestResult(dataSource::artists) }
+                        val newestResult = newest.value
+                            ?.let { Result.success(it) }
+                            ?: requestResult(dataSource::newestAlbums)
                         artists = combineArtists(
-                            newestResult = newestRequest.await(),
+                            newestResult = newestResult,
                             artistsResult = artistsRequest.await(),
                             previous = artists,
                         )
@@ -239,6 +248,6 @@ internal fun recentArtists(newestAlbums: List<Album>, artists: List<Artist>): Li
                 ?: artistsByName[album.artist.lowercase()]
         }
         .distinctBy { it.id }
-        .take(20)
+        .take(HOME_SHELF_ITEM_LIMIT)
         .toList()
 }

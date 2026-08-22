@@ -2,7 +2,10 @@
 
 ## Data
 
-`NavidromeClient` talks directly to the OpenSubsonic REST API using salted-token authentication. Screen state is held in Compose memory only and is refetched when its destination is opened or refreshed.
+`NavidromeClient` talks directly to the OpenSubsonic REST API using salted-token authentication.
+Screen state is held in Compose memory only. Ordinary destinations refetch when opened or refreshed;
+Home retains its coordinator for the authenticated Compose session so returning from a detail screen
+does not reload every shelf, while pull-to-refresh still requests fresh server content.
 
 The API client is shared across account sessions and gives each complete metadata call a finite
 20-second deadline in addition to connect/read/write timeouts. Phone UI requests run through
@@ -17,6 +20,9 @@ by Artists and Recently Added, and publishes each result without waiting for unr
 Previously loaded section content remains visible during refresh. Network `IOException`s receive two
 short backoff retries; cancellation and permanent response errors do not retry. Exhausted failures
 remain local to their section and can be retried individually.
+Home album shelves request and retain at most twelve items. Retrying Artists reuses an already loaded
+Recently Added result and only refetches it when none is available; the complete portable artist
+catalogue is still requested to preserve correct artist metadata and imagery.
 
 `RemoteResourceCoordinator` provides the keyed request lifecycle shared by ordinary collections and
 read-only detail specializations. `RemoteCollectionCoordinator` owns Artists and Playlists, while the
