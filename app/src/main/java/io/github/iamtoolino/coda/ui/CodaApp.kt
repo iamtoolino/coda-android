@@ -75,6 +75,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -105,6 +106,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.text.font.FontWeight
@@ -2385,68 +2389,64 @@ private fun NowPlayingScreen(
 }
 
 @Composable
-private fun SeekBar(
+internal fun SeekBar(
     positionMs: Long,
     durationMs: Long,
     enabled: Boolean,
     onSeek: (Long) -> Unit,
 ) {
     val safeDuration = durationMs.coerceAtLeast(0)
+    val effectiveEnabled = enabled && safeDuration > 0
     val fraction = if (safeDuration > 0) {
         (positionMs.toFloat() / safeDuration).coerceIn(0f, 1f)
     } else {
         0f
     }
-    Box(
+    val activeColor = if (effectiveEnabled) {
+        MaterialTheme.colorScheme.primary
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.42f)
+    }
+    Slider(
+        value = fraction,
+        onValueChange = { targetFraction ->
+            onSeek((targetFraction.coerceIn(0f, 1f) * safeDuration).toLong())
+        },
+        enabled = effectiveEnabled,
         modifier = Modifier
             .fillMaxWidth()
-            .height(32.dp)
-            .pointerInput(safeDuration, enabled) {
-                if (!enabled || safeDuration <= 0) return@pointerInput
-                awaitEachGesture {
-                    val down = awaitFirstDown()
-
-                    fun seekAt(x: Float) {
-                        val targetFraction = (x / size.width).coerceIn(0f, 1f)
-                        onSeek((targetFraction * safeDuration).toLong())
-                    }
-
-                    seekAt(down.position.x)
-                    do {
-                        val event = awaitPointerEvent()
-                        val change = event.changes.firstOrNull { it.id == down.id } ?: break
-                        if (change.pressed) {
-                            seekAt(change.position.x)
-                            change.consume()
-                        }
-                    } while (change.pressed)
-                }
-            },
-        contentAlignment = Alignment.CenterStart,
-    ) {
-        Box(
-            Modifier
-                .fillMaxWidth()
-                .height(5.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.16f)),
-        )
-        if (fraction > 0f) {
+            .height(48.dp)
+            .semantics { contentDescription = "Playback position" }
+            .testTag("playbackSeekBar"),
+        thumb = {
             Box(
                 Modifier
-                    .fillMaxWidth(fraction)
+                    .size(8.dp)
+                    .clip(CircleShape)
+                    .background(activeColor),
+            )
+        },
+        track = { sliderState ->
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
                     .height(5.dp)
                     .clip(CircleShape)
-                    .background(
-                        if (enabled) {
-                            MaterialTheme.colorScheme.primary
-                        } else {
-                            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.42f)
-                        },
-                    ),
-            )
-        }
-    }
+                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.16f)),
+                contentAlignment = Alignment.CenterStart,
+            ) {
+                if (sliderState.value > 0f) {
+                    Box(
+                        Modifier
+                            .fillMaxWidth(sliderState.value.coerceIn(0f, 1f))
+                            .height(5.dp)
+                            .clip(CircleShape)
+                            .background(activeColor),
+                    )
+                }
+            }
+        },
+    )
 }
 
 @Composable
