@@ -30,4 +30,35 @@ class NowPlayingFormattingTest {
     fun `missing codec has no quality label`() {
         assertNull(qualityLabel(PlaybackUiState()))
     }
+
+    @Test
+    fun `restored item falls back to preserved source measurements`() {
+        assertEquals(
+            "FLAC • 16/44.1 kHz • 1048 kb/s",
+            qualityLabel(
+                PlaybackUiState(
+                    sourceCodec = "flac",
+                    sourceBitDepth = 16,
+                    sourceSamplingRate = 44_100,
+                    sourceBitRate = 1_048,
+                ),
+            ),
+        )
+    }
+
+    @Test
+    fun `transcode codec does not inherit source measurements`() {
+        assertEquals(
+            "OPUS",
+            qualityLabel(
+                PlaybackUiState(
+                    codec = "opus",
+                    sourceCodec = "flac",
+                    sourceBitDepth = 24,
+                    sourceSamplingRate = 96_000,
+                    sourceBitRate = 2_822,
+                ),
+            ),
+        )
+    }
 }

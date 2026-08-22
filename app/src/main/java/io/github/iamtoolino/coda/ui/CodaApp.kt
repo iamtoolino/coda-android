@@ -2431,14 +2431,6 @@ private fun NowPlayingScreen(
                             overflow = TextOverflow.Ellipsis,
                             textAlign = TextAlign.Center,
                         )
-                        if (state.error == null && streamQuality != null) {
-                            Spacer(Modifier.height(if (compact) 2.dp else 4.dp))
-                            Text(
-                                streamQuality,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.78f),
-                                fontSize = 11.sp,
-                            )
-                        }
                         state.error?.let {
                             Spacer(Modifier.height(if (compact) 4.dp else 8.dp))
                             Text(it, color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
@@ -2466,15 +2458,7 @@ private fun NowPlayingScreen(
                                 onOpenQueue = { navController.navigate("queue") },
                             )
                         }
-                        Spacer(
-                            Modifier.height(
-                                when {
-                                    veryCompact -> 18.dp
-                                    compact -> 24.dp
-                                    else -> 32.dp
-                                },
-                            ),
-                        )
+                        Spacer(Modifier.weight(1f))
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -2512,6 +2496,19 @@ private fun NowPlayingScreen(
                                     Icons.Default.SkipNext,
                                     "Next",
                                     modifier = Modifier.size(38.dp),
+                                )
+                            }
+                        }
+                        Spacer(Modifier.height(if (compact) 8.dp else 14.dp))
+                        Box(
+                            modifier = Modifier.height(16.dp),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            if (state.error == null && streamQuality != null) {
+                                Text(
+                                    streamQuality,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.78f),
+                                    fontSize = 11.sp,
                                 )
                             }
                         }
@@ -2863,13 +2860,17 @@ private fun formatDurationMs(milliseconds: Long): String {
 }
 
 internal fun qualityLabel(state: PlaybackUiState): String? {
-    val codec = state.codec?.uppercase() ?: return null
+    val usesSourceFallback = state.codec == null
+    val codec = (state.codec ?: state.sourceCodec)?.uppercase() ?: return null
+    val bitDepth = state.bitDepth ?: state.sourceBitDepth.takeIf { usesSourceFallback }
+    val samplingRate = state.samplingRate ?: state.sourceSamplingRate.takeIf { usesSourceFallback }
+    val bitRate = state.bitRate ?: state.sourceBitRate.takeIf { usesSourceFallback }
     val parts = mutableListOf(codec)
-    if (state.bitDepth != null && state.samplingRate != null) {
-        val khz = state.samplingRate / 1_000.0
-        parts += "${state.bitDepth}/${if (khz % 1.0 == 0.0) khz.toInt() else khz} kHz"
+    if (bitDepth != null && samplingRate != null) {
+        val khz = samplingRate / 1_000.0
+        parts += "$bitDepth/${if (khz % 1.0 == 0.0) khz.toInt() else khz} kHz"
     }
-    state.bitRate?.let { parts += "$it kb/s" }
+    bitRate?.let { parts += "$it kb/s" }
     return parts.joinToString(" • ")
 }
 

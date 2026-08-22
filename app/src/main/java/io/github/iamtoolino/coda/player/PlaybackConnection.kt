@@ -106,6 +106,10 @@ data class PlaybackUiState(
     val bitDepth: Int? = null,
     val samplingRate: Int? = null,
     val bitRate: Int? = null,
+    val sourceCodec: String? = null,
+    val sourceBitDepth: Int? = null,
+    val sourceSamplingRate: Int? = null,
+    val sourceBitRate: Int? = null,
     val error: String? = null,
     val currentIndex: Int = -1,
     val queue: List<QueueEntry> = emptyList(),
@@ -455,6 +459,13 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
             bitDepth = extras?.takeIf { it.containsKey("bitDepth") }?.getInt("bitDepth"),
             samplingRate = extras?.takeIf { it.containsKey("samplingRate") }?.getInt("samplingRate"),
             bitRate = extras?.takeIf { it.containsKey("bitRate") }?.getInt("bitRate"),
+            sourceCodec = extras?.getString("sourceCodec"),
+            sourceBitDepth = extras?.takeIf { it.containsKey("sourceBitDepth") }
+                ?.getInt("sourceBitDepth"),
+            sourceSamplingRate = extras?.takeIf { it.containsKey("sourceSamplingRate") }
+                ?.getInt("sourceSamplingRate"),
+            sourceBitRate = extras?.takeIf { it.containsKey("sourceBitRate") }
+                ?.getInt("sourceBitRate"),
             error = playbackError,
             currentIndex = player.currentMediaItemIndex,
             queue = queueSnapshot,
