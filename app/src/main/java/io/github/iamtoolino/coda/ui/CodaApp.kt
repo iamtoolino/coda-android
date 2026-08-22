@@ -2316,11 +2316,7 @@ private fun NowPlayingScreen(
                 val screenRatio = maxHeight.value / maxWidth.value.coerceAtLeast(1f)
                 val veryCompact = screenRatio < 1.95f
                 val compact = screenRatio < 2.2f
-                val artworkHeight = when {
-                    veryCompact -> maxWidth * 0.74f
-                    compact -> maxWidth * 0.86f
-                    else -> maxWidth
-                }
+                val artworkSize = if (veryCompact) maxWidth * 0.74f else maxWidth
                 val primaryControlSize = if (veryCompact) 64.dp else 72.dp
                 val primaryControlIconSize = if (veryCompact) 36.dp else 40.dp
                 Column(
@@ -2330,7 +2326,7 @@ private fun NowPlayingScreen(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(artworkHeight),
+                            .height(artworkSize),
                     ) {
                         Artwork(
                             source = playbackArtworkSource(
@@ -2338,7 +2334,9 @@ private fun NowPlayingScreen(
                                 state.artworkUrl,
                             ),
                             description = state.album,
-                            modifier = Modifier.fillMaxSize(),
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                                .size(artworkSize),
                         )
                         Box(
                             Modifier
