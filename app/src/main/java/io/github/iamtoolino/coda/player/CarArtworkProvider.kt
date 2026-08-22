@@ -14,7 +14,13 @@ import java.io.InputStream
 import java.security.MessageDigest
 import java.util.Collections
 import java.util.LinkedHashMap
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ExecutionException
+import java.util.concurrent.Executors
+import java.util.concurrent.Future
+import java.util.concurrent.FutureTask
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 import okhttp3.OkHttpClient
 import okhttp3.Request
 
@@ -28,6 +34,8 @@ internal object CarArtwork {
     private const val CACHE_DIRECTORY = "android-auto-artwork"
     private const val MAX_EXTERNAL_URLS = 2_048
     private val diskLock = Any()
+    private var knownCacheRootPath: String? = null
+    private var knownCacheBytes: Long? = null
     private val externalUrls = Collections.synchronizedMap(
         object : LinkedHashMap<String, String>(MAX_EXTERNAL_URLS + 1, 0.75f, true) {
             override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, String>?): Boolean =
@@ -108,6 +116,8 @@ internal object CarArtwork {
         withDiskLock {
             namespaceDirectory(context, namespace).deleteRecursively()
             cacheRoot(context).takeIf { it.listFiles()?.isEmpty() == true }?.delete()
+            knownCacheRootPath = null
+            knownCacheBytes = null
         }
     }
 
@@ -117,6 +127,42 @@ internal object CarArtwork {
         File(cacheRoot(context), sha256("namespace:$namespace"))
 
     fun <T> withDiskLock(block: () -> T): T = synchronized(diskLock, block)
+
+    fun recordCacheReplacement(
+        root: File,
+        replacedBytes: Long,
+        replacementBytes: Long,
+        maximumBytes: Long,
+    ) {
+        val rootPath = root.absolutePath
+        if (knownCacheRootPath != rootPath) {
+            knownCacheRootPath = rootPath
+            knownCacheBytes = null
+        }
+        val currentBytes = knownCacheBytes
+            ?.let { (it - replacedBytes).coerceAtLeast(0L) + replacementBytes }
+            ?: cacheFiles(root).sumOf(File::length)
+        knownCacheBytes = if (currentBytes > maximumBytes) {
+            trimCache(root, maximumBytes)
+        } else {
+            currentBytes
+        }
+    }
+
+    private fun trimCache(root: File, maximumBytes: Long): Long {
+        val files = cacheFiles(root).sortedBy(File::lastModified)
+        var size = files.sumOf(File::length)
+        for (file in files) {
+            if (size <= maximumBytes) break
+            val length = file.length()
+            if (file.delete()) size -= length
+        }
+        return size
+    }
+
+    private fun cacheFiles(root: File): List<File> = root.walkTopDown()
+        .filter { it.isFile && !it.name.endsWith(".tmp") }
+        .toList()
 
     private fun externalMapKey(namespace: String, key: String) = "$namespace:$key"
 
@@ -131,8 +177,11 @@ class CarArtworkProvider : ContentProvider() {
     private val httpClient = OkHttpClient.Builder()
         .connectTimeout(15, TimeUnit.SECONDS)
         .readTimeout(30, TimeUnit.SECONDS)
+        .callTimeout(30, TimeUnit.SECONDS)
         .build()
-    private val downloadLocks = Array(DOWNLOAD_LOCK_COUNT) { Any() }
+    private val downloadExecutor = Executors.newFixedThreadPool(DOWNLOAD_WORKER_COUNT)
+    private val pipeExecutor = Executors.newFixedThreadPool(PIPE_WORKER_COUNT)
+    private val downloads = ConcurrentHashMap<String, Future<Unit>>()
 
     override fun onCreate(): Boolean = true
 
@@ -143,21 +192,82 @@ class CarArtworkProvider : ContentProvider() {
             ?: throw FileNotFoundException("Unknown artwork URI")
         val directory = CarArtwork.namespaceDirectory(context, resolved.namespace).apply { mkdirs() }
         val file = File(directory, resolved.cacheKey.toFileName())
-        val lock = downloadLocks[(resolved.cacheKey.hashCode() and Int.MAX_VALUE) % downloadLocks.size]
 
-        synchronized(lock) {
-            if (!file.isFile || file.length() == 0L) download(resolved, file, directory, context)
-            if (resolved.namespace != AppGraph.cacheNamespace) {
-                throw FileNotFoundException("Artwork belongs to a previous account")
-            }
-            return CarArtwork.withDiskLock {
-                if (!file.isFile || file.length() == 0L) {
-                    throw FileNotFoundException("Artwork cache entry disappeared")
+        if (!file.isFile || file.length() == 0L) {
+            val download = downloads[resolved.cacheKey] ?: startDownload(
+                uri = uri,
+                resolved = resolved,
+                destination = file,
+                directory = directory,
+                context = context,
+            )
+            try {
+                download.get(CACHE_MISS_WAIT_MILLIS, TimeUnit.MILLISECONDS)
+            } catch (_: TimeoutException) {
+                return openDownloadPipe(download, file)
+            } catch (error: ExecutionException) {
+                throw FileNotFoundException("Could not load artwork").apply {
+                    initCause(error.cause ?: error)
                 }
-                file.setLastModified(System.currentTimeMillis())
-                ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
+            } catch (error: InterruptedException) {
+                Thread.currentThread().interrupt()
+                throw FileNotFoundException("Artwork load was interrupted").apply {
+                    initCause(error)
+                }
             }
         }
+        if (resolved.namespace != AppGraph.cacheNamespace) {
+            throw FileNotFoundException("Artwork belongs to a previous account")
+        }
+        return CarArtwork.withDiskLock {
+            if (!file.isFile || file.length() == 0L) {
+                throw FileNotFoundException("Artwork cache entry is not ready")
+            }
+            file.setLastModified(System.currentTimeMillis())
+            ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
+        }
+    }
+
+    private fun openDownloadPipe(
+        download: Future<Unit>,
+        file: File,
+    ): ParcelFileDescriptor {
+        val pipe = ParcelFileDescriptor.createReliablePipe()
+        pipeExecutor.execute {
+            try {
+                download.get()
+                file.inputStream().use { input ->
+                    ParcelFileDescriptor.AutoCloseOutputStream(pipe[1]).use { output ->
+                        input.copyTo(output)
+                    }
+                }
+            } catch (_: Throwable) {
+                runCatching { pipe[1].closeWithError("Artwork unavailable") }
+            }
+        }
+        return pipe[0]
+    }
+
+    private fun startDownload(
+        uri: Uri,
+        resolved: CarArtwork.ResolvedArtwork,
+        destination: File,
+        directory: File,
+        context: Context,
+    ): Future<Unit> {
+        lateinit var task: FutureTask<Unit>
+        task = FutureTask {
+            try {
+                if (!destination.isFile || destination.length() == 0L) {
+                    download(resolved, destination, directory, context)
+                    context.contentResolver.notifyChange(uri, null)
+                }
+            } finally {
+                downloads.remove(resolved.cacheKey, task)
+            }
+        }
+        val existing = downloads.putIfAbsent(resolved.cacheKey, task)
+        return existing ?: task.also(downloadExecutor::execute)
     }
 
     private fun download(
@@ -193,13 +303,19 @@ class CarArtworkProvider : ContentProvider() {
                     throw FileNotFoundException("Artwork belongs to a previous account")
                 }
                 directory.mkdirs()
+                val replacedBytes = destination.takeIf(File::isFile)?.length() ?: 0L
                 if (destination.exists() && !destination.delete()) {
                     throw FileNotFoundException("Could not replace cached artwork")
                 }
                 if (temporary.length() == 0L || !temporary.renameTo(destination)) {
                     throw FileNotFoundException("Could not cache artwork")
                 }
-                trimCache(CarArtwork.cacheRoot(context))
+                CarArtwork.recordCacheReplacement(
+                    root = CarArtwork.cacheRoot(context),
+                    replacedBytes = replacedBytes,
+                    replacementBytes = destination.length(),
+                    maximumBytes = MAX_CACHE_BYTES,
+                )
             }
         } catch (error: Throwable) {
             temporary.delete()
@@ -216,19 +332,6 @@ class CarArtworkProvider : ContentProvider() {
             total += count
             if (total > MAX_IMAGE_BYTES) throw FileNotFoundException("Artwork is too large")
             output.write(buffer, 0, count)
-        }
-    }
-
-    private fun trimCache(root: File) {
-        val files = root.walkTopDown()
-            .filter { it.isFile && !it.name.endsWith(".tmp") }
-            .sortedBy(File::lastModified)
-            .toList()
-        var size = files.sumOf(File::length)
-        for (file in files) {
-            if (size <= MAX_CACHE_BYTES) break
-            val length = file.length()
-            if (file.delete()) size -= length
         }
     }
 
@@ -254,7 +357,9 @@ class CarArtworkProvider : ContentProvider() {
         .joinToString("") { "%02x".format(it) }
 
     private companion object {
-        const val DOWNLOAD_LOCK_COUNT = 64
+        const val DOWNLOAD_WORKER_COUNT = 2
+        const val PIPE_WORKER_COUNT = 2
+        const val CACHE_MISS_WAIT_MILLIS = 250L
         const val MAX_IMAGE_BYTES = 16L * 1024L * 1024L
         const val MAX_CACHE_BYTES = 128L * 1024L * 1024L
     }

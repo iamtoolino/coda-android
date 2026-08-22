@@ -81,8 +81,8 @@ teal.
 ## Artwork
 
 Phone artwork uses four server-source buckets: 420 px for the high-volume Albums grid and playlist
-thumbnails, 500 px for artist cards and rows, 600 px for Home album cards and Android Auto album
-browsing, and 1200 px for heroes, Continue, Now Playing, playback metadata, and theme extraction.
+thumbnails, 500 px for artist cards and rows, 600 px for Home album cards and Android Auto browsing
+and playback metadata, and 1200 px for phone heroes, Continue, Now Playing, and theme extraction.
 Callers resolve these through one policy instead of inventing component-specific sizes.
 
 Coil owns a decoded memory cache and a 10 GB encoded disk cache. A Navidrome cover's encoded key is
@@ -138,20 +138,25 @@ are cancelled when their account session becomes obsolete.
 
 ## Android Auto
 
-`PlaybackService` is exported as both a Media3 `MediaLibraryService` and a legacy-compatible `MediaBrowserService`. `CodaMediaLibraryCallback` exposes four car-safe roots: alphabetically bucketed artists, recently added albums, recently played albums, and playlists. Each node returns its complete intended contents because Android Auto does not paginate media-browser children. Search, album playback, and playlist playback resolve library IDs back into the same network-aware `MediaItem` factory used by the phone UI.
+`PlaybackService` is exported as both a Media3 `MediaLibraryService` and a legacy-compatible `MediaBrowserService`. `CodaMediaLibraryCallback` exposes four car-safe roots: alphabetically bucketed artists, recently added albums, recently played albums, and playlists. A separate playable recommendation root supplies up to ten recently played albums to the Android Auto `For you` card, including legacy hosts that do not set the suggested-content root hint. Each node returns its complete intended contents because Android Auto does not paginate media-browser children. Search, album playback, and playlist playback resolve library IDs back into the same network-aware `MediaItem` factory used by the phone UI.
 
 The exported session authorizes controllers before exposing commands. Coda's own controller and the
-Media3-recognized Android Auto companion receive library and playback access. Media notification and
-other user-trusted system controllers receive transport and playback-state access without library
-browsing or queue mutation. Untrusted applications are rejected. The service remains exported so
-Android Auto, system controls, media buttons, and playback resumption can cold-start it.
+Media3-recognized Android Auto companion receive full library and playback access. The exact
+platform-trusted Google recommendation broker receives library browsing plus transport controls,
+but cannot mutate the queue. Media notification and other user-trusted system controllers receive
+transport and playback-state access without library browsing or queue mutation. Untrusted
+applications are rejected. The service remains exported so Android Auto, system controls, media
+buttons, and playback resumption can cold-start it.
 
 Android Auto supplies the driving UI. Coda supplies browse metadata, artwork, the playback queue, and the shared media session. The service can be cold-started by the car host without launching `MainActivity`.
 
 Remote artwork is represented to Android Auto as a local `content://` URI. `CarArtworkProvider`
 downloads it through Coda's authenticated phone connection and keeps a bounded disk cache, which
-allows private and VPN-only servers to work on physical car hosts. The car cache is limited to 128 MB
-in total and 16 MB for any single compressed response.
+allows private and VPN-only servers to work on physical car hosts. Cache misses run on two bounded
+workers; after a short fast-path wait, the provider returns a local pipe that streams the completed
+file instead of blocking the Binder call or returning a transient missing image. Cache byte usage is
+accounted incrementally, so a full LRU walk occurs only when the 128 MB limit is exceeded. A single
+compressed response remains limited to 16 MB.
 
 ## Queue handoff
 

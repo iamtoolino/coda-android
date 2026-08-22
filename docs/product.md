@@ -99,8 +99,10 @@ Coda is a personal, album-oriented Android client for Navidrome/OpenSubsonic.
 - Artists are grouped into `#` and `A`–`Z` buckets because Android Auto does not paginate browse nodes.
 - Search results are grouped into Artists, Albums, and Songs.
 - Albums and playlists can be browsed or played as complete queues.
+- The Android Auto `For you` card shows up to ten recently played albums.
 - Android Auto and the phone UI control the same playback session, queue, artwork, and progress.
-- Private server artwork is cached and exposed to the car as a local content URI.
+- Private server artwork is cached and exposed to the car as a local content URI; slow uncached
+  artwork must not block the car host while the phone fetches and resizes it.
 - The car can cold-start the media service without opening the phone activity.
 
 ## Explicit non-goals

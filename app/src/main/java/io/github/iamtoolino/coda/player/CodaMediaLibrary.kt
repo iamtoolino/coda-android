@@ -37,6 +37,7 @@ import kotlinx.coroutines.sync.withLock
 
 internal object CodaMediaIds {
     const val ROOT = "coda:root"
+    const val RECOMMENDATIONS = "coda:recommendations"
     const val RECENTLY_ADDED = "coda:recently-added"
     const val RECENTLY_PLAYED = "coda:recently-played"
     const val ARTISTS = "coda:artists"
@@ -58,8 +59,25 @@ internal object CodaMediaIds {
         takeIf { startsWith(prefix) }?.removePrefix(prefix)?.takeIf(String::isNotBlank)
 }
 
+private const val GOOGLE_RECOMMENDATION_BROKER_PACKAGE =
+    "com.google.android.googlequicksearchbox"
+
+internal fun isRecommendationBroker(packageName: String, isTrusted: Boolean): Boolean =
+    isTrusted && packageName == GOOGLE_RECOMMENDATION_BROKER_PACKAGE
+
+internal fun libraryRootId(
+    isRecent: Boolean,
+    isSuggested: Boolean,
+    isRecommendationBroker: Boolean,
+): String = if (isRecent || isSuggested || isRecommendationBroker) {
+    CodaMediaIds.RECOMMENDATIONS
+} else {
+    CodaMediaIds.ROOT
+}
+
 internal enum class ControllerAccess {
     FULL_LIBRARY,
+    LIBRARY_TRANSPORT,
     TRANSPORT,
     REJECTED,
 }
@@ -67,10 +85,12 @@ internal enum class ControllerAccess {
 internal fun controllerAccess(
     isOwnApp: Boolean,
     isAutoCompanion: Boolean,
+    isRecommendationBroker: Boolean,
     isMediaNotification: Boolean,
     isTrusted: Boolean,
 ): ControllerAccess = when {
     isOwnApp || isAutoCompanion -> ControllerAccess.FULL_LIBRARY
+    isRecommendationBroker -> ControllerAccess.LIBRARY_TRANSPORT
     isMediaNotification || isTrusted -> ControllerAccess.TRANSPORT
     else -> ControllerAccess.REJECTED
 }
@@ -138,16 +158,28 @@ internal class CodaMediaLibraryCallback(
         session: MediaSession,
         controller: MediaSession.ControllerInfo,
     ): MediaSession.ConnectionResult {
+        val isOwnApp = controller.uid == context.applicationInfo.uid &&
+            controller.packageName == context.packageName
+        val isAutoCompanion = session.isAutoCompanionController(controller)
+        val isRecommendationBroker = isRecommendationBroker(
+            packageName = controller.packageName,
+            isTrusted = controller.isTrusted,
+        )
+        val isMediaNotification = session.isMediaNotificationController(controller)
         val access = controllerAccess(
-            isOwnApp = controller.uid == context.applicationInfo.uid &&
-                controller.packageName == context.packageName,
-            isAutoCompanion = session.isAutoCompanionController(controller),
-            isMediaNotification = session.isMediaNotificationController(controller),
+            isOwnApp = isOwnApp,
+            isAutoCompanion = isAutoCompanion,
+            isRecommendationBroker = isRecommendationBroker,
+            isMediaNotification = isMediaNotification,
             isTrusted = controller.isTrusted,
         )
         return when (access) {
             ControllerAccess.FULL_LIBRARY ->
                 MediaSession.ConnectionResult.AcceptedResultBuilder(session).build()
+            ControllerAccess.LIBRARY_TRANSPORT -> MediaSession.ConnectionResult.accept(
+                MediaSession.ConnectionResult.DEFAULT_SESSION_AND_LIBRARY_COMMANDS,
+                transportPlayerCommands(),
+            )
             ControllerAccess.TRANSPORT -> MediaSession.ConnectionResult.accept(
                 MediaSession.ConnectionResult.DEFAULT_SESSION_COMMANDS,
                 transportPlayerCommands(),
@@ -161,7 +193,19 @@ internal class CodaMediaLibraryCallback(
         browser: MediaSession.ControllerInfo,
         params: MediaLibraryService.LibraryParams?,
     ): ListenableFuture<LibraryResult<MediaItem>> = Futures.immediateFuture(
-        LibraryResult.ofItem(rootItem(), params),
+        LibraryResult.ofItem(
+            rootItem(
+                libraryRootId(
+                    isRecent = params?.isRecent == true,
+                    isSuggested = params?.isSuggested == true,
+                    isRecommendationBroker = isRecommendationBroker(
+                        packageName = browser.packageName,
+                        isTrusted = browser.isTrusted,
+                    ),
+                ),
+            ),
+            params,
+        ),
     )
 
     override fun onGetChildren(
@@ -297,6 +341,9 @@ internal class CodaMediaLibraryCallback(
     private suspend fun children(account: NavidromeSession, parentId: String): List<MediaItem> =
         when (parentId) {
             CodaMediaIds.ROOT -> rootChildren()
+            CodaMediaIds.RECOMMENDATIONS -> account.client
+                .recentlyPlayedAlbums(CAR_RECOMMENDATION_LIMIT)
+                .map { albumItem(account, it) }
             CodaMediaIds.RECENTLY_ADDED -> account.client
                 .albums(AlbumListType.NEWEST, CAR_ALBUM_LIMIT, 0)
                 .map { albumItem(account, it) }
@@ -327,6 +374,7 @@ internal class CodaMediaLibraryCallback(
 
     private suspend fun item(account: NavidromeSession, mediaId: String): MediaItem? = when (mediaId) {
         CodaMediaIds.ROOT -> rootItem()
+        CodaMediaIds.RECOMMENDATIONS -> rootItem(CodaMediaIds.RECOMMENDATIONS)
         CodaMediaIds.RECENTLY_ADDED -> categoryItem(
             CodaMediaIds.RECENTLY_ADDED,
             "Recently added",
@@ -453,8 +501,8 @@ internal class CodaMediaLibraryCallback(
         }
     }
 
-    private fun rootItem(): MediaItem = MediaItem.Builder()
-        .setMediaId(CodaMediaIds.ROOT)
+    private fun rootItem(mediaId: String = CodaMediaIds.ROOT): MediaItem = MediaItem.Builder()
+        .setMediaId(mediaId)
         .setMediaMetadata(
             MediaMetadata.Builder()
                 .setTitle("Coda")
@@ -703,6 +751,7 @@ internal class CodaMediaLibraryCallback(
 
     private companion object {
         const val CAR_ALBUM_LIMIT = 40
+        const val CAR_RECOMMENDATION_LIMIT = 10
         const val MAX_CACHED_SEARCHES = 32
         const val CONTENT_STYLE_GROUP_TITLE_HINT =
             "android.media.browse.CONTENT_STYLE_GROUP_TITLE_HINT"

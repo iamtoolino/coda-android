@@ -96,10 +96,15 @@ The Android Auto interface exposes four intentionally short sections:
 Search results are grouped into Artists, Albums, and Songs. Selecting an album or playlist creates
 the complete playback queue, shared with the phone.
 
+Android Auto's **For you** card receives up to ten recently played albums. Coda authorizes the
+platform-trusted Google recommendation broker for this library request while keeping other trusted
+system controllers limited to transport controls.
+
 Android Auto requires local artwork URIs. Coda downloads private server artwork through the phone's
 own connection, keeps a separate 128 MB **car-artwork cache**, and exposes it to the car through a
 local content provider. This also works when Navidrome is reachable only through a phone VPN such as
-Tailscale.
+Tailscale. Cache misses use bounded background downloads and a local pipe, so slow server-side image
+resizing does not block the car host or discard the original artwork request.
 
 ## Login and privacy
 
