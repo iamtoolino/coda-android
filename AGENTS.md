@@ -204,6 +204,17 @@
   inspect the signed APK/AAB and merged manifest, and keep local tag/package preparation separate
   from explicit approval to push or publish.
 
+### Debug theme labs
+
+- The browser-controlled theme lab is temporary design tooling, not a product setting. Keep its ADB
+  receiver and manifest declaration under `app/src/debug`; the browser server must bind to loopback
+  and require an explicit device serial.
+- After a visual decision, bake the chosen treatment into the central theme policy and remove
+  rejected variants and tuning controls. Do not carry a general user-selectable theme framework
+  forward.
+- Before a release candidate, either remove the lab or prove that its receiver and broadcast action
+  are absent from the merged release manifest and packaged release output.
+
 ## Verification
 
 - Match verification effort to risk and report checks that were not run.

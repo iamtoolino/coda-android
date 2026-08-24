@@ -97,6 +97,20 @@ offers an explicit artwork refresh: it clears Coil memory/disk data, Android Aut
 derived theme colors, then advances the persisted generation so in-flight old requests cannot
 repopulate visible stale entries. Disconnect performs the same cache cleanup for the old account.
 
+## Debug design tooling
+
+The theme lab is a temporary debug seam for artwork-background experiments. A loopback-only Python
+server serves a browser controller and translates validated preset and tuning values into explicit
+ADB broadcasts for one named device serial. `BackgroundDesignTuningReceiver` is declared only by the
+debug source set, and production UI ignores tuning state when `BuildConfig.DEBUG` is false. The
+background artwork reuses the committed theme owner's encoded Coil entry and requests a separate
+small decoded memory entry; nested `AdaptiveBackground` calls do not create duplicate blur layers.
+
+The lab state is neither a product setting nor persistent. Once a background design is accepted, its
+reviewed treatment belongs in the central theme policy and the receiver, browser server, variants,
+and tuning controls should be removed. Release inspection must confirm that the receiver and action
+are absent from the merged release manifest.
+
 ## Playback
 
 `PlaybackService` owns a Media3 `ExoPlayer` and `MediaLibrarySession`. `PlaybackConnection` is the
