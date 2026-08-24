@@ -113,7 +113,7 @@ private data class BackgroundArtwork(
 )
 
 private val LocalBackgroundArtwork = staticCompositionLocalOf<BackgroundArtwork?> { null }
-private val LocalArtworkFieldBackgroundActive = staticCompositionLocalOf { false }
+internal val LocalArtworkFieldBackgroundActive = staticCompositionLocalOf { false }
 
 private val BrandColors = artworkColors(CodaAccentExtractor.GENERIC_FALLBACK)
 private const val ThemeTransitionDurationMillis = 850

@@ -101,6 +101,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -163,6 +164,7 @@ import io.github.iamtoolino.coda.player.QueueEntry
 import io.github.iamtoolino.coda.ui.theme.AdaptiveBackground
 import io.github.iamtoolino.coda.ui.theme.CodaThemeRequest
 import io.github.iamtoolino.coda.ui.theme.CodaThemeRouter
+import io.github.iamtoolino.coda.ui.theme.LocalArtworkFieldBackgroundActive
 import io.github.iamtoolino.coda.ui.theme.RegisterForegroundTheme
 import io.github.iamtoolino.coda.ui.theme.RoutedCodaTheme
 import io.github.iamtoolino.coda.ui.theme.rememberCodaThemeRouter
@@ -192,19 +194,48 @@ private enum class AlbumViewMode(
     }
 }
 
-private fun heroFadeBrush(background: Color): Brush = Brush.verticalGradient(
-    0f to Color.Black.copy(alpha = 0.14f),
-    0.46f to Color.Transparent,
-    0.68f to background.copy(alpha = 0f),
-    0.72f to background.copy(alpha = 0.04f),
-    0.76f to background.copy(alpha = 0.12f),
-    0.80f to background.copy(alpha = 0.21f),
-    0.84f to background.copy(alpha = 0.33f),
-    0.88f to background.copy(alpha = 0.47f),
-    0.92f to background.copy(alpha = 0.62f),
-    0.96f to background.copy(alpha = 0.80f),
-    1f to background,
-)
+private fun heroFadeBrush(background: Color, revealArtworkField: Boolean): Brush =
+    if (revealArtworkField) {
+        Brush.verticalGradient(
+            0f to Color.Black.copy(alpha = 0.14f),
+            0.46f to Color.Transparent,
+            0.64f to Color.Transparent,
+            0.72f to Color.Black.copy(alpha = 0.06f),
+            0.80f to Color.Black.copy(alpha = 0.20f),
+            0.87f to Color.Black.copy(alpha = 0.42f),
+            0.93f to Color.Black.copy(alpha = 0.68f),
+            0.97f to Color.Black.copy(alpha = 0.86f),
+            1f to Color.Black,
+        )
+    } else {
+        Brush.verticalGradient(
+            0f to Color.Black.copy(alpha = 0.14f),
+            0.46f to Color.Transparent,
+            0.68f to background.copy(alpha = 0f),
+            0.72f to background.copy(alpha = 0.04f),
+            0.76f to background.copy(alpha = 0.12f),
+            0.80f to background.copy(alpha = 0.21f),
+            0.84f to background.copy(alpha = 0.33f),
+            0.88f to background.copy(alpha = 0.47f),
+            0.92f to background.copy(alpha = 0.62f),
+            0.96f to background.copy(alpha = 0.80f),
+            1f to background,
+        )
+    }
+
+private fun Modifier.continueHeroFadeIntoArtworkField(enabled: Boolean): Modifier {
+    if (!enabled) return this
+    return drawWithCache {
+        val continuation = Brush.verticalGradient(
+            0f to Color.Black,
+            0.24f to Color.Black.copy(alpha = 0.82f),
+            0.52f to Color.Black.copy(alpha = 0.46f),
+            0.78f to Color.Black.copy(alpha = 0.16f),
+            1f to Color.Transparent,
+        )
+        onDrawBehind { drawRect(continuation) }
+    }
+}
 
 @Composable
 private fun rememberRestorableLazyListState(
@@ -1704,6 +1735,7 @@ private fun ArtistHero(
     artist: Artist,
     albums: List<Album>,
 ) {
+    val revealArtworkField = LocalArtworkFieldBackgroundActive.current
     val artworkSource = artistArtworkSource(
         artist = artist,
         size = ArtworkSizes.HERO,
@@ -1725,7 +1757,10 @@ private fun ArtistHero(
             Modifier
                 .fillMaxSize()
                 .background(
-                    heroFadeBrush(MaterialTheme.colorScheme.background),
+                    heroFadeBrush(
+                        MaterialTheme.colorScheme.background,
+                        revealArtworkField,
+                    ),
                 ),
         )
         Column(
@@ -1755,6 +1790,7 @@ private fun AlbumHero(
     rating: Int,
     onRate: (Int) -> Unit,
 ) {
+    val revealArtworkField = LocalArtworkFieldBackgroundActive.current
     Column {
         Box(
             modifier = Modifier
@@ -1771,7 +1807,10 @@ private fun AlbumHero(
                 Modifier
                     .fillMaxSize()
                     .background(
-                        heroFadeBrush(MaterialTheme.colorScheme.background),
+                        heroFadeBrush(
+                            MaterialTheme.colorScheme.background,
+                            revealArtworkField,
+                        ),
                     ),
             )
             Row(
@@ -1811,7 +1850,10 @@ private fun AlbumHero(
             }
         }
         Column(
-            modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 10.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .continueHeroFadeIntoArtworkField(revealArtworkField)
+                .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 10.dp),
         ) {
             Text(
                 page.album.name,
@@ -2308,6 +2350,7 @@ private fun NowPlayingScreen(
         }
     }
     AdaptiveBackground {
+            val revealArtworkField = LocalArtworkFieldBackgroundActive.current
             BoxWithConstraints(
                 modifier = Modifier
                     .fillMaxSize()
@@ -2342,7 +2385,10 @@ private fun NowPlayingScreen(
                             Modifier
                                 .fillMaxSize()
                                 .background(
-                                    heroFadeBrush(MaterialTheme.colorScheme.background),
+                                    heroFadeBrush(
+                                        MaterialTheme.colorScheme.background,
+                                        revealArtworkField,
+                                    ),
                                 ),
                         )
                     }
@@ -2350,6 +2396,7 @@ private fun NowPlayingScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .weight(1f)
+                            .continueHeroFadeIntoArtworkField(revealArtworkField)
                             .padding(horizontal = 20.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {

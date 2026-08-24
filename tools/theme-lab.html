@@ -105,7 +105,7 @@
     </section>
 
     <section aria-labelledby="tuning-title">
-      <div class="section-heading"><h2 id="tuning-title">Live tuning</h2><span class="hint">Selecting a preset resets these values</span></div>
+      <div class="section-heading"><h2 id="tuning-title">Live tuning</h2><span class="hint">Applied when a slider is released</span></div>
       <div class="controls" id="controls"></div>
     </section>
 
@@ -177,8 +177,9 @@
     designButtons.forEach(button => button.addEventListener("click",() => selectPreset(button.dataset.variant)));
     inputs.forEach(input => input.addEventListener("input",() => {
       model[input.dataset.field] = Number(input.value);
-      render(); scheduleApply();
+      render();
     }));
+    inputs.forEach(input => input.addEventListener("change",scheduleApply));
     document.querySelector("#reset").addEventListener("click",() => selectPreset(model.variant));
     document.querySelector("#openCoda").addEventListener("click",async () => {
       setStatus("working","Opening Coda…");
