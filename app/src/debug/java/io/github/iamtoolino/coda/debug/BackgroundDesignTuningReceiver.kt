@@ -43,6 +43,7 @@ class BackgroundDesignTuningReceiver : BroadcastReceiver() {
                 miniPlayerAccentOpacity = intent.getFloatExtra(EXTRA_MINI_ACCENT, 0f),
                 miniPlayerOutlineOpacity = intent.getFloatExtra(EXTRA_MINI_OUTLINE, 0f),
                 miniPlayerHaloOpacity = intent.getFloatExtra(EXTRA_MINI_HALO, 0f),
+                miniPlayerBottomOffsetDp = intent.getFloatExtra(EXTRA_MINI_BOTTOM_OFFSET, 0f),
                 progressPlacement = MiniProgressPlacement.fromWireName(
                     intent.getStringExtra(EXTRA_PROGRESS_PLACEMENT),
                 ) ?: MiniProgressPlacement.BOTTOM,
@@ -76,6 +77,7 @@ class BackgroundDesignTuningReceiver : BroadcastReceiver() {
         const val EXTRA_MINI_ACCENT = "mini_accent"
         const val EXTRA_MINI_OUTLINE = "mini_outline"
         const val EXTRA_MINI_HALO = "mini_halo"
+        const val EXTRA_MINI_BOTTOM_OFFSET = "mini_bottom_offset"
         const val EXTRA_PROGRESS_PLACEMENT = "progress_placement"
         const val EXTRA_PROGRESS_THICKNESS = "progress_thickness"
         const val EXTRA_PROGRESS_HORIZONTAL_INSET = "progress_horizontal_inset"
