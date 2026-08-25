@@ -1586,7 +1586,16 @@ private fun PlaylistScreen(
                     playlist?.let { loaded ->
                         item {
                             Column(Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
-                                Text(loaded.name, fontSize = 34.sp, fontWeight = FontWeight.Bold)
+                                Text(
+                                    loaded.name,
+                                    style = MaterialTheme.typography.headlineLarge.copy(
+                                        fontSize = 34.sp,
+                                        lineHeight = 38.sp,
+                                        fontWeight = FontWeight.Bold,
+                                    ),
+                                    maxLines = 3,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
                                 Text(
                                     "${loaded.songCount} tracks",
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,

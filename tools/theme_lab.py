@@ -66,7 +66,7 @@ DEFAULT_STATE = {
     "miniPlayerAccentOpacity": 0.10,
     "miniPlayerOutlineOpacity": 0.10,
     "miniPlayerHaloOpacity": 0.08,
-    "miniPlayerBottomOffsetDp": 0.0,
+    "miniPlayerBottomOffsetDp": 12.0,
     "progressPlacement": "bottom",
     "progressThicknessDp": 2.0,
     "progressHorizontalInsetDp": 18.0,

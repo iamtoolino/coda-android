@@ -77,7 +77,7 @@ internal data class BackgroundDesignTuning(
     val miniPlayerAccentOpacity: Float = 0f,
     val miniPlayerOutlineOpacity: Float = 0f,
     val miniPlayerHaloOpacity: Float = 0f,
-    val miniPlayerBottomOffsetDp: Float = 0f,
+    val miniPlayerBottomOffsetDp: Float = 12f,
     val progressPlacement: MiniProgressPlacement = MiniProgressPlacement.BOTTOM,
     val progressThicknessDp: Float = 4f,
     val progressHorizontalInsetDp: Float = 0f,
