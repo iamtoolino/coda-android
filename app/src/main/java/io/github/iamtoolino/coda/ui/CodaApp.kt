@@ -66,7 +66,6 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.ClearAll
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
@@ -2483,10 +2482,7 @@ private fun NowPlayingScreen(
     state: PlaybackUiState,
 ) {
     val progress by playback.progress.collectAsStateWithLifecycle()
-    val prototype by NowPlayingPrototypeStore.prototype.collectAsStateWithLifecycle()
-    val titleStress by NowPlayingPrototypeStore.titleStress.collectAsStateWithLifecycle()
     var showPlaybackDetails by rememberSaveable { mutableStateOf(false) }
-    var showSessionSheet by rememberSaveable { mutableStateOf(false) }
     val ratings = LocalAlbumRatingCoordinator.current
     val albumId = state.albumId
     val ratingScope = rememberCoroutineScope()
@@ -2502,10 +2498,6 @@ private fun NowPlayingScreen(
         ?.takeIf { ratingSeedState.key == albumId }
         ?.userRating
     val rating = albumId?.let { ratings.state(it, serverRating).rating }
-    val nextEntry = state.currentIndex
-        .takeIf { it >= 0 }
-        ?.plus(1)
-        ?.let(state.queue::getOrNull)
     val remainingQueueCount = if (state.currentIndex in state.queue.indices) {
         (state.queue.size - state.currentIndex - 1).coerceAtLeast(0)
     } else {
@@ -2513,13 +2505,6 @@ private fun NowPlayingScreen(
     }
     val streamQuality = qualityLabel(state)
     val streamMode = streamModeLabel(state)
-    val displayTitle = when (titleStress) {
-        NowPlayingTitleStress.ACTUAL -> state.title
-        NowPlayingTitleStress.TWO_LINES ->
-            "Everything We Never Said Beneath the Northern Lights"
-        NowPlayingTitleStress.THREE_LINES ->
-            "The Extraordinary and Unnecessarily Elaborate Ballad of Satellites Falling Into the Sea"
-    }
     LaunchedEffect(ratingSeed, albumId) {
         if (albumId != null &&
             (ratingSeedState.key != albumId || ratingSeedState.value == null)
@@ -2569,25 +2554,6 @@ private fun NowPlayingScreen(
                                     ),
                                 ),
                         )
-                        if (prototype == NowPlayingPrototype.IMMERSIVE_UTILITIES) {
-                            ImmersiveArtworkUtilities(
-                                remainingCount = remainingQueueCount,
-                                streamMode = streamMode,
-                                onOpenQueue = { navController.navigate("queue") },
-                                onOpenDetails = { showPlaybackDetails = true },
-                                modifier = Modifier
-                                    .align(Alignment.BottomCenter)
-                                    .padding(horizontal = 20.dp, vertical = 18.dp),
-                            )
-                        }
-                        if (prototype == NowPlayingPrototype.SESSION_BUTTON) {
-                            SessionOrb(
-                                onClick = { showSessionSheet = true },
-                                modifier = Modifier
-                                    .align(Alignment.BottomEnd)
-                                    .padding(horizontal = 20.dp, vertical = 18.dp),
-                            )
-                        }
                     }
                     Column(
                         modifier = Modifier
@@ -2617,27 +2583,20 @@ private fun NowPlayingScreen(
                             )
                         }
                         Spacer(Modifier.height(if (compact) 7.dp else 12.dp))
-                        val wideTitle = prototype == NowPlayingPrototype.QUIET_DOCK_WIDE
                         Text(
-                            displayTitle,
+                            state.title,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .heightIn(
-                                    max = if (wideTitle) {
-                                        if (veryCompact) 76.dp else 94.dp
-                                    } else {
-                                        if (veryCompact) 48.dp else 54.dp
-                                    },
-                                ),
+                                .heightIn(max = if (veryCompact) 48.dp else 54.dp),
                             autoSize = TextAutoSize.StepBased(
-                                minFontSize = if (wideTitle) 16.sp else 18.sp,
+                                minFontSize = 18.sp,
                                 maxFontSize = if (veryCompact) 24.sp else 28.sp,
                                 stepSize = 1.sp,
                             ),
                             fontSize = if (veryCompact) 24.sp else 28.sp,
                             fontWeight = FontWeight.Bold,
                             lineHeight = 1.16.em,
-                            maxLines = if (wideTitle) 3 else 2,
+                            maxLines = 2,
                             overflow = TextOverflow.Ellipsis,
                             textAlign = TextAlign.Center,
                         )
@@ -2699,81 +2658,22 @@ private fun NowPlayingScreen(
                                 iconSize = 40.dp,
                             )
                         }
-                        if (prototype == NowPlayingPrototype.BASELINE && state.queue.isNotEmpty()) {
-                            Spacer(Modifier.height(if (compact) 7.dp else 14.dp))
-                            QueuePreviewButton(
-                                remainingCount = remainingQueueCount,
-                                nextEntry = nextEntry,
-                                onOpenQueue = { navController.navigate("queue") },
-                            )
-                        }
                         Spacer(Modifier.weight(1f))
-                        when (prototype) {
-                            NowPlayingPrototype.INSTRUMENT_RAIL -> InstrumentRail(
-                                isPlaying = progress.isPlaying,
-                                remainingCount = remainingQueueCount,
-                                streamMode = streamMode,
-                                onPrevious = playback::previous,
-                                onToggle = playback::togglePlayPause,
-                                onNext = playback::next,
-                                onOpenQueue = { navController.navigate("queue") },
-                                onOpenDetails = { showPlaybackDetails = true },
-                            )
-
-                            NowPlayingPrototype.QUEUE_DECK -> {
-                                TransportControls(
-                                    isPlaying = progress.isPlaying,
-                                    primaryControlSize = primaryControlSize,
-                                    primaryControlIconSize = primaryControlIconSize,
-                                    onPrevious = playback::previous,
-                                    onToggle = playback::togglePlayPause,
-                                    onNext = playback::next,
-                                )
-                                Spacer(Modifier.height(if (compact) 6.dp else 10.dp))
-                                QueueDeckStrip(
-                                    remainingCount = remainingQueueCount,
-                                    nextEntry = nextEntry,
-                                    onClick = { showSessionSheet = true },
-                                )
-                            }
-
-                            else -> {
-                                TransportControls(
-                                    isPlaying = progress.isPlaying,
-                                    primaryControlSize = primaryControlSize,
-                                    primaryControlIconSize = primaryControlIconSize,
-                                    onPrevious = playback::previous,
-                                    onToggle = playback::togglePlayPause,
-                                    onNext = playback::next,
-                                )
-                                if (prototype == NowPlayingPrototype.QUIET_DOCK ||
-                                    prototype == NowPlayingPrototype.QUIET_DOCK_WIDE
-                                ) {
-                                    Spacer(Modifier.height(if (compact) 6.dp else 10.dp))
-                                    QuietUtilityDock(
-                                        remainingCount = remainingQueueCount,
-                                        streamMode = streamMode,
-                                        onOpenQueue = { navController.navigate("queue") },
-                                        onOpenDetails = { showPlaybackDetails = true },
-                                        wide = prototype == NowPlayingPrototype.QUIET_DOCK_WIDE,
-                                    )
-                                } else if (prototype == NowPlayingPrototype.BASELINE) {
-                                    Spacer(Modifier.height(if (compact) 8.dp else 14.dp))
-                                    Box(
-                                        modifier = Modifier.height(16.dp),
-                                        contentAlignment = Alignment.Center,
-                                    ) {
-                                        if (state.error == null && streamQuality != null) {
-                                            Text(
-                                                streamQuality,
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.78f),
-                                                fontSize = 11.sp,
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        TransportControls(
+                            isPlaying = progress.isPlaying,
+                            primaryControlSize = primaryControlSize,
+                            primaryControlIconSize = primaryControlIconSize,
+                            onPrevious = playback::previous,
+                            onToggle = playback::togglePlayPause,
+                            onNext = playback::next,
+                        )
+                        Spacer(Modifier.height(if (compact) 6.dp else 10.dp))
+                        QuietUtilityDock(
+                            remainingCount = remainingQueueCount,
+                            streamMode = streamMode,
+                            onOpenQueue = { navController.navigate("queue") },
+                            onOpenDetails = { showPlaybackDetails = true },
+                        )
                         Spacer(Modifier.height(if (compact) 5.dp else 10.dp))
                     }
                 }
@@ -2783,19 +2683,6 @@ private fun NowPlayingScreen(
                     streamMode = streamMode,
                     streamQuality = streamQuality,
                     onDismiss = { showPlaybackDetails = false },
-                )
-            }
-            if (showSessionSheet) {
-                PlaybackSessionSheet(
-                    remainingCount = remainingQueueCount,
-                    nextEntry = nextEntry,
-                    streamMode = streamMode,
-                    streamQuality = streamQuality,
-                    onOpenQueue = {
-                        showSessionSheet = false
-                        navController.navigate("queue")
-                    },
-                    onDismiss = { showSessionSheet = false },
                 )
             }
     }
@@ -2856,76 +2743,22 @@ private fun PrimaryPlaybackButton(
 }
 
 @Composable
-private fun InstrumentRail(
-    isPlaying: Boolean,
-    remainingCount: Int,
-    streamMode: String,
-    onPrevious: () -> Unit,
-    onToggle: () -> Unit,
-    onNext: () -> Unit,
-    onOpenQueue: () -> Unit,
-    onOpenDetails: () -> Unit,
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(72.dp)
-            .clip(RoundedCornerShape(24.dp))
-            .background(Color.Black.copy(alpha = 0.54f))
-            .border(
-                1.dp,
-                MaterialTheme.colorScheme.primary.copy(alpha = 0.18f),
-                RoundedCornerShape(24.dp),
-            )
-            .padding(horizontal = 6.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        CompactUtilityButton(
-            label = remainingCount.toString(),
-            contentDescription = "Open queue, $remainingCount tracks remaining",
-            onClick = onOpenQueue,
-        )
-        IconButton(onClick = onPrevious, modifier = Modifier.size(48.dp)) {
-            Icon(Icons.Default.SkipPrevious, "Previous", modifier = Modifier.size(30.dp))
-        }
-        PrimaryPlaybackButton(
-            isPlaying = isPlaying,
-            size = 60.dp,
-            iconSize = 34.dp,
-            onClick = onToggle,
-        )
-        IconButton(onClick = onNext, modifier = Modifier.size(48.dp)) {
-            Icon(Icons.Default.SkipNext, "Next", modifier = Modifier.size(30.dp))
-        }
-        CompactUtilityButton(
-            label = if (streamMode.startsWith("Transcoded")) "OPUS" else "SRC",
-            contentDescription = "Playback details, $streamMode",
-            onClick = onOpenDetails,
-        )
-    }
-}
-
-@Composable
 private fun QuietUtilityDock(
     remainingCount: Int,
     streamMode: String,
     onOpenQueue: () -> Unit,
     onOpenDetails: () -> Unit,
-    wide: Boolean = false,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        val utilityModifier = if (wide) Modifier.weight(1f) else Modifier
         UtilityPill(
             icon = Icons.AutoMirrored.Filled.QueueMusic,
             label = "Queue · $remainingCount",
             contentDescription = "Open queue, $remainingCount tracks remaining",
             onClick = onOpenQueue,
-            modifier = utilityModifier,
         )
         Spacer(Modifier.width(10.dp))
         UtilityPill(
@@ -2933,37 +2766,6 @@ private fun QuietUtilityDock(
             label = streamMode,
             contentDescription = "Playback details, $streamMode",
             onClick = onOpenDetails,
-            modifier = utilityModifier,
-        )
-    }
-}
-
-@Composable
-private fun ImmersiveArtworkUtilities(
-    remainingCount: Int,
-    streamMode: String,
-    onOpenQueue: () -> Unit,
-    onOpenDetails: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        UtilityPill(
-            icon = Icons.AutoMirrored.Filled.QueueMusic,
-            label = remainingCount.toString(),
-            contentDescription = "Open queue, $remainingCount tracks remaining",
-            onClick = onOpenQueue,
-            artworkOverlay = true,
-        )
-        UtilityPill(
-            icon = Icons.Default.Info,
-            label = if (streamMode.startsWith("Transcoded")) "OPUS" else "Original",
-            contentDescription = "Playback details, $streamMode",
-            onClick = onOpenDetails,
-            artworkOverlay = true,
         )
     }
 }
@@ -2974,14 +2776,12 @@ private fun UtilityPill(
     label: String,
     contentDescription: String,
     onClick: () -> Unit,
-    artworkOverlay: Boolean = false,
-    modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = modifier
+        modifier = Modifier
             .height(48.dp)
             .clip(CircleShape)
-            .background(Color.Black.copy(alpha = if (artworkOverlay) 0.68f else 0.46f))
+            .background(Color.Black.copy(alpha = 0.46f))
             .border(
                 1.dp,
                 MaterialTheme.colorScheme.primary.copy(alpha = 0.20f),
@@ -3007,209 +2807,6 @@ private fun UtilityPill(
             color = MaterialTheme.colorScheme.onSurface,
             maxLines = 1,
         )
-    }
-}
-
-@Composable
-private fun CompactUtilityButton(
-    label: String,
-    contentDescription: String,
-    onClick: () -> Unit,
-) {
-    Box(
-        modifier = Modifier
-            .size(48.dp)
-            .clip(CircleShape)
-            .clickable(onClick = onClick)
-            .semantics { this.contentDescription = contentDescription },
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            label,
-            color = MaterialTheme.colorScheme.primary,
-            fontSize = if (label.length > 3) 9.sp else 12.sp,
-            fontWeight = FontWeight.Bold,
-            maxLines = 1,
-        )
-    }
-}
-
-@Composable
-private fun QueueDeckStrip(
-    remainingCount: Int,
-    nextEntry: QueueEntry?,
-    onClick: () -> Unit,
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(52.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .background(Color.Black.copy(alpha = 0.52f))
-            .border(
-                1.dp,
-                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.10f),
-                RoundedCornerShape(16.dp),
-            )
-            .clickable(onClick = onClick)
-            .semantics {
-                contentDescription = if (nextEntry != null) {
-                    "Up next, ${nextEntry.title}. Open playback session"
-                } else {
-                    "Queue, $remainingCount tracks remaining. Open playback session"
-                }
-            }
-            .padding(horizontal = 14.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            "UP NEXT",
-            color = MaterialTheme.colorScheme.primary,
-            fontSize = 9.sp,
-            fontWeight = FontWeight.Bold,
-            letterSpacing = 0.08.em,
-        )
-        Spacer(Modifier.width(12.dp))
-        Text(
-            nextEntry?.title ?: "Queue complete",
-            modifier = Modifier.weight(1f),
-            color = MaterialTheme.colorScheme.onSurface,
-            fontSize = 13.sp,
-            fontWeight = FontWeight.Medium,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
-        Text(
-            remainingCount.toString(),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            fontSize = 12.sp,
-        )
-        Spacer(Modifier.width(2.dp))
-        Icon(
-            Icons.Default.ChevronRight,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.size(18.dp),
-        )
-    }
-}
-
-@Composable
-private fun SessionOrb(
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    IconButton(
-        onClick = onClick,
-        modifier = modifier
-            .size(48.dp)
-            .clip(CircleShape)
-            .background(Color.Black.copy(alpha = 0.68f))
-            .border(
-                1.dp,
-                MaterialTheme.colorScheme.primary.copy(alpha = 0.24f),
-                CircleShape,
-            ),
-    ) {
-        Icon(
-            Icons.Default.MoreHoriz,
-            contentDescription = "Open playback session",
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(24.dp),
-        )
-    }
-}
-
-@Composable
-private fun PlaybackSessionSheet(
-    remainingCount: Int,
-    nextEntry: QueueEntry?,
-    streamMode: String,
-    streamQuality: String?,
-    onOpenQueue: () -> Unit,
-    onDismiss: () -> Unit,
-) {
-    ModalBottomSheet(onDismissRequest = onDismiss) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .navigationBarsPadding()
-                .padding(horizontal = 24.dp, vertical = 8.dp),
-        ) {
-            Text(
-                "Playback session",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-            )
-            Spacer(Modifier.height(18.dp))
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = 56.dp)
-                    .clip(RoundedCornerShape(14.dp))
-                    .clickable(onClick = onOpenQueue)
-                    .padding(horizontal = 12.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Icon(
-                    Icons.AutoMirrored.Filled.QueueMusic,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(22.dp),
-                )
-                Spacer(Modifier.width(12.dp))
-                Column(Modifier.weight(1f)) {
-                    Text(
-                        "Queue · $remainingCount",
-                        fontWeight = FontWeight.SemiBold,
-                    )
-                    nextEntry?.let {
-                        Text(
-                            "Up next: ${it.title}",
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            fontSize = 13.sp,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                    }
-                }
-                Icon(
-                    Icons.Default.ChevronRight,
-                    contentDescription = "Open queue",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            Spacer(Modifier.height(12.dp))
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Icon(
-                    Icons.Default.Info,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(22.dp),
-                )
-                Spacer(Modifier.width(12.dp))
-                Column {
-                    Text(
-                        streamMode,
-                        color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.SemiBold,
-                    )
-                    streamQuality?.let {
-                        Text(
-                            it,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            fontSize = 13.sp,
-                        )
-                    }
-                }
-            }
-            Spacer(Modifier.height(20.dp))
-        }
     }
 }
 
@@ -3352,62 +2949,6 @@ internal fun SeekBar(
                     .clip(CircleShape)
                     .background(activeColor),
             )
-        }
-    }
-}
-
-@Composable
-private fun QueuePreviewButton(
-    remainingCount: Int,
-    nextEntry: QueueEntry?,
-    onOpenQueue: () -> Unit,
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(10.dp))
-            .clickable(onClick = onOpenQueue)
-            .padding(horizontal = 8.dp, vertical = 6.dp),
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                "Queue · $remainingCount",
-                fontSize = 13.sp,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Icon(
-                Icons.Default.ChevronRight,
-                contentDescription = "Open queue",
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(18.dp),
-            )
-        }
-        nextEntry?.let { entry ->
-            Spacer(Modifier.height(8.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    entry.title,
-                    modifier = Modifier.weight(1f),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    fontSize = 16.sp,
-                )
-                if (entry.durationMs > 0) {
-                    Spacer(Modifier.width(12.dp))
-                    Text(
-                        formatDurationMs(entry.durationMs),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontSize = 14.sp,
-                    )
-                }
-            }
         }
     }
 }

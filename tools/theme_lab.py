@@ -15,16 +15,6 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 ADB_SCRIPT = REPO_ROOT / "scripts" / "adb.sh"
 PAGE_TEMPLATE = (Path(__file__).parent / "theme-lab.html").read_text(encoding="utf-8")
-PROTOTYPES = {
-    "baseline",
-    "instrument-rail",
-    "quiet-dock",
-    "immersive-utilities",
-    "queue-deck",
-    "session-button",
-    "quiet-dock-wide",
-}
-TITLE_STRESSES = {"actual", "two-lines", "three-lines"}
 
 
 def parse_arguments():
@@ -57,8 +47,6 @@ class ThemeLabServer(HTTPServer):
     def __init__(self, address, serial):
         super().__init__(address, ThemeLabHandler)
         self.serial = serial
-        self.prototype = "baseline"
-        self.title_stress = "actual"
 
 
 class ThemeLabHandler(BaseHTTPRequestHandler):
@@ -78,13 +66,7 @@ class ThemeLabHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         if self.path == "/":
-            body = (
-                PAGE_TEMPLATE
-                .replace("__TARGET_SERIAL__", self.server.serial)
-                .replace("__CURRENT_PROTOTYPE__", self.server.prototype)
-                .replace("__CURRENT_TITLE_STRESS__", self.server.title_stress)
-                .encode("utf-8")
-            )
+            body = PAGE_TEMPLATE.replace("__TARGET_SERIAL__", self.server.serial).encode("utf-8")
             self.send_response(200)
             self.send_header("Content-Type", "text/html; charset=utf-8")
             self.send_header("Cache-Control", "no-store")
@@ -105,59 +87,9 @@ class ThemeLabHandler(BaseHTTPRequestHandler):
                     ["shell", "am", "start", "-n", "io.github.iamtoolino.coda/.MainActivity"],
                 )
                 self.send_json(200, {"ok": True})
-            elif self.path == "/api/prototype":
-                length = int(self.headers.get("Content-Length", "0"))
-                if length <= 0 or length > 4096:
-                    raise RuntimeError("invalid request body")
-                payload = json.loads(self.rfile.read(length).decode("utf-8"))
-                prototype = payload.get("prototype")
-                if prototype not in PROTOTYPES:
-                    raise RuntimeError("unknown Now Playing prototype")
-                run_adb(
-                    self.server.serial,
-                    [
-                        "shell",
-                        "am",
-                        "broadcast",
-                        "-a",
-                        "io.github.iamtoolino.coda.debug.NOW_PLAYING_PROTOTYPE",
-                        "-n",
-                        "io.github.iamtoolino.coda/.debug.NowPlayingPrototypeReceiver",
-                        "--es",
-                        "prototype",
-                        prototype,
-                    ],
-                )
-                self.server.prototype = prototype
-                self.send_json(200, {"ok": True, "prototype": prototype})
-            elif self.path == "/api/title-stress":
-                length = int(self.headers.get("Content-Length", "0"))
-                if length <= 0 or length > 4096:
-                    raise RuntimeError("invalid request body")
-                payload = json.loads(self.rfile.read(length).decode("utf-8"))
-                title_stress = payload.get("titleStress")
-                if title_stress not in TITLE_STRESSES:
-                    raise RuntimeError("unknown title stress case")
-                run_adb(
-                    self.server.serial,
-                    [
-                        "shell",
-                        "am",
-                        "broadcast",
-                        "-a",
-                        "io.github.iamtoolino.coda.debug.NOW_PLAYING_PROTOTYPE",
-                        "-n",
-                        "io.github.iamtoolino.coda/.debug.NowPlayingPrototypeReceiver",
-                        "--es",
-                        "title_stress",
-                        title_stress,
-                    ],
-                )
-                self.server.title_stress = title_stress
-                self.send_json(200, {"ok": True, "titleStress": title_stress})
             else:
                 self.send_json(404, {"error": "not found"})
-        except (RuntimeError, ValueError, json.JSONDecodeError) as error:
+        except RuntimeError as error:
             self.send_json(400, {"error": str(error)})
 
 

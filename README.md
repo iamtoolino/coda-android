@@ -164,11 +164,10 @@ emulator or device:
 ./scripts/theme-lab.sh emulator-5554
 ```
 
-The accepted OLED Instrument treatment is production policy rather than a selectable preset. The
-lab currently compares its Now Playing baseline with six isolated control-layout prototypes and
-provides narrow two- and three-line metadata stress cases,
-binds only to `127.0.0.1`, and requires an explicit device serial. Prototype controls use a narrow
-debug-only receiver; the lab remains temporary design tooling rather than a user-facing setting.
+The accepted OLED Instrument and Quiet Dock treatments are production policy rather than selectable
+presets. The cleaned lab remains available for future isolated Now Playing experiments, binds only
+to `127.0.0.1`, and requires an explicit device serial. It is temporary design tooling rather than a
+user-facing setting.
 
 The current implementation and verification boundaries are recorded in
 [docs/development-baseline.md](docs/development-baseline.md).
