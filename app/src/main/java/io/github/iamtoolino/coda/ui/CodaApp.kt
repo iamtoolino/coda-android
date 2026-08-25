@@ -66,6 +66,7 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.ClearAll
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
@@ -2484,6 +2485,7 @@ private fun NowPlayingScreen(
     val progress by playback.progress.collectAsStateWithLifecycle()
     val prototype by NowPlayingPrototypeStore.prototype.collectAsStateWithLifecycle()
     var showPlaybackDetails by rememberSaveable { mutableStateOf(false) }
+    var showSessionSheet by rememberSaveable { mutableStateOf(false) }
     val ratings = LocalAlbumRatingCoordinator.current
     val albumId = state.albumId
     val ratingScope = rememberCoroutineScope()
@@ -2567,6 +2569,14 @@ private fun NowPlayingScreen(
                                 onOpenDetails = { showPlaybackDetails = true },
                                 modifier = Modifier
                                     .align(Alignment.BottomCenter)
+                                    .padding(horizontal = 20.dp, vertical = 18.dp),
+                            )
+                        }
+                        if (prototype == NowPlayingPrototype.SESSION_BUTTON) {
+                            SessionOrb(
+                                onClick = { showSessionSheet = true },
+                                modifier = Modifier
+                                    .align(Alignment.BottomEnd)
                                     .padding(horizontal = 20.dp, vertical = 18.dp),
                             )
                         }
@@ -2695,6 +2705,23 @@ private fun NowPlayingScreen(
                                 onOpenDetails = { showPlaybackDetails = true },
                             )
 
+                            NowPlayingPrototype.QUEUE_DECK -> {
+                                TransportControls(
+                                    isPlaying = progress.isPlaying,
+                                    primaryControlSize = primaryControlSize,
+                                    primaryControlIconSize = primaryControlIconSize,
+                                    onPrevious = playback::previous,
+                                    onToggle = playback::togglePlayPause,
+                                    onNext = playback::next,
+                                )
+                                Spacer(Modifier.height(if (compact) 6.dp else 10.dp))
+                                QueueDeckStrip(
+                                    remainingCount = remainingQueueCount,
+                                    nextEntry = nextEntry,
+                                    onClick = { showSessionSheet = true },
+                                )
+                            }
+
                             else -> {
                                 TransportControls(
                                     isPlaying = progress.isPlaying,
@@ -2738,6 +2765,19 @@ private fun NowPlayingScreen(
                     streamMode = streamMode,
                     streamQuality = streamQuality,
                     onDismiss = { showPlaybackDetails = false },
+                )
+            }
+            if (showSessionSheet) {
+                PlaybackSessionSheet(
+                    remainingCount = remainingQueueCount,
+                    nextEntry = nextEntry,
+                    streamMode = streamMode,
+                    streamQuality = streamQuality,
+                    onOpenQueue = {
+                        showSessionSheet = false
+                        navController.navigate("queue")
+                    },
+                    onDismiss = { showSessionSheet = false },
                 )
             }
     }
@@ -2967,6 +3007,185 @@ private fun CompactUtilityButton(
             fontWeight = FontWeight.Bold,
             maxLines = 1,
         )
+    }
+}
+
+@Composable
+private fun QueueDeckStrip(
+    remainingCount: Int,
+    nextEntry: QueueEntry?,
+    onClick: () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(52.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .background(Color.Black.copy(alpha = 0.52f))
+            .border(
+                1.dp,
+                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.10f),
+                RoundedCornerShape(16.dp),
+            )
+            .clickable(onClick = onClick)
+            .semantics {
+                contentDescription = if (nextEntry != null) {
+                    "Up next, ${nextEntry.title}. Open playback session"
+                } else {
+                    "Queue, $remainingCount tracks remaining. Open playback session"
+                }
+            }
+            .padding(horizontal = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            "UP NEXT",
+            color = MaterialTheme.colorScheme.primary,
+            fontSize = 9.sp,
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 0.08.em,
+        )
+        Spacer(Modifier.width(12.dp))
+        Text(
+            nextEntry?.title ?: "Queue complete",
+            modifier = Modifier.weight(1f),
+            color = MaterialTheme.colorScheme.onSurface,
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Medium,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+        Text(
+            remainingCount.toString(),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            fontSize = 12.sp,
+        )
+        Spacer(Modifier.width(2.dp))
+        Icon(
+            Icons.Default.ChevronRight,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(18.dp),
+        )
+    }
+}
+
+@Composable
+private fun SessionOrb(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    IconButton(
+        onClick = onClick,
+        modifier = modifier
+            .size(48.dp)
+            .clip(CircleShape)
+            .background(Color.Black.copy(alpha = 0.68f))
+            .border(
+                1.dp,
+                MaterialTheme.colorScheme.primary.copy(alpha = 0.24f),
+                CircleShape,
+            ),
+    ) {
+        Icon(
+            Icons.Default.MoreHoriz,
+            contentDescription = "Open playback session",
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(24.dp),
+        )
+    }
+}
+
+@Composable
+private fun PlaybackSessionSheet(
+    remainingCount: Int,
+    nextEntry: QueueEntry?,
+    streamMode: String,
+    streamQuality: String?,
+    onOpenQueue: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    ModalBottomSheet(onDismissRequest = onDismiss) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(horizontal = 24.dp, vertical = 8.dp),
+        ) {
+            Text(
+                "Playback session",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+            )
+            Spacer(Modifier.height(18.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 56.dp)
+                    .clip(RoundedCornerShape(14.dp))
+                    .clickable(onClick = onOpenQueue)
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    Icons.AutoMirrored.Filled.QueueMusic,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(22.dp),
+                )
+                Spacer(Modifier.width(12.dp))
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        "Queue · $remainingCount",
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                    nextEntry?.let {
+                        Text(
+                            "Up next: ${it.title}",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontSize = 13.sp,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+                }
+                Icon(
+                    Icons.Default.ChevronRight,
+                    contentDescription = "Open queue",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            Spacer(Modifier.height(12.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    Icons.Default.Info,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(22.dp),
+                )
+                Spacer(Modifier.width(12.dp))
+                Column {
+                    Text(
+                        streamMode,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                    streamQuality?.let {
+                        Text(
+                            it,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontSize = 13.sp,
+                        )
+                    }
+                }
+            }
+            Spacer(Modifier.height(20.dp))
+        }
     }
 }
 

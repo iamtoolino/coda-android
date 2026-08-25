@@ -20,6 +20,8 @@ PROTOTYPES = {
     "instrument-rail",
     "quiet-dock",
     "immersive-utilities",
+    "queue-deck",
+    "session-button",
 }
 
 

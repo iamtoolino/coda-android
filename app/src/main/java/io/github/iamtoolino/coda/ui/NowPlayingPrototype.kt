@@ -8,6 +8,8 @@ internal enum class NowPlayingPrototype(val wireName: String) {
     INSTRUMENT_RAIL("instrument-rail"),
     QUIET_DOCK("quiet-dock"),
     IMMERSIVE_UTILITIES("immersive-utilities"),
+    QUEUE_DECK("queue-deck"),
+    SESSION_BUTTON("session-button"),
     ;
 
     companion object {
