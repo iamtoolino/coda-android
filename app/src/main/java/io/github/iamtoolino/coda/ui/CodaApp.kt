@@ -104,6 +104,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
@@ -223,17 +225,29 @@ private fun heroFadeBrush(background: Color, revealArtworkField: Boolean): Brush
         )
     }
 
-private fun Modifier.continueHeroFadeIntoArtworkField(enabled: Boolean): Modifier {
+private fun Modifier.continueHeroFadeIntoArtworkField(
+    enabled: Boolean,
+    topExtension: Dp = 0.dp,
+): Modifier {
     if (!enabled) return this
     return drawWithCache {
+        val startY = -topExtension.toPx()
         val continuation = Brush.verticalGradient(
             0f to Color.Black,
             0.24f to Color.Black.copy(alpha = 0.82f),
             0.52f to Color.Black.copy(alpha = 0.46f),
             0.78f to Color.Black.copy(alpha = 0.16f),
             1f to Color.Transparent,
+            startY = startY,
+            endY = size.height,
         )
-        onDrawBehind { drawRect(continuation) }
+        onDrawBehind {
+            drawRect(
+                brush = continuation,
+                topLeft = Offset(0f, startY),
+                size = Size(size.width, size.height - startY),
+            )
+        }
     }
 }
 
@@ -1262,6 +1276,7 @@ private fun SearchScreen(
 
 @Composable
 private fun ArtistScreen(navController: NavHostController, id: String) {
+    val revealArtworkField = LocalArtworkFieldBackgroundActive.current
     val scope = rememberCoroutineScope()
     val coordinator = remember(scope) {
         RemoteDetailCoordinator(scope, id) { requestedId ->
@@ -1307,7 +1322,13 @@ private fun ArtistScreen(navController: NavHostController, id: String) {
                                 "Albums",
                                 fontSize = 28.sp,
                                 fontWeight = FontWeight.Bold,
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .continueHeroFadeIntoArtworkField(
+                                        enabled = revealArtworkField,
+                                        topExtension = 16.dp,
+                                    )
+                                    .padding(horizontal = 16.dp, vertical = 4.dp),
                             )
                         }
                         items(
@@ -2244,12 +2265,17 @@ private fun MiniPlayer(
     onToggle: () -> Unit,
 ) {
     val progress by playback.progress.collectAsStateWithLifecycle()
+    val background = if (LocalArtworkFieldBackgroundActive.current) {
+        Color.Black.copy(alpha = 0.72f)
+    } else {
+        MaterialTheme.colorScheme.surfaceVariant
+    }
     Column(
         modifier = Modifier
             .padding(horizontal = 10.dp, vertical = 4.dp)
             .fillMaxWidth()
             .clip(RoundedCornerShape(20.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant),
+            .background(background),
     ) {
         Row(
             modifier = Modifier
