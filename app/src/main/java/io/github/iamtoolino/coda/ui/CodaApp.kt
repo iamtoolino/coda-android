@@ -23,12 +23,14 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
@@ -94,6 +96,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.Lifecycle
@@ -181,6 +184,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 private val OverlayButtonBackground = Color.Black.copy(alpha = 0.46f)
+private val LocalMiniPlayerOverlayClearance = staticCompositionLocalOf { 0.dp }
+private val MiniPlayerVisualClearance = 104.dp
 
 private enum class AlbumViewMode(
     val routeValue: String,
@@ -350,6 +355,8 @@ fun CodaApp() {
     }
     val returningFromFullScreen = fullScreenPlayerVisible &&
         route != "now-playing" && route != "queue"
+    val miniPlayerVisible = playbackState.currentSongId != null &&
+        route != "now-playing" && route != "queue"
     val playbackThemeSource = localPlaybackArtworkSource(
         namespace = AppGraph.cacheNamespace,
         generation = artworkGeneration,
@@ -370,9 +377,16 @@ fun CodaApp() {
         playbackPresentationVisible = fullScreenPlayerVisible,
     )
     RoutedCodaTheme(themeRequest) {
+        val miniPlayerClearance = if (miniPlayerVisible) {
+            MiniPlayerVisualClearance +
+                WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+        } else {
+            0.dp
+        }
         CompositionLocalProvider(
             LocalAlbumRatingCoordinator provides ratings,
             LocalArtworkGeneration provides artworkGeneration,
+            LocalMiniPlayerOverlayClearance provides miniPlayerClearance,
         ) {
             AdaptiveBackground {
                 Box(Modifier.fillMaxSize()) {
@@ -381,16 +395,6 @@ fun CodaApp() {
                         containerColor = Color.Transparent,
                         contentColor = MaterialTheme.colorScheme.onSurface,
                         contentWindowInsets = WindowInsets(0, 0, 0, 0),
-                        bottomBar = {
-                            if (!fullScreenPlayerVisible && playbackState.currentSongId != null) {
-                                MiniPlayer(
-                                    state = playbackState,
-                                    playback = playback,
-                                    onOpen = { navController.navigate("now-playing") },
-                                    onToggle = playback::togglePlayPause,
-                                )
-                            }
-                        },
                     ) { padding ->
                         NavHost(
                             navController = navController,
@@ -488,6 +492,16 @@ fun CodaApp() {
                         }
                         }
                     }
+                    if (!fullScreenPlayerVisible && playbackState.currentSongId != null) {
+                        Box(Modifier.align(Alignment.BottomCenter)) {
+                            MiniPlayer(
+                                state = playbackState,
+                                playback = playback,
+                                onOpen = { navController.navigate("now-playing") },
+                                onToggle = playback::togglePlayPause,
+                            )
+                        }
+                    }
                     AnimatedVisibility(
                         visible = returningFromFullScreen && playbackState.currentSongId != null,
                         modifier = Modifier.align(Alignment.BottomCenter),
@@ -518,6 +532,7 @@ private fun HomeScreen(
     playback: PlaybackConnection,
     home: HomeCoordinator,
 ) {
+    val miniPlayerClearance = LocalMiniPlayerOverlayClearance.current
     val scope = rememberCoroutineScope()
     val handoffQueue by playback.handoffQueue.collectAsStateWithLifecycle()
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -550,7 +565,7 @@ private fun HomeScreen(
         LazyColumn(
             state = listState,
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(bottom = 24.dp),
+            contentPadding = PaddingValues(bottom = 24.dp + miniPlayerClearance),
             verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
             item {
@@ -770,6 +785,7 @@ private fun HomeSectionHeader(title: String, onClick: (() -> Unit)? = null) {
 
 @Composable
 private fun ArtistsScreen(navController: NavHostController) {
+    val miniPlayerClearance = LocalMiniPlayerOverlayClearance.current
     var activeLetter by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
     val coordinator = remember(scope) {
@@ -795,6 +811,7 @@ private fun ArtistsScreen(navController: NavHostController) {
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(end = 28.dp),
+                contentPadding = PaddingValues(bottom = miniPlayerClearance),
             ) {
                 item {
                     ScreenHeader(
@@ -928,6 +945,7 @@ private fun AlbumsScreen(
     navController: NavHostController,
     initialMode: AlbumViewMode,
 ) {
+    val miniPlayerClearance = LocalMiniPlayerOverlayClearance.current
     var mode by rememberSaveable { mutableStateOf(initialMode) }
     val scope = rememberCoroutineScope()
     val coordinator = remember(scope) {
@@ -980,7 +998,12 @@ private fun AlbumsScreen(
             columns = GridCells.Fixed(3),
             state = gridState,
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(16.dp),
+            contentPadding = PaddingValues(
+                start = 16.dp,
+                top = 16.dp,
+                end = 16.dp,
+                bottom = 16.dp + miniPlayerClearance,
+            ),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalArrangement = Arrangement.spacedBy(18.dp),
         ) {
@@ -1188,6 +1211,7 @@ private fun SearchScreen(
     playback: PlaybackConnection,
     playbackState: PlaybackUiState,
 ) {
+    val miniPlayerClearance = LocalMiniPlayerOverlayClearance.current
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusRequester = remember { FocusRequester() }
@@ -1228,7 +1252,11 @@ private fun SearchScreen(
         onRefresh = { coordinator.refresh() },
         modifier = Modifier.fillMaxSize(),
     ) {
-        LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
+        LazyColumn(
+            state = listState,
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(bottom = miniPlayerClearance),
+        ) {
             item {
                 Column(
                     Modifier
@@ -1289,6 +1317,7 @@ private fun SearchScreen(
 
 @Composable
 private fun ArtistScreen(navController: NavHostController, id: String) {
+    val miniPlayerClearance = LocalMiniPlayerOverlayClearance.current
     val revealArtworkField = LocalArtworkFieldBackgroundActive.current
     val scope = rememberCoroutineScope()
     val coordinator = remember(scope) {
@@ -1314,7 +1343,7 @@ private fun ArtistScreen(navController: NavHostController, id: String) {
                 LazyColumn(
                     state = listState,
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(bottom = 24.dp),
+                    contentPadding = PaddingValues(bottom = 24.dp + miniPlayerClearance),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     item {
@@ -1382,6 +1411,7 @@ private fun AlbumScreen(
     themeRouter: CodaThemeRouter,
     themeOwner: String,
 ) {
+    val miniPlayerClearance = LocalMiniPlayerOverlayClearance.current
     val context = LocalContext.current
     val ratings = LocalAlbumRatingCoordinator.current
     val scope = rememberCoroutineScope()
@@ -1421,7 +1451,11 @@ private fun AlbumScreen(
                 onRefresh = { coordinator.load(id) },
                 modifier = Modifier.fillMaxSize(),
             ) {
-                LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(bottom = miniPlayerClearance),
+                ) {
                     if (page == null) {
                         item { Spacer(Modifier.statusBarsPadding().height(16.dp)) }
                     }
@@ -1497,6 +1531,7 @@ private fun PlaylistScreen(
     themeRouter: CodaThemeRouter,
     themeOwner: String,
 ) {
+    val miniPlayerClearance = LocalMiniPlayerOverlayClearance.current
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val coordinator = remember(scope) {
@@ -1533,7 +1568,11 @@ private fun PlaylistScreen(
                 onRefresh = { coordinator.load(id) },
                 modifier = Modifier.fillMaxSize(),
             ) {
-                LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(bottom = miniPlayerClearance),
+                ) {
                     item {
                         DetailHeader(
                             playlist?.name ?: "Playlist",
@@ -1672,6 +1711,7 @@ private fun <T> RemoteListScreen(
     loader: suspend NavidromeClient.() -> List<T>,
     content: androidx.compose.foundation.lazy.LazyListScope.(List<T>) -> Unit,
 ) {
+    val miniPlayerClearance = LocalMiniPlayerOverlayClearance.current
     val scope = rememberCoroutineScope()
     val coordinator = remember(scope) {
         RemoteCollectionCoordinator(scope, Unit) {
@@ -1690,7 +1730,11 @@ private fun <T> RemoteListScreen(
         onRefresh = { coordinator.refresh() },
         modifier = Modifier.fillMaxSize(),
     ) {
-        LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
+        LazyColumn(
+            state = listState,
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(bottom = miniPlayerClearance),
+        ) {
             item {
                 ScreenHeader(
                     title = title,
