@@ -1,5 +1,3 @@
-@file:OptIn(androidx.compose.ui.text.ExperimentalTextApi::class)
-
 package io.github.iamtoolino.coda.ui.theme
 
 import android.graphics.Bitmap
@@ -29,12 +27,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontVariation
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import coil3.imageLoader
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
@@ -43,8 +35,6 @@ import coil3.request.allowHardware
 import coil3.request.bitmapConfig
 import coil3.toBitmap
 import io.github.iamtoolino.coda.AppGraph
-import io.github.iamtoolino.coda.BuildConfig
-import io.github.iamtoolino.coda.R
 import java.util.LinkedHashMap
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -52,40 +42,7 @@ import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
 
-private val Manrope = FontFamily(
-    manropeFont(FontWeight.Normal),
-    manropeFont(FontWeight.Medium),
-    manropeFont(FontWeight.SemiBold),
-    manropeFont(FontWeight.Bold),
-)
-
-private fun manropeFont(weight: FontWeight) = Font(
-    resId = R.font.manrope_variable,
-    weight = weight,
-    variationSettings = FontVariation.Settings(FontVariation.weight(weight.weight)),
-)
-
-private fun TextStyle.manrope() = copy(fontFamily = Manrope)
-
-private val CodaTypography = Typography().let { typography ->
-    typography.copy(
-        displayLarge = typography.displayLarge.manrope(),
-        displayMedium = typography.displayMedium.manrope(),
-        displaySmall = typography.displaySmall.manrope(),
-        headlineLarge = typography.headlineLarge.manrope(),
-        headlineMedium = typography.headlineMedium.manrope(),
-        headlineSmall = typography.headlineSmall.manrope(),
-        titleLarge = typography.titleLarge.manrope(),
-        titleMedium = typography.titleMedium.manrope(),
-        titleSmall = typography.titleSmall.manrope(),
-        bodyLarge = typography.bodyLarge.manrope(),
-        bodyMedium = typography.bodyMedium.manrope(),
-        bodySmall = typography.bodySmall.manrope(),
-        labelLarge = typography.labelLarge.manrope(),
-        labelMedium = typography.labelMedium.manrope(),
-        labelSmall = typography.labelSmall.manrope(),
-    )
-}
+private val CodaTypography = Typography()
 
 private data class ArtworkColors(
     val accent: Color,
@@ -98,11 +55,16 @@ private data class ArtworkColors(
 )
 
 internal val LocalArtworkFieldBackgroundActive = staticCompositionLocalOf { false }
-internal val LocalVisualDesignTuning = staticCompositionLocalOf { BackgroundDesignTuning() }
 
 private val BrandColors = artworkColors(CodaAccentExtractor.GENERIC_FALLBACK)
 private const val ThemeTransitionDurationMillis = 850
 private val ThemeTransitionEasing = CubicBezierEasing(0.42f, 0f, 0.58f, 1f)
+private const val PrimaryInkLuminance = 0.77f
+private const val SecondaryInkLuminance = 0.44f
+private const val ArtworkBroadGlowOpacity = 0.42f
+private const val ArtworkFocusedGlowOpacity = 0.30f
+private const val ArtworkVignetteOpacity = 0.62f
+private const val ArtworkBlackFalloffOpacity = 0.88f
 
 private object ArtworkColorCache {
     private const val maxEntries = 80
@@ -197,7 +159,6 @@ internal fun RoutedCodaTheme(
 
 @Composable
 private fun CodaMaterialTheme(colors: ArtworkColors, content: @Composable () -> Unit) {
-    val tuning = BackgroundDesignTuningStore.current.takeIf { BuildConfig.DEBUG && it.enabled }
     val transition = updateTransition(
         targetState = colors,
         label = "artwork theme",
@@ -244,12 +205,8 @@ private fun CodaMaterialTheme(colors: ArtworkColors, content: @Composable () -> 
         },
         label = "artwork surface variant",
     ) { it.surfaceVariant }
-    val primaryText = tuning?.let { warmInk(it.primaryTextLuminance) } ?: Color(0xFFF5F2F0)
-    val secondaryText = tuning?.let { warmInk(it.secondaryTextLuminance) } ?: Color(0xFFBBB7B5)
-    val typography = when (tuning?.typeface) {
-        DebugTypeface.SYSTEM -> systemTypography()
-        else -> CodaTypography
-    }
+    val primaryText = warmInk(PrimaryInkLuminance)
+    val secondaryText = warmInk(SecondaryInkLuminance)
     val colorScheme = darkColorScheme(
         primary = accent,
         onPrimary = onAccent,
@@ -274,13 +231,11 @@ private fun CodaMaterialTheme(colors: ArtworkColors, content: @Composable () -> 
         surfaceTint = accent,
         inversePrimary = accent,
     )
-    CompositionLocalProvider(LocalVisualDesignTuning provides (tuning ?: BackgroundDesignTuning())) {
-        MaterialTheme(
-            colorScheme = colorScheme,
-            typography = typography,
-            content = content,
-        )
-    }
+    MaterialTheme(
+        colorScheme = colorScheme,
+        typography = CodaTypography,
+        content = content,
+    )
 }
 
 private fun warmInk(luminance: Float): Color = Color(
@@ -288,8 +243,6 @@ private fun warmInk(luminance: Float): Color = Color(
     green = luminance * 0.985f,
     blue = luminance * 0.97f,
 )
-
-private fun systemTypography(): Typography = Typography()
 
 @Composable
 fun AdaptiveBackground(
@@ -300,30 +253,12 @@ fun AdaptiveBackground(
         Box(modifier = modifier.fillMaxSize()) { content() }
         return
     }
-    val tuning = BackgroundDesignTuningStore.current.takeIf { BuildConfig.DEBUG && it.enabled }
-    if (tuning != null) {
-        ArtworkFieldBackground(modifier, tuning, content)
-        return
-    }
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    0f to MaterialTheme.colorScheme.background,
-                    0.60f to MaterialTheme.colorScheme.background,
-                    1f to MaterialTheme.colorScheme.surface,
-                ),
-            ),
-    ) {
-        content()
-    }
+    ArtworkFieldBackground(modifier, content)
 }
 
 @Composable
 private fun ArtworkFieldBackground(
     modifier: Modifier,
-    tuning: BackgroundDesignTuning,
     content: @Composable () -> Unit,
 ) {
     val accent = MaterialTheme.colorScheme.primary
@@ -337,7 +272,7 @@ private fun ArtworkFieldBackground(
                         val shortestSide = minOf(size.width, size.height)
                         val broadGlow = Brush.radialGradient(
                             colors = listOf(
-                                accent.copy(alpha = tuning.accentOpacity),
+                                accent.copy(alpha = ArtworkBroadGlowOpacity),
                                 Color.Transparent,
                             ),
                             center = Offset(size.width * 0.34f, size.height * 0.38f),
@@ -345,7 +280,7 @@ private fun ArtworkFieldBackground(
                         )
                         val coreGlow = Brush.radialGradient(
                             colorStops = arrayOf(
-                                0f to accent.copy(alpha = tuning.glowOpacity),
+                                0f to accent.copy(alpha = ArtworkFocusedGlowOpacity),
                                 0.36f to accent.copy(alpha = 0.08f),
                                 1f to Color.Transparent,
                             ),
@@ -358,7 +293,7 @@ private fun ArtworkFieldBackground(
                                 (
                                     shortestSide * 0.24f / (longestSide * 0.78f)
                                 ).coerceIn(0f, 1f) to Color.Transparent,
-                                1f to Color.Black.copy(alpha = tuning.vignetteOpacity),
+                                1f to Color.Black.copy(alpha = ArtworkVignetteOpacity),
                             ),
                             center = Offset(size.width * 0.50f, size.height * 0.43f),
                             radius = longestSide * 0.78f,
@@ -367,7 +302,7 @@ private fun ArtworkFieldBackground(
                             colors = listOf(
                                 Color.Black.copy(alpha = 0.18f),
                                 Color(0xFF060809).copy(alpha = 0.48f),
-                                Color.Black.copy(alpha = tuning.blackFalloffOpacity),
+                                Color.Black.copy(alpha = ArtworkBlackFalloffOpacity),
                             ),
                             start = Offset.Zero,
                             end = Offset(size.width, size.height),

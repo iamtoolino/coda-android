@@ -170,13 +170,9 @@ import io.github.iamtoolino.coda.player.PlaybackConnection
 import io.github.iamtoolino.coda.player.PlaybackUiState
 import io.github.iamtoolino.coda.player.QueueEntry
 import io.github.iamtoolino.coda.ui.theme.AdaptiveBackground
-import io.github.iamtoolino.coda.ui.theme.BackgroundDesignVariant
 import io.github.iamtoolino.coda.ui.theme.CodaThemeRequest
 import io.github.iamtoolino.coda.ui.theme.CodaThemeRouter
 import io.github.iamtoolino.coda.ui.theme.LocalArtworkFieldBackgroundActive
-import io.github.iamtoolino.coda.ui.theme.LocalVisualDesignTuning
-import io.github.iamtoolino.coda.ui.theme.MiniProgressPlacement
-import io.github.iamtoolino.coda.ui.theme.RatingTintSource
 import io.github.iamtoolino.coda.ui.theme.RegisterForegroundTheme
 import io.github.iamtoolino.coda.ui.theme.RoutedCodaTheme
 import io.github.iamtoolino.coda.ui.theme.rememberCodaThemeRouter
@@ -188,6 +184,9 @@ import kotlinx.coroutines.launch
 private val OverlayButtonBackground = Color.Black.copy(alpha = 0.46f)
 private val LocalMiniPlayerOverlayClearance = staticCompositionLocalOf { 0.dp }
 private val MiniPlayerVisualClearance = 104.dp
+private val HomeHeadingSize = 23.5.sp
+private val HomeHeadingWeight = FontWeight(650)
+private val CardTitleSize = 15.5.sp
 
 private enum class AlbumViewMode(
     val routeValue: String,
@@ -765,7 +764,6 @@ private fun <T> HomeSectionStatus(
 
 @Composable
 private fun HomeSectionHeader(title: String, onClick: (() -> Unit)? = null) {
-    val tuning = LocalVisualDesignTuning.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -777,8 +775,8 @@ private fun HomeSectionHeader(title: String, onClick: (() -> Unit)? = null) {
             title,
             modifier = Modifier.weight(1f),
             style = MaterialTheme.typography.headlineSmall.copy(
-                fontSize = tuning.homeHeadingSizeSp.sp,
-                fontWeight = FontWeight(tuning.headingWeight),
+                fontSize = HomeHeadingSize,
+                fontWeight = HomeHeadingWeight,
             ),
         )
         if (onClick != null) Icon(Icons.Default.ChevronRight, "See all")
@@ -2063,7 +2061,6 @@ private fun AlbumShelf(
     onAlbum: (Album) -> Unit,
     onMore: (() -> Unit)? = null,
 ) {
-    val tuning = LocalVisualDesignTuning.current
     Column {
         Row(
             modifier = Modifier
@@ -2076,8 +2073,8 @@ private fun AlbumShelf(
                 title,
                 modifier = Modifier.weight(1f),
                 style = MaterialTheme.typography.headlineSmall.copy(
-                    fontSize = tuning.homeHeadingSizeSp.sp,
-                    fontWeight = FontWeight(tuning.headingWeight),
+                    fontSize = HomeHeadingSize,
+                    fontWeight = HomeHeadingWeight,
                 ),
             )
             if (onMore != null) Icon(Icons.Default.ChevronRight, "See all")
@@ -2101,7 +2098,6 @@ private fun AlbumCard(
     artworkSize: Int = ArtworkSizes.ALBUM_CARD,
     onClick: () -> Unit,
 ) {
-    val tuning = LocalVisualDesignTuning.current
     Column(modifier = modifier.clickable(onClick = onClick)) {
         Cover(
             album,
@@ -2117,7 +2113,7 @@ private fun AlbumCard(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             style = MaterialTheme.typography.bodyLarge.copy(
-                fontSize = tuning.cardTitleSizeSp.sp,
+                fontSize = CardTitleSize,
                 fontWeight = FontWeight.Medium,
             ),
         )
@@ -2139,18 +2135,7 @@ private fun Cover(
     showRatingBadge: Boolean = true,
 ) {
     val source = navidromeCoverSource(album.coverArt ?: album.id, size)
-    val tuning = LocalVisualDesignTuning.current
-    val presentationTint = MaterialTheme.colorScheme.primary
-    val albumTint = rememberAlbumRatingTint(
-        source = source,
-        enabled = tuning.enabled && tuning.ratingTintSource == RatingTintSource.ALBUM,
-        fallback = presentationTint,
-    )
-    val ratingTint = if (tuning.ratingTintSource == RatingTintSource.ALBUM) {
-        albumTint
-    } else {
-        presentationTint
-    }
+    val ratingTint = MaterialTheme.colorScheme.primary
     val rating = LocalAlbumRatingCoordinator.current
         .state(album.id, album.userRating)
         .rating
@@ -2172,19 +2157,19 @@ private fun Cover(
             )
         }
         if (showRatingBadge && rating in 1..5) {
-            val badgeShape = RoundedCornerShape(tuning.ratingRadiusDp.dp)
+            val badgeShape = RoundedCornerShape(7.dp)
             Box(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
-                    .padding(if (tuning.ratingSizeDp >= 29f) 7.dp else 5.dp)
-                    .size(tuning.ratingSizeDp.dp)
+                    .padding(5.dp)
+                    .size(22.dp)
                     .clip(badgeShape)
-                    .background(Color.Black.copy(alpha = tuning.ratingBlackOpacity))
-                    .background(ratingTint.copy(alpha = tuning.ratingAccentOpacity))
+                    .background(Color.Black.copy(alpha = 0.78f))
+                    .background(ratingTint.copy(alpha = 0.18f))
                     .border(
                         width = 0.75.dp,
                         color = MaterialTheme.colorScheme.onSurface.copy(
-                            alpha = tuning.ratingOutlineOpacity,
+                            alpha = 0.14f,
                         ),
                         shape = badgeShape,
                     ),
@@ -2192,18 +2177,10 @@ private fun Cover(
             ) {
                 Text(
                     rating.toString(),
-                    color = if (tuning.variant == BackgroundDesignVariant.OLED_GLOW) {
-                        MaterialTheme.colorScheme.onPrimary
-                    } else {
-                        MaterialTheme.colorScheme.onSurface
-                    },
+                    color = MaterialTheme.colorScheme.onSurface,
                     style = MaterialTheme.typography.labelMedium.copy(
-                        fontWeight = if (tuning.variant == BackgroundDesignVariant.OLED_GLOW) {
-                            FontWeight.Bold
-                        } else {
-                            FontWeight.Medium
-                        },
-                        fontSize = (13f + (tuning.ratingSizeDp - 22f) * 0.25f).sp,
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 13.sp,
                     ),
                 )
             }
@@ -2385,9 +2362,8 @@ private fun MiniPlayer(
     onToggle: () -> Unit,
 ) {
     val progress by playback.progress.collectAsStateWithLifecycle()
-    val tuning = LocalVisualDesignTuning.current
     val shape = RoundedCornerShape(20.dp)
-    val background = Color.Black.copy(alpha = tuning.miniPlayerOpacity)
+    val background = Color.Black.copy(alpha = 0.92f)
     val progressIndicator: @Composable () -> Unit = {
         LinearProgressIndicator(
             progress = {
@@ -2400,10 +2376,10 @@ private fun MiniPlayer(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(
-                    horizontal = tuning.progressHorizontalInsetDp.dp,
-                    vertical = tuning.progressVerticalInsetDp.dp,
+                    horizontal = 18.dp,
+                    vertical = 5.dp,
                 )
-                .height(tuning.progressThicknessDp.dp)
+                .height(2.dp)
                 .clip(RoundedCornerShape(99.dp)),
             color = MaterialTheme.colorScheme.primary,
             trackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.14f),
@@ -2413,13 +2389,13 @@ private fun MiniPlayer(
         modifier = Modifier
             .navigationBarsPadding()
             .padding(start = 10.dp, end = 10.dp, top = 4.dp, bottom = 8.dp)
-            .offset(y = tuning.miniPlayerBottomOffsetDp.dp)
+            .offset(y = 12.dp)
             .fillMaxWidth()
             .background(
                 Brush.verticalGradient(
                     colors = listOf(
                         Color.Transparent,
-                        MaterialTheme.colorScheme.primary.copy(alpha = tuning.miniPlayerHaloOpacity),
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
                     ),
                 ),
                 shape = shape,
@@ -2432,18 +2408,17 @@ private fun MiniPlayer(
                 .background(background)
                 .background(
                     MaterialTheme.colorScheme.primary.copy(
-                        alpha = tuning.miniPlayerAccentOpacity,
+                        alpha = 0.10f,
                     ),
                 )
                 .border(
                     0.75.dp,
                     MaterialTheme.colorScheme.onSurface.copy(
-                        alpha = tuning.miniPlayerOutlineOpacity,
+                        alpha = 0.10f,
                     ),
                     shape,
                 ),
         ) {
-            if (tuning.progressPlacement == MiniProgressPlacement.TOP) progressIndicator()
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -2493,7 +2468,7 @@ private fun MiniPlayer(
                     )
                 }
             }
-            if (tuning.progressPlacement == MiniProgressPlacement.BOTTOM) progressIndicator()
+            progressIndicator()
         }
     }
 }
@@ -3048,13 +3023,12 @@ private fun artworkRequest(source: ArtworkSource): ImageRequest {
 
 @Composable
 private fun SectionTitle(title: String) {
-    val tuning = LocalVisualDesignTuning.current
     Text(
         title,
         modifier = Modifier.padding(16.dp),
         style = MaterialTheme.typography.headlineSmall.copy(
-            fontSize = tuning.homeHeadingSizeSp.sp,
-            fontWeight = FontWeight(tuning.headingWeight),
+            fontSize = HomeHeadingSize,
+            fontWeight = HomeHeadingWeight,
         ),
     )
 }

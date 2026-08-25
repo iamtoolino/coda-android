@@ -99,19 +99,16 @@ repopulate visible stale entries. Disconnect performs the same cache cleanup for
 
 ## Debug design tooling
 
-The theme lab is a temporary debug seam for OLED visual-design experiments. A loopback-only Python
-server serves a browser controller and translates validated preset and tuning values into explicit
-ADB broadcasts for one named device serial. `BackgroundDesignTuningReceiver` is declared only by the
-debug source set, and production UI ignores tuning state when `BuildConfig.DEBUG` is false. Its
-presets share the accepted OLED Glow artwork field and vary semantic foreground treatment. The
-optional per-album rating-tint comparison reuses the album's encoded Coil entry, decodes a 32 px
-software sample, and keeps only a bounded derived-color cache; presentation-theme tint remains the
-default.
+The browser lab is a temporary debug seam for Now Playing visual experiments. Its loopback-only
+Python server requires one explicit ADB serial and currently serves a clean prototype workspace plus
+an Open Coda action. The completed general-theme presets and tuning payload have been removed; OLED
+Instrument is ordinary production policy.
 
-The lab state is neither a product setting nor persistent. Once a background design is accepted, its
-reviewed treatment belongs in the central theme policy and the receiver, browser server, variants,
-and tuning controls should be removed. Release inspection must confirm that the receiver and action
-are absent from the merged release manifest.
+When a Now Playing prototype needs live values, add only the narrowly scoped controls and a
+debug-source-set receiver required for that experiment. Lab state is neither a product setting nor
+persistent. After a visual decision, bake the reviewed treatment into production and remove the
+prototype controls and receiver. Release inspection must confirm that no debug receiver or broadcast
+action enters the merged release manifest.
 
 ## Playback
 

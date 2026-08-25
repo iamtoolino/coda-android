@@ -60,6 +60,9 @@ Coda is a personal, album-oriented Android client for Navidrome/OpenSubsonic.
 - Every committed palette change crossfades together with the same 850 ms ease-in-out motion used
   by Coda on macOS, keeping backgrounds, surfaces, controls, progress, and ratings on one visual
   timeline.
+- Ordinary phone screens use the accepted OLED Instrument treatment: true-black foundations with a
+  restrained artwork-accent field, system sans typography with softened warm ink, compact
+  presentation-tinted rating material, and a translucent artwork-owned mini-player.
 
 ## Playback
 
