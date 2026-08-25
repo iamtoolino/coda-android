@@ -165,9 +165,9 @@ emulator or device:
 ```
 
 The accepted OLED Instrument treatment is production policy rather than a selectable preset. The
-lab now provides a clean shell for isolated Now Playing prototypes, binds only to `127.0.0.1`, and
-requires an explicit device serial. Prototype controls may add a debug-only receiver as needed; the
-lab remains temporary design tooling rather than a user-facing setting.
+lab currently compares its Now Playing baseline with three isolated control-layout prototypes,
+binds only to `127.0.0.1`, and requires an explicit device serial. Prototype controls use a narrow
+debug-only receiver; the lab remains temporary design tooling rather than a user-facing setting.
 
 The current implementation and verification boundaries are recorded in
 [docs/development-baseline.md](docs/development-baseline.md).

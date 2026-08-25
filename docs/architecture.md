@@ -100,9 +100,9 @@ repopulate visible stale entries. Disconnect performs the same cache cleanup for
 ## Debug design tooling
 
 The browser lab is a temporary debug seam for Now Playing visual experiments. Its loopback-only
-Python server requires one explicit ADB serial and currently serves a clean prototype workspace plus
-an Open Coda action. The completed general-theme presets and tuning payload have been removed; OLED
-Instrument is ordinary production policy.
+Python server requires one explicit ADB serial and currently switches between the production
+baseline and three non-persistent control-layout prototypes. The completed general-theme presets
+and tuning payload have been removed; OLED Instrument is ordinary production policy.
 
 When a Now Playing prototype needs live values, add only the narrowly scoped controls and a
 debug-source-set receiver required for that experiment. Lab state is neither a product setting nor

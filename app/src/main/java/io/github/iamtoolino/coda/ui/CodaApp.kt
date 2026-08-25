@@ -65,6 +65,7 @@ import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.ClearAll
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
@@ -81,6 +82,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -2480,6 +2482,8 @@ private fun NowPlayingScreen(
     state: PlaybackUiState,
 ) {
     val progress by playback.progress.collectAsStateWithLifecycle()
+    val prototype by NowPlayingPrototypeStore.prototype.collectAsStateWithLifecycle()
+    var showPlaybackDetails by rememberSaveable { mutableStateOf(false) }
     val ratings = LocalAlbumRatingCoordinator.current
     val albumId = state.albumId
     val ratingScope = rememberCoroutineScope()
@@ -2505,6 +2509,7 @@ private fun NowPlayingScreen(
         state.queue.size
     }
     val streamQuality = qualityLabel(state)
+    val streamMode = streamModeLabel(state)
     LaunchedEffect(ratingSeed, albumId) {
         if (albumId != null &&
             (ratingSeedState.key != albumId || ratingSeedState.value == null)
@@ -2554,6 +2559,17 @@ private fun NowPlayingScreen(
                                     ),
                                 ),
                         )
+                        if (prototype == NowPlayingPrototype.IMMERSIVE_UTILITIES) {
+                            ImmersiveArtworkUtilities(
+                                remainingCount = remainingQueueCount,
+                                streamMode = streamMode,
+                                onOpenQueue = { navController.navigate("queue") },
+                                onOpenDetails = { showPlaybackDetails = true },
+                                modifier = Modifier
+                                    .align(Alignment.BottomCenter)
+                                    .padding(horizontal = 20.dp, vertical = 18.dp),
+                            )
+                        }
                     }
                     Column(
                         modifier = Modifier
@@ -2658,7 +2674,7 @@ private fun NowPlayingScreen(
                                 iconSize = 40.dp,
                             )
                         }
-                        if (state.queue.isNotEmpty()) {
+                        if (prototype == NowPlayingPrototype.BASELINE && state.queue.isNotEmpty()) {
                             Spacer(Modifier.height(if (compact) 7.dp else 14.dp))
                             QueuePreviewButton(
                                 remainingCount = remainingQueueCount,
@@ -2667,65 +2683,336 @@ private fun NowPlayingScreen(
                             )
                         }
                         Spacer(Modifier.weight(1f))
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 18.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            IconButton(onClick = playback::previous, modifier = Modifier.size(56.dp)) {
-                                Icon(
-                                    Icons.Default.SkipPrevious,
-                                    "Previous",
-                                    modifier = Modifier.size(38.dp),
+                        when (prototype) {
+                            NowPlayingPrototype.INSTRUMENT_RAIL -> InstrumentRail(
+                                isPlaying = progress.isPlaying,
+                                remainingCount = remainingQueueCount,
+                                streamMode = streamMode,
+                                onPrevious = playback::previous,
+                                onToggle = playback::togglePlayPause,
+                                onNext = playback::next,
+                                onOpenQueue = { navController.navigate("queue") },
+                                onOpenDetails = { showPlaybackDetails = true },
+                            )
+
+                            else -> {
+                                TransportControls(
+                                    isPlaying = progress.isPlaying,
+                                    primaryControlSize = primaryControlSize,
+                                    primaryControlIconSize = primaryControlIconSize,
+                                    onPrevious = playback::previous,
+                                    onToggle = playback::togglePlayPause,
+                                    onNext = playback::next,
                                 )
-                            }
-                            IconButton(
-                                onClick = playback::togglePlayPause,
-                                modifier = Modifier
-                                    .requiredSize(primaryControlSize)
-                                    .clip(CircleShape)
-                                    .background(MaterialTheme.colorScheme.primary),
-                            ) {
-                                Icon(
-                                    if (progress.isPlaying) {
-                                        Icons.Default.Pause
-                                    } else {
-                                        Icons.Default.PlayArrow
-                                    },
-                                    if (progress.isPlaying) "Pause" else "Play",
-                                    tint = MaterialTheme.colorScheme.onPrimary,
-                                    modifier = Modifier.size(primaryControlIconSize),
-                                )
-                            }
-                            IconButton(onClick = playback::next, modifier = Modifier.size(56.dp)) {
-                                Icon(
-                                    Icons.Default.SkipNext,
-                                    "Next",
-                                    modifier = Modifier.size(38.dp),
-                                )
-                            }
-                        }
-                        Spacer(Modifier.height(if (compact) 8.dp else 14.dp))
-                        Box(
-                            modifier = Modifier.height(16.dp),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            if (state.error == null && streamQuality != null) {
-                                Text(
-                                    streamQuality,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.78f),
-                                    fontSize = 11.sp,
-                                )
+                                if (prototype == NowPlayingPrototype.QUIET_DOCK) {
+                                    Spacer(Modifier.height(if (compact) 6.dp else 10.dp))
+                                    QuietUtilityDock(
+                                        remainingCount = remainingQueueCount,
+                                        streamMode = streamMode,
+                                        onOpenQueue = { navController.navigate("queue") },
+                                        onOpenDetails = { showPlaybackDetails = true },
+                                    )
+                                } else if (prototype == NowPlayingPrototype.BASELINE) {
+                                    Spacer(Modifier.height(if (compact) 8.dp else 14.dp))
+                                    Box(
+                                        modifier = Modifier.height(16.dp),
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        if (state.error == null && streamQuality != null) {
+                                            Text(
+                                                streamQuality,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.78f),
+                                                fontSize = 11.sp,
+                                            )
+                                        }
+                                    }
+                                }
                             }
                         }
                         Spacer(Modifier.height(if (compact) 5.dp else 10.dp))
                     }
                 }
             }
+            if (showPlaybackDetails) {
+                PlaybackDetailsSheet(
+                    streamMode = streamMode,
+                    streamQuality = streamQuality,
+                    onDismiss = { showPlaybackDetails = false },
+                )
+            }
     }
 }
+
+@Composable
+private fun TransportControls(
+    isPlaying: Boolean,
+    primaryControlSize: Dp,
+    primaryControlIconSize: Dp,
+    onPrevious: () -> Unit,
+    onToggle: () -> Unit,
+    onNext: () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 18.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        IconButton(onClick = onPrevious, modifier = Modifier.size(56.dp)) {
+            Icon(Icons.Default.SkipPrevious, "Previous", modifier = Modifier.size(38.dp))
+        }
+        PrimaryPlaybackButton(
+            isPlaying = isPlaying,
+            size = primaryControlSize,
+            iconSize = primaryControlIconSize,
+            onClick = onToggle,
+        )
+        IconButton(onClick = onNext, modifier = Modifier.size(56.dp)) {
+            Icon(Icons.Default.SkipNext, "Next", modifier = Modifier.size(38.dp))
+        }
+    }
+}
+
+@Composable
+private fun PrimaryPlaybackButton(
+    isPlaying: Boolean,
+    size: Dp,
+    iconSize: Dp,
+    onClick: () -> Unit,
+) {
+    IconButton(
+        onClick = onClick,
+        modifier = Modifier
+            .requiredSize(size)
+            .clip(CircleShape)
+            .background(MaterialTheme.colorScheme.primary),
+    ) {
+        Icon(
+            if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+            if (isPlaying) "Pause" else "Play",
+            tint = MaterialTheme.colorScheme.onPrimary,
+            modifier = Modifier.size(iconSize),
+        )
+    }
+}
+
+@Composable
+private fun InstrumentRail(
+    isPlaying: Boolean,
+    remainingCount: Int,
+    streamMode: String,
+    onPrevious: () -> Unit,
+    onToggle: () -> Unit,
+    onNext: () -> Unit,
+    onOpenQueue: () -> Unit,
+    onOpenDetails: () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(72.dp)
+            .clip(RoundedCornerShape(24.dp))
+            .background(Color.Black.copy(alpha = 0.54f))
+            .border(
+                1.dp,
+                MaterialTheme.colorScheme.primary.copy(alpha = 0.18f),
+                RoundedCornerShape(24.dp),
+            )
+            .padding(horizontal = 6.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        CompactUtilityButton(
+            label = remainingCount.toString(),
+            contentDescription = "Open queue, $remainingCount tracks remaining",
+            onClick = onOpenQueue,
+        )
+        IconButton(onClick = onPrevious, modifier = Modifier.size(48.dp)) {
+            Icon(Icons.Default.SkipPrevious, "Previous", modifier = Modifier.size(30.dp))
+        }
+        PrimaryPlaybackButton(
+            isPlaying = isPlaying,
+            size = 60.dp,
+            iconSize = 34.dp,
+            onClick = onToggle,
+        )
+        IconButton(onClick = onNext, modifier = Modifier.size(48.dp)) {
+            Icon(Icons.Default.SkipNext, "Next", modifier = Modifier.size(30.dp))
+        }
+        CompactUtilityButton(
+            label = if (streamMode.startsWith("Transcoded")) "OPUS" else "SRC",
+            contentDescription = "Playback details, $streamMode",
+            onClick = onOpenDetails,
+        )
+    }
+}
+
+@Composable
+private fun QuietUtilityDock(
+    remainingCount: Int,
+    streamMode: String,
+    onOpenQueue: () -> Unit,
+    onOpenDetails: () -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        UtilityPill(
+            icon = Icons.AutoMirrored.Filled.QueueMusic,
+            label = "Queue · $remainingCount",
+            contentDescription = "Open queue, $remainingCount tracks remaining",
+            onClick = onOpenQueue,
+        )
+        Spacer(Modifier.width(10.dp))
+        UtilityPill(
+            icon = Icons.Default.Info,
+            label = streamMode,
+            contentDescription = "Playback details, $streamMode",
+            onClick = onOpenDetails,
+        )
+    }
+}
+
+@Composable
+private fun ImmersiveArtworkUtilities(
+    remainingCount: Int,
+    streamMode: String,
+    onOpenQueue: () -> Unit,
+    onOpenDetails: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        UtilityPill(
+            icon = Icons.AutoMirrored.Filled.QueueMusic,
+            label = remainingCount.toString(),
+            contentDescription = "Open queue, $remainingCount tracks remaining",
+            onClick = onOpenQueue,
+            artworkOverlay = true,
+        )
+        UtilityPill(
+            icon = Icons.Default.Info,
+            label = if (streamMode.startsWith("Transcoded")) "OPUS" else "Original",
+            contentDescription = "Playback details, $streamMode",
+            onClick = onOpenDetails,
+            artworkOverlay = true,
+        )
+    }
+}
+
+@Composable
+private fun UtilityPill(
+    icon: ImageVector,
+    label: String,
+    contentDescription: String,
+    onClick: () -> Unit,
+    artworkOverlay: Boolean = false,
+) {
+    Row(
+        modifier = Modifier
+            .height(48.dp)
+            .clip(CircleShape)
+            .background(Color.Black.copy(alpha = if (artworkOverlay) 0.68f else 0.46f))
+            .border(
+                1.dp,
+                MaterialTheme.colorScheme.primary.copy(alpha = 0.20f),
+                CircleShape,
+            )
+            .clickable(onClick = onClick)
+            .semantics { this.contentDescription = contentDescription }
+            .padding(horizontal = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(19.dp),
+        )
+        Spacer(Modifier.width(7.dp))
+        Text(
+            label,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 1,
+        )
+    }
+}
+
+@Composable
+private fun CompactUtilityButton(
+    label: String,
+    contentDescription: String,
+    onClick: () -> Unit,
+) {
+    Box(
+        modifier = Modifier
+            .size(48.dp)
+            .clip(CircleShape)
+            .clickable(onClick = onClick)
+            .semantics { this.contentDescription = contentDescription },
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            label,
+            color = MaterialTheme.colorScheme.primary,
+            fontSize = if (label.length > 3) 9.sp else 12.sp,
+            fontWeight = FontWeight.Bold,
+            maxLines = 1,
+        )
+    }
+}
+
+@Composable
+private fun PlaybackDetailsSheet(
+    streamMode: String,
+    streamQuality: String?,
+    onDismiss: () -> Unit,
+) {
+    ModalBottomSheet(onDismissRequest = onDismiss) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(horizontal = 24.dp, vertical = 8.dp),
+        ) {
+            Text(
+                "Playback signal",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+            )
+            Spacer(Modifier.height(8.dp))
+            Text(
+                streamMode,
+                color = MaterialTheme.colorScheme.primary,
+                style = MaterialTheme.typography.titleMedium,
+            )
+            streamQuality?.let {
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    it,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+            Spacer(Modifier.height(24.dp))
+        }
+    }
+}
+
+private fun streamModeLabel(state: PlaybackUiState): String =
+    if (state.codec.equals("opus", ignoreCase = true)) {
+        "Transcoded · OPUS"
+    } else {
+        "Original"
+    }
 
 @Composable
 internal fun SeekBar(
