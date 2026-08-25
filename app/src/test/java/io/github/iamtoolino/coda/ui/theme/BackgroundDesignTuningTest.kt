@@ -7,34 +7,39 @@ class BackgroundDesignTuningTest {
     @Test
     fun `wire names resolve known variants only`() {
         assertEquals(
-            BackgroundDesignVariant.DEEP_ARTWORK,
-            BackgroundDesignVariant.fromWireName("deep_artwork"),
+            BackgroundDesignVariant.QUIET_MATERIAL,
+            BackgroundDesignVariant.fromWireName("quiet_material"),
         )
         assertEquals(null, BackgroundDesignVariant.fromWireName("unknown"))
+        assertEquals(RatingTintSource.ALBUM, RatingTintSource.fromWireName("album"))
+        assertEquals(DebugTypeface.SYSTEM, DebugTypeface.fromWireName("system"))
+        assertEquals(MiniProgressPlacement.TOP, MiniProgressPlacement.fromWireName("top"))
     }
 
     @Test
     fun `tuning values are bounded`() {
         val tuning = BackgroundDesignTuning(
-            artworkOpacity = 2f,
-            blurRadiusDp = -1f,
-            artworkScale = 4f,
-            artworkSaturation = 3f,
             accentOpacity = -1f,
             glowOpacity = 2f,
             vignetteOpacity = 2f,
             blackFalloffOpacity = -1f,
-            baseLuminance = 1f,
+            primaryTextLuminance = 2f,
+            secondaryTextLuminance = -1f,
+            headingWeight = 999,
+            ratingSizeDp = 2f,
+            miniPlayerOpacity = 0f,
+            progressThicknessDp = 9f,
         ).sanitized()
 
-        assertEquals(0.40f, tuning.artworkOpacity)
-        assertEquals(0f, tuning.blurRadiusDp)
-        assertEquals(1.50f, tuning.artworkScale)
-        assertEquals(1.50f, tuning.artworkSaturation)
         assertEquals(0f, tuning.accentOpacity)
         assertEquals(0.65f, tuning.glowOpacity)
         assertEquals(0.90f, tuning.vignetteOpacity)
         assertEquals(0f, tuning.blackFalloffOpacity)
-        assertEquals(0.10f, tuning.baseLuminance)
+        assertEquals(1f, tuning.primaryTextLuminance)
+        assertEquals(0.42f, tuning.secondaryTextLuminance)
+        assertEquals(800, tuning.headingWeight)
+        assertEquals(22f, tuning.ratingSizeDp)
+        assertEquals(0.55f, tuning.miniPlayerOpacity)
+        assertEquals(4f, tuning.progressThicknessDp)
     }
 }

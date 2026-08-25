@@ -5,56 +5,36 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Coda Theme Lab</title>
   <style>
-    :root {
-      color-scheme: dark;
-      font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      --brand: #2b7a82;
-      --gold: #d19433;
-      --surface: #17191c;
-      --border: #343940;
-      --text: #f4f2ef;
-      --muted: #9ba1a8;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0; min-height: 100vh; color: var(--text);
-      background: radial-gradient(circle at 18% -10%, rgba(43,122,130,.22), transparent 42rem), #090a0c;
-    }
-    main { width:min(980px,calc(100% - 40px)); margin:0 auto; padding:42px 0 64px; }
+    :root { color-scheme:dark; font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; --brand:#2b7a82; --gold:#d19433; --surface:#17191c; --border:#343940; --text:#ebe7e3; --muted:#999591; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; color:var(--text); background:radial-gradient(circle at 18% -10%,rgba(43,122,130,.22),transparent 42rem),#050607; }
+    main { width:min(1080px,calc(100% - 40px)); margin:0 auto; padding:42px 0 64px; }
     header { display:flex; align-items:flex-start; justify-content:space-between; gap:24px; margin-bottom:32px; }
     h1 { margin:0 0 8px; font-size:clamp(28px,4vw,42px); letter-spacing:-.04em; }
     h2 { margin:0; font-size:17px; }
     p { margin:0; color:var(--muted); line-height:1.5; }
     .target { margin-top:7px; font:600 13px/1.2 ui-monospace,SFMono-Regular,Menlo,monospace; color:#b9d9dc; }
-    button { font:inherit; }
-    .open-button, .secondary {
-      border:1px solid var(--border); border-radius:999px; color:var(--text); cursor:pointer;
-      background:rgba(32,35,40,.82); padding:11px 17px; white-space:nowrap;
-    }
-    .open-button:hover, .secondary:hover { background:#2a2e34; }
+    button,select,input { font:inherit; }
+    .open-button,.secondary { border:1px solid var(--border); border-radius:999px; color:var(--text); cursor:pointer; background:rgba(32,35,40,.82); padding:11px 17px; white-space:nowrap; }
     section { margin-top:28px; }
     .section-heading { display:flex; align-items:baseline; justify-content:space-between; gap:18px; margin-bottom:12px; }
     .hint { font-size:13px; color:var(--muted); }
     .design-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
-    .design-card {
-      display:block; position:relative; padding:17px; min-height:124px; text-align:left;
-      border:1px solid var(--border); border-radius:17px; background:rgba(23,25,28,.88);
-      color:var(--text); cursor:pointer; transition:border-color 140ms,background 140ms,transform 140ms;
-    }
+    .design-card { display:block; position:relative; padding:17px; min-height:124px; text-align:left; border:1px solid var(--border); border-radius:17px; background:rgba(23,25,28,.88); color:var(--text); cursor:pointer; transition:border-color 140ms,background 140ms,transform 140ms; }
     .design-card:hover { transform:translateY(-1px); border-color:#4b535c; }
     .design-card[aria-pressed="true"] { border-color:#63aab1; background:rgba(43,122,130,.17); }
-    .design-card[aria-pressed="true"]::after {
-      content:"✓"; position:absolute; top:15px; right:16px; width:25px; height:25px;
-      display:grid; place-items:center; border-radius:50%; background:var(--brand); font-weight:800;
-    }
+    .design-card[aria-pressed="true"]::after { content:"✓"; position:absolute; top:15px; right:16px; width:25px; height:25px; display:grid; place-items:center; border-radius:50%; background:var(--brand); font-weight:800; }
     .design-name { display:block; font-weight:750; font-size:17px; margin-bottom:7px; }
-    .design-description { display:block; max-width:39ch; color:var(--muted); font-size:14px; line-height:1.42; }
-    .controls { border:1px solid var(--border); border-radius:17px; background:rgba(23,25,28,.88); padding:5px 20px; }
-    .control { display:grid; grid-template-columns:190px 1fr 74px; align-items:center; gap:18px; padding:15px 0; }
-    .control + .control { border-top:1px solid #2d3137; }
-    label { font-weight:650; }
+    .design-description { display:block; max-width:43ch; color:var(--muted); font-size:14px; line-height:1.42; }
+    .controls { border:1px solid var(--border); border-radius:17px; background:rgba(23,25,28,.88); padding:4px 20px; }
+    .group-title { margin:0 -20px; padding:13px 20px 9px; color:#b9d9dc; font-size:12px; font-weight:750; letter-spacing:.08em; text-transform:uppercase; border-top:1px solid #2d3137; }
+    .group-title:first-child { border-top:0; }
+    .control { display:grid; grid-template-columns:220px 1fr 78px; align-items:center; gap:18px; padding:12px 0; }
+    .control + .control { border-top:1px solid #292d32; }
+    label { font-weight:620; }
     output { text-align:right; color:#cbd0d5; font-variant-numeric:tabular-nums; }
     input[type="range"] { width:100%; accent-color:#63aab1; cursor:ew-resize; }
+    select { grid-column:2/4; width:100%; color:var(--text); background:#23272c; border:1px solid #41474e; border-radius:9px; padding:8px 10px; }
     footer { display:flex; align-items:center; justify-content:space-between; gap:20px; margin-top:22px; }
     .status { display:flex; align-items:center; gap:9px; color:var(--muted); font-size:13px; }
     .status-dot { width:8px; height:8px; border-radius:50%; background:#64707a; }
@@ -62,142 +42,66 @@
     .status[data-state="ok"] .status-dot { background:#67b77a; }
     .status[data-state="error"] { color:#ef9b96; }
     .status[data-state="error"] .status-dot { background:#e16961; }
-    @media (max-width:680px) {
-      main { width:min(100% - 26px,980px); padding-top:28px; }
-      header { flex-direction:column; }
-      .design-grid { grid-template-columns:1fr; }
-      .control { grid-template-columns:1fr 64px; gap:8px 14px; }
-      .control input { grid-column:1/-1; grid-row:2; }
-    }
+    @media (max-width:680px) { main{width:min(100% - 26px,1080px);padding-top:28px} header{flex-direction:column}.design-grid{grid-template-columns:1fr}.control{grid-template-columns:1fr 64px;gap:8px 14px}.control input{grid-column:1/-1;grid-row:2}.control select{grid-column:1/-1} }
   </style>
 </head>
 <body>
   <main>
     <header>
-      <div>
-        <h1>Coda Theme Lab</h1>
-        <p>Tune the artwork-owned background while watching the debug app.</p>
-        <div class="target">Target: __TARGET_SERIAL__</div>
-      </div>
+      <div><h1>Coda Theme Lab</h1><p>Compare complete OLED visual systems while watching the debug app.</p><div class="target">Target: __TARGET_SERIAL__</div></div>
       <button class="open-button" id="openCoda" type="button">Open Coda</button>
     </header>
 
     <section aria-labelledby="design-title">
-      <div class="section-heading"><h2 id="design-title">Starting points</h2><span class="hint">Changes apply immediately</span></div>
+      <div class="section-heading"><h2 id="design-title">Design presets</h2><span class="hint">All retain the OLED Glow artwork field</span></div>
       <div class="design-grid" id="designs">
-        <button class="design-card" type="button" data-variant="current" aria-pressed="false">
-          <span class="design-name">Current Android</span>
-          <span class="design-description">The existing uniformly tinted background for direct comparison.</span>
-        </button>
-        <button class="design-card" type="button" data-variant="oled_glow" aria-pressed="false">
-          <span class="design-name">OLED Glow</span>
-          <span class="design-description">Pure black with localized accent light; no blurred artwork layer.</span>
-        </button>
-        <button class="design-card" type="button" data-variant="macos_field" aria-pressed="false">
-          <span class="design-name">macOS Artwork Field</span>
-          <span class="design-description">The macOS blur, saturation, glow, vignette, and falloff recipe.</span>
-        </button>
-        <button class="design-card" type="button" data-variant="deep_artwork" aria-pressed="true">
-          <span class="design-name">Deep Artwork</span>
-          <span class="design-description">A mobile tuning of the macOS field with firmer blacks and quieter glow.</span>
-        </button>
+        <button class="design-card" type="button" data-variant="oled_glow"><span class="design-name">OLED Glow · baseline</span><span class="design-description">The current accepted background and existing foreground treatment for direct comparison.</span></button>
+        <button class="design-card" type="button" data-variant="quiet_material"><span class="design-name">Quiet Material</span><span class="design-description">Warm ink, refined Manrope, macOS-like material ratings, and a subtly lifted player.</span></button>
+        <button class="design-card" type="button" data-variant="oled_instrument"><span class="design-name">OLED Instrument</span><span class="design-description">Darker, tighter and more Android-native, with a top progress rail.</span></button>
+        <button class="design-card" type="button" data-variant="sleeve_editorial"><span class="design-name">Sleeve Editorial</span><span class="design-description">Warm, restrained typography and a fine internal progress rule.</span></button>
       </div>
     </section>
 
     <section aria-labelledby="tuning-title">
-      <div class="section-heading"><h2 id="tuning-title">Live tuning</h2><span class="hint">Applied when a slider is released</span></div>
+      <div class="section-heading"><h2 id="tuning-title">Live tuning</h2><span class="hint">Sliders apply when released; menus apply immediately</span></div>
       <div class="controls" id="controls"></div>
     </section>
 
-    <footer>
-      <div class="status" id="status" data-state="idle" role="status" aria-live="polite">
-        <span class="status-dot"></span><span id="statusText">Connecting…</span>
-      </div>
-      <button class="secondary" id="reset" type="button">Reset selected preset</button>
-    </footer>
+    <footer><div class="status" id="status" data-state="idle" role="status" aria-live="polite"><span class="status-dot"></span><span id="statusText">Connecting…</span></div><button class="secondary" id="reset" type="button">Reset selected preset</button></footer>
   </main>
 
   <script>
-    const presets = {
-      current: { artworkOpacity:.15, blurRadiusDp:72, artworkScale:1.20, artworkSaturation:.78, accentOpacity:.34, glowOpacity:.26, vignetteOpacity:.48, blackFalloffOpacity:.72, baseLuminance:.035 },
-      oled_glow: { artworkOpacity:0, blurRadiusDp:72, artworkScale:1.20, artworkSaturation:.78, accentOpacity:.42, glowOpacity:.30, vignetteOpacity:.62, blackFalloffOpacity:.88, baseLuminance:0 },
-      macos_field: { artworkOpacity:.15, blurRadiusDp:72, artworkScale:1.20, artworkSaturation:.78, accentOpacity:.34, glowOpacity:.26, vignetteOpacity:.48, blackFalloffOpacity:.72, baseLuminance:.035 },
-      deep_artwork: { artworkOpacity:.11, blurRadiusDp:84, artworkScale:1.24, artworkSaturation:.86, accentOpacity:.26, glowOpacity:.20, vignetteOpacity:.62, blackFalloffOpacity:.90, baseLuminance:0 },
+    const commonGlow={accentOpacity:.42,glowOpacity:.30,vignetteOpacity:.62,blackFalloffOpacity:.88};
+    const presets={
+      oled_glow:{...commonGlow,primaryTextLuminance:.96,secondaryTextLuminance:.73,typeface:"manrope",homeHeadingSizeSp:27,headingWeight:700,cardTitleSizeSp:16,ratingSizeDp:30,ratingRadiusDp:9,ratingBlackOpacity:0,ratingAccentOpacity:1,ratingOutlineOpacity:0,ratingTintSource:"presentation",miniPlayerOpacity:.72,miniPlayerAccentOpacity:0,miniPlayerOutlineOpacity:0,miniPlayerHaloOpacity:0,progressPlacement:"bottom",progressThicknessDp:4,progressHorizontalInsetDp:0,progressVerticalInsetDp:0},
+      quiet_material:{...commonGlow,primaryTextLuminance:.91,secondaryTextLuminance:.66,typeface:"manrope",homeHeadingSizeSp:25,headingWeight:600,cardTitleSizeSp:15.5,ratingSizeDp:24,ratingRadiusDp:7.5,ratingBlackOpacity:.68,ratingAccentOpacity:.32,ratingOutlineOpacity:.10,ratingTintSource:"presentation",miniPlayerOpacity:.86,miniPlayerAccentOpacity:.07,miniPlayerOutlineOpacity:.08,miniPlayerHaloOpacity:.06,progressPlacement:"bottom",progressThicknessDp:2,progressHorizontalInsetDp:12,progressVerticalInsetDp:6},
+      oled_instrument:{...commonGlow,primaryTextLuminance:.87,secondaryTextLuminance:.60,typeface:"system",homeHeadingSizeSp:23.5,headingWeight:650,cardTitleSizeSp:15.5,ratingSizeDp:22,ratingRadiusDp:7,ratingBlackOpacity:.78,ratingAccentOpacity:.18,ratingOutlineOpacity:.14,ratingTintSource:"presentation",miniPlayerOpacity:.92,miniPlayerAccentOpacity:.03,miniPlayerOutlineOpacity:.10,miniPlayerHaloOpacity:.08,progressPlacement:"top",progressThicknessDp:2,progressHorizontalInsetDp:18,progressVerticalInsetDp:5},
+      sleeve_editorial:{...commonGlow,primaryTextLuminance:.89,secondaryTextLuminance:.62,typeface:"manrope",homeHeadingSizeSp:24.5,headingWeight:600,cardTitleSizeSp:16,ratingSizeDp:24,ratingRadiusDp:7.5,ratingBlackOpacity:.62,ratingAccentOpacity:.24,ratingOutlineOpacity:.08,ratingTintSource:"presentation",miniPlayerOpacity:.76,miniPlayerAccentOpacity:.11,miniPlayerOutlineOpacity:.06,miniPlayerHaloOpacity:.08,progressPlacement:"bottom",progressThicknessDp:1.5,progressHorizontalInsetDp:16,progressVerticalInsetDp:7}
     };
-    const fields = [
-      ["artworkOpacity","Artwork opacity",0,.40,.01,""],
-      ["blurRadiusDp","Artwork blur",0,120,1," dp"],
-      ["artworkScale","Artwork scale",1,1.50,.01,"×"],
-      ["artworkSaturation","Artwork saturation",0,1.50,.01,"×"],
-      ["accentOpacity","Broad accent glow",0,.65,.01,""],
-      ["glowOpacity","Focused accent glow",0,.65,.01,""],
-      ["vignetteOpacity","Edge vignette",0,.90,.01,""],
-      ["blackFalloffOpacity","Black falloff",0,1,.01,""],
-      ["baseLuminance","Base luminance",0,.10,.001,""],
+    const groups=[
+      ["OLED artwork field",[["accentOpacity","Broad accent glow",0,.65,.01,""],["glowOpacity","Focused accent glow",0,.65,.01,""],["vignetteOpacity","Edge vignette",0,.90,.01,""],["blackFalloffOpacity","Black falloff",0,1,.01,""]]],
+      ["Type",[["primaryTextLuminance","Primary ink",.72,1,.01,""],["secondaryTextLuminance","Secondary ink",.42,.86,.01,""],["typeface","Typeface",[["manrope","Manrope"],["system","Android system sans"]]],["homeHeadingSizeSp","Home heading size",22,30,.5," sp"],["headingWeight","Heading weight",400,800,50,""],["cardTitleSizeSp","Card title size",14,18,.5," sp"]]],
+      ["Album rating material",[["ratingTintSource","Tint source",[["presentation","Presentation theme"],["album","Each album artwork"]]],["ratingSizeDp","Badge size",22,30,.5," dp"],["ratingRadiusDp","Corner radius",6,12,.5," dp"],["ratingBlackOpacity","Black material",0,.85,.01,""],["ratingAccentOpacity","Accent tint",0,1,.01,""],["ratingOutlineOpacity","Hairline",0,.30,.01,""]]],
+      ["Mini-player",[["miniPlayerOpacity","Black material",.55,1,.01,""],["miniPlayerAccentOpacity","Accent wash",0,.20,.01,""],["miniPlayerOutlineOpacity","Hairline",0,.25,.01,""],["miniPlayerHaloOpacity","Home halo",0,.18,.01,""],["progressPlacement","Progress placement",[["bottom","Bottom inset"],["top","Top inset"]]],["progressThicknessDp","Progress thickness",1.5,4,.5," dp"],["progressHorizontalInsetDp","Progress side inset",0,24,1," dp"],["progressVerticalInsetDp","Progress edge inset",0,12,1," dp"]]]
     ];
-    const model = { variant:"deep_artwork", ...presets.deep_artwork };
-    const controls = document.querySelector("#controls");
-    controls.innerHTML = fields.map(([name,label,min,max,step]) => `<div class="control"><label for="${name}">${label}</label><input id="${name}" data-field="${name}" type="range" min="${min}" max="${max}" step="${step}"><output id="${name}Value" for="${name}"></output></div>`).join("");
-    const designButtons = [...document.querySelectorAll("[data-variant]")];
-    const inputs = [...document.querySelectorAll("[data-field]")];
-    const status = document.querySelector("#status");
-    const statusText = document.querySelector("#statusText");
-    let applyTimer;
-    let requestRevision = 0;
-
-    function formatted(name,value) {
-      const field = fields.find(item => item[0] === name);
-      const step = field[4];
-      const digits = step < .01 ? 3 : step < 1 ? 2 : 0;
-      return `${Number(value).toFixed(digits)}${field[5]}`;
-    }
-    function render() {
-      designButtons.forEach(button => button.setAttribute("aria-pressed", String(button.dataset.variant === model.variant)));
-      inputs.forEach(input => {
-        input.value = model[input.dataset.field];
-        document.querySelector(`#${input.dataset.field}Value`).textContent = formatted(input.dataset.field, model[input.dataset.field]);
-        input.disabled = model.variant === "current";
-      });
-    }
-    function setStatus(state,text) { status.dataset.state = state; statusText.textContent = text; }
-    async function apply() {
-      const revision = ++requestRevision;
-      setStatus("working","Applying…");
-      try {
-        const response = await fetch("/api/tuning", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(model) });
-        const result = await response.json();
-        if (!response.ok) throw new Error(result.error || "Could not apply theme");
-        if (revision === requestRevision) setStatus("ok","Live on __TARGET_SERIAL__");
-      } catch (error) {
-        if (revision === requestRevision) setStatus("error",error.message || String(error));
-      }
-    }
-    function scheduleApply() { clearTimeout(applyTimer); applyTimer = setTimeout(apply,70); }
-    function selectPreset(variant) { Object.assign(model,{variant},presets[variant]); render(); scheduleApply(); }
-    designButtons.forEach(button => button.addEventListener("click",() => selectPreset(button.dataset.variant)));
-    inputs.forEach(input => input.addEventListener("input",() => {
-      model[input.dataset.field] = Number(input.value);
-      render();
-    }));
-    inputs.forEach(input => input.addEventListener("change",scheduleApply));
-    document.querySelector("#reset").addEventListener("click",() => selectPreset(model.variant));
-    document.querySelector("#openCoda").addEventListener("click",async () => {
-      setStatus("working","Opening Coda…");
-      try {
-        const response = await fetch("/api/open-coda",{method:"POST"});
-        const result = await response.json();
-        if (!response.ok) throw new Error(result.error || "Could not open Coda");
-        setStatus("ok","Coda opened");
-      } catch (error) { setStatus("error",error.message || String(error)); }
-    });
-    (async function initialize() {
-      try {
-        const response = await fetch("/api/state");
-        const result = await response.json();
-        if (!response.ok) throw new Error(result.error || "Could not read state");
-        Object.assign(model,result); render(); await apply();
-      } catch (error) { setStatus("error",error.message || String(error)); }
-    })();
+    const fields=groups.flatMap(group=>group[1]);
+    const model={variant:"quiet_material",...presets.quiet_material};
+    const controls=document.querySelector("#controls");
+    controls.innerHTML=groups.map(([group,items])=>`<div class="group-title">${group}</div>${items.map(item=>{const [name,label,spec]=item;if(Array.isArray(spec))return `<div class="control"><label for="${name}">${label}</label><select id="${name}" data-choice="${name}">${spec.map(([value,text])=>`<option value="${value}">${text}</option>`).join("")}</select></div>`;const [, ,min,max,step]=item;return `<div class="control"><label for="${name}">${label}</label><input id="${name}" data-field="${name}" type="range" min="${min}" max="${max}" step="${step}"><output id="${name}Value" for="${name}"></output></div>`}).join("")}`).join("");
+    const designButtons=[...document.querySelectorAll("[data-variant]")],inputs=[...document.querySelectorAll("[data-field]")],selects=[...document.querySelectorAll("[data-choice]")];
+    const status=document.querySelector("#status"),statusText=document.querySelector("#statusText");let applyTimer,requestRevision=0;
+    function formatted(name,value){const field=fields.find(item=>item[0]===name),step=field[4],digits=step<.01?3:step<1?2:0;return `${Number(value).toFixed(digits)}${field[5]}`}
+    function render(){designButtons.forEach(button=>button.setAttribute("aria-pressed",String(button.dataset.variant===model.variant)));inputs.forEach(input=>{input.value=model[input.dataset.field];document.querySelector(`#${input.dataset.field}Value`).textContent=formatted(input.dataset.field,model[input.dataset.field])});selects.forEach(select=>select.value=model[select.dataset.choice])}
+    function setStatus(state,text){status.dataset.state=state;statusText.textContent=text}
+    async function apply(){const revision=++requestRevision;setStatus("working","Applying…");try{const response=await fetch("/api/tuning",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(model)}),result=await response.json();if(!response.ok)throw new Error(result.error||"Could not apply design");if(revision===requestRevision)setStatus("ok","Live on __TARGET_SERIAL__")}catch(error){if(revision===requestRevision)setStatus("error",error.message||String(error))}}
+    function scheduleApply(){clearTimeout(applyTimer);applyTimer=setTimeout(apply,70)}
+    function selectPreset(variant){Object.assign(model,{variant},presets[variant]);render();scheduleApply()}
+    designButtons.forEach(button=>button.addEventListener("click",()=>selectPreset(button.dataset.variant)));
+    inputs.forEach(input=>input.addEventListener("input",()=>{model[input.dataset.field]=Number(input.value);render()}));inputs.forEach(input=>input.addEventListener("change",scheduleApply));
+    selects.forEach(select=>select.addEventListener("change",()=>{model[select.dataset.choice]=select.value;scheduleApply()}));
+    document.querySelector("#reset").addEventListener("click",()=>selectPreset(model.variant));
+    document.querySelector("#openCoda").addEventListener("click",async()=>{setStatus("working","Opening Coda…");try{const response=await fetch("/api/open-coda",{method:"POST"}),result=await response.json();if(!response.ok)throw new Error(result.error||"Could not open Coda");setStatus("ok","Coda opened")}catch(error){setStatus("error",error.message||String(error))}});
+    (async function initialize(){try{const response=await fetch("/api/state"),result=await response.json();if(!response.ok)throw new Error(result.error||"Could not read state");Object.assign(model,result);render();await apply()}catch(error){setStatus("error",error.message||String(error))}})();
   </script>
 </body>
 </html>

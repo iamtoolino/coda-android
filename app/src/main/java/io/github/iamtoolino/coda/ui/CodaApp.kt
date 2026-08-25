@@ -10,6 +10,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -164,9 +165,13 @@ import io.github.iamtoolino.coda.player.PlaybackConnection
 import io.github.iamtoolino.coda.player.PlaybackUiState
 import io.github.iamtoolino.coda.player.QueueEntry
 import io.github.iamtoolino.coda.ui.theme.AdaptiveBackground
+import io.github.iamtoolino.coda.ui.theme.BackgroundDesignVariant
 import io.github.iamtoolino.coda.ui.theme.CodaThemeRequest
 import io.github.iamtoolino.coda.ui.theme.CodaThemeRouter
 import io.github.iamtoolino.coda.ui.theme.LocalArtworkFieldBackgroundActive
+import io.github.iamtoolino.coda.ui.theme.LocalVisualDesignTuning
+import io.github.iamtoolino.coda.ui.theme.MiniProgressPlacement
+import io.github.iamtoolino.coda.ui.theme.RatingTintSource
 import io.github.iamtoolino.coda.ui.theme.RegisterForegroundTheme
 import io.github.iamtoolino.coda.ui.theme.RoutedCodaTheme
 import io.github.iamtoolino.coda.ui.theme.rememberCodaThemeRouter
@@ -743,6 +748,7 @@ private fun <T> HomeSectionStatus(
 
 @Composable
 private fun HomeSectionHeader(title: String, onClick: (() -> Unit)? = null) {
+    val tuning = LocalVisualDesignTuning.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -750,7 +756,14 @@ private fun HomeSectionHeader(title: String, onClick: (() -> Unit)? = null) {
             .padding(horizontal = 16.dp, vertical = 2.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(title, fontSize = 27.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+        Text(
+            title,
+            modifier = Modifier.weight(1f),
+            style = MaterialTheme.typography.headlineSmall.copy(
+                fontSize = tuning.homeHeadingSizeSp.sp,
+                fontWeight = FontWeight(tuning.headingWeight),
+            ),
+        )
         if (onClick != null) Icon(Icons.Default.ChevronRight, "See all")
     }
 }
@@ -1991,6 +2004,7 @@ private fun AlbumShelf(
     onAlbum: (Album) -> Unit,
     onMore: (() -> Unit)? = null,
 ) {
+    val tuning = LocalVisualDesignTuning.current
     Column {
         Row(
             modifier = Modifier
@@ -1999,7 +2013,14 @@ private fun AlbumShelf(
                 .padding(horizontal = 16.dp, vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(title, fontSize = 27.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+            Text(
+                title,
+                modifier = Modifier.weight(1f),
+                style = MaterialTheme.typography.headlineSmall.copy(
+                    fontSize = tuning.homeHeadingSizeSp.sp,
+                    fontWeight = FontWeight(tuning.headingWeight),
+                ),
+            )
             if (onMore != null) Icon(Icons.Default.ChevronRight, "See all")
         }
         LazyRow(
@@ -2021,6 +2042,7 @@ private fun AlbumCard(
     artworkSize: Int = ArtworkSizes.ALBUM_CARD,
     onClick: () -> Unit,
 ) {
+    val tuning = LocalVisualDesignTuning.current
     Column(modifier = modifier.clickable(onClick = onClick)) {
         Cover(
             album,
@@ -2031,7 +2053,15 @@ private fun AlbumCard(
             size = artworkSize,
         )
         Spacer(Modifier.height(8.dp))
-        Text(album.name, maxLines = 1, overflow = TextOverflow.Ellipsis, fontWeight = FontWeight.Medium)
+        Text(
+            album.name,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            style = MaterialTheme.typography.bodyLarge.copy(
+                fontSize = tuning.cardTitleSizeSp.sp,
+                fontWeight = FontWeight.Medium,
+            ),
+        )
         Text(
             subtitle,
             maxLines = 1,
@@ -2050,6 +2080,18 @@ private fun Cover(
     showRatingBadge: Boolean = true,
 ) {
     val source = navidromeCoverSource(album.coverArt ?: album.id, size)
+    val tuning = LocalVisualDesignTuning.current
+    val presentationTint = MaterialTheme.colorScheme.primary
+    val albumTint = rememberAlbumRatingTint(
+        source = source,
+        enabled = tuning.enabled && tuning.ratingTintSource == RatingTintSource.ALBUM,
+        fallback = presentationTint,
+    )
+    val ratingTint = if (tuning.ratingTintSource == RatingTintSource.ALBUM) {
+        albumTint
+    } else {
+        presentationTint
+    }
     val rating = LocalAlbumRatingCoordinator.current
         .state(album.id, album.userRating)
         .rating
@@ -2071,20 +2113,39 @@ private fun Cover(
             )
         }
         if (showRatingBadge && rating in 1..5) {
+            val badgeShape = RoundedCornerShape(tuning.ratingRadiusDp.dp)
             Box(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
-                    .padding(7.dp)
-                    .size(30.dp)
-                    .clip(RoundedCornerShape(9.dp))
-                    .background(MaterialTheme.colorScheme.primary),
+                    .padding(if (tuning.ratingSizeDp >= 29f) 7.dp else 5.dp)
+                    .size(tuning.ratingSizeDp.dp)
+                    .clip(badgeShape)
+                    .background(Color.Black.copy(alpha = tuning.ratingBlackOpacity))
+                    .background(ratingTint.copy(alpha = tuning.ratingAccentOpacity))
+                    .border(
+                        width = 0.75.dp,
+                        color = MaterialTheme.colorScheme.onSurface.copy(
+                            alpha = tuning.ratingOutlineOpacity,
+                        ),
+                        shape = badgeShape,
+                    ),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
                     rating.toString(),
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 15.sp,
+                    color = if (tuning.variant == BackgroundDesignVariant.OLED_GLOW) {
+                        MaterialTheme.colorScheme.onPrimary
+                    } else {
+                        MaterialTheme.colorScheme.onSurface
+                    },
+                    style = MaterialTheme.typography.labelMedium.copy(
+                        fontWeight = if (tuning.variant == BackgroundDesignVariant.OLED_GLOW) {
+                            FontWeight.Bold
+                        } else {
+                            FontWeight.Medium
+                        },
+                        fontSize = (13f + (tuning.ratingSizeDp - 22f) * 0.25f).sp,
+                    ),
                 )
             }
         }
@@ -2265,64 +2326,10 @@ private fun MiniPlayer(
     onToggle: () -> Unit,
 ) {
     val progress by playback.progress.collectAsStateWithLifecycle()
-    val background = if (LocalArtworkFieldBackgroundActive.current) {
-        Color.Black.copy(alpha = 0.72f)
-    } else {
-        MaterialTheme.colorScheme.surfaceVariant
-    }
-    Column(
-        modifier = Modifier
-            .padding(horizontal = 10.dp, vertical = 4.dp)
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
-            .background(background),
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable(onClick = onOpen),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Artwork(
-                source = playbackArtworkSource(
-                    state.artworkKey ?: state.currentSongId.orEmpty(),
-                    state.artworkUrl,
-                ),
-                description = state.album,
-                modifier = Modifier.size(68.dp),
-            )
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(horizontal = 14.dp),
-            ) {
-                Text(
-                    state.title,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-                Text(
-                    state.error ?: state.artist,
-                    color = if (state.error != null) {
-                        MaterialTheme.colorScheme.error
-                    } else {
-                        MaterialTheme.colorScheme.onSurfaceVariant
-                    },
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
-            IconButton(onClick = onToggle, modifier = Modifier.size(60.dp)) {
-                Icon(
-                    if (progress.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                    if (progress.isPlaying) "Pause" else "Play",
-                    tint = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.size(34.dp),
-                )
-            }
-        }
+    val tuning = LocalVisualDesignTuning.current
+    val shape = RoundedCornerShape(20.dp)
+    val background = Color.Black.copy(alpha = tuning.miniPlayerOpacity)
+    val progressIndicator: @Composable () -> Unit = {
         LinearProgressIndicator(
             progress = {
                 if (progress.durationMs > 0) {
@@ -2331,8 +2338,103 @@ private fun MiniPlayer(
                     0f
                 }
             },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    horizontal = tuning.progressHorizontalInsetDp.dp,
+                    vertical = tuning.progressVerticalInsetDp.dp,
+                )
+                .height(tuning.progressThicknessDp.dp)
+                .clip(RoundedCornerShape(99.dp)),
+            color = MaterialTheme.colorScheme.primary,
+            trackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.14f),
         )
+    }
+    Box(
+        modifier = Modifier
+            .navigationBarsPadding()
+            .padding(start = 10.dp, end = 10.dp, top = 4.dp, bottom = 8.dp)
+            .fillMaxWidth()
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(
+                        Color.Transparent,
+                        MaterialTheme.colorScheme.primary.copy(alpha = tuning.miniPlayerHaloOpacity),
+                    ),
+                ),
+                shape = shape,
+            ),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(shape)
+                .background(background)
+                .background(
+                    MaterialTheme.colorScheme.primary.copy(
+                        alpha = tuning.miniPlayerAccentOpacity,
+                    ),
+                )
+                .border(
+                    0.75.dp,
+                    MaterialTheme.colorScheme.onSurface.copy(
+                        alpha = tuning.miniPlayerOutlineOpacity,
+                    ),
+                    shape,
+                ),
+        ) {
+            if (tuning.progressPlacement == MiniProgressPlacement.TOP) progressIndicator()
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(onClick = onOpen),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Artwork(
+                    source = playbackArtworkSource(
+                        state.artworkKey ?: state.currentSongId.orEmpty(),
+                        state.artworkUrl,
+                    ),
+                    description = state.album,
+                    modifier = Modifier.size(68.dp),
+                )
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 14.dp),
+                ) {
+                    Text(
+                        state.title,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        style = MaterialTheme.typography.bodyLarge.copy(
+                            fontWeight = FontWeight.SemiBold,
+                        ),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    Text(
+                        state.error ?: state.artist,
+                        color = if (state.error != null) {
+                            MaterialTheme.colorScheme.error
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        },
+                        style = MaterialTheme.typography.bodyMedium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+                IconButton(onClick = onToggle, modifier = Modifier.size(60.dp)) {
+                    Icon(
+                        if (progress.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                        if (progress.isPlaying) "Pause" else "Play",
+                        tint = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.size(34.dp),
+                    )
+                }
+            }
+            if (tuning.progressPlacement == MiniProgressPlacement.BOTTOM) progressIndicator()
+        }
     }
 }
 
@@ -2886,7 +2988,15 @@ private fun artworkRequest(source: ArtworkSource): ImageRequest {
 
 @Composable
 private fun SectionTitle(title: String) {
-    Text(title, fontSize = 27.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(16.dp))
+    val tuning = LocalVisualDesignTuning.current
+    Text(
+        title,
+        modifier = Modifier.padding(16.dp),
+        style = MaterialTheme.typography.headlineSmall.copy(
+            fontSize = tuning.homeHeadingSizeSp.sp,
+            fontWeight = FontWeight(tuning.headingWeight),
+        ),
+    )
 }
 
 @Composable

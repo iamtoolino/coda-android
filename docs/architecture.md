@@ -99,12 +99,14 @@ repopulate visible stale entries. Disconnect performs the same cache cleanup for
 
 ## Debug design tooling
 
-The theme lab is a temporary debug seam for artwork-background experiments. A loopback-only Python
+The theme lab is a temporary debug seam for OLED visual-design experiments. A loopback-only Python
 server serves a browser controller and translates validated preset and tuning values into explicit
 ADB broadcasts for one named device serial. `BackgroundDesignTuningReceiver` is declared only by the
-debug source set, and production UI ignores tuning state when `BuildConfig.DEBUG` is false. The
-background artwork reuses the committed theme owner's encoded Coil entry and requests a separate
-small decoded memory entry; nested `AdaptiveBackground` calls do not create duplicate blur layers.
+debug source set, and production UI ignores tuning state when `BuildConfig.DEBUG` is false. Its
+presets share the accepted OLED Glow artwork field and vary semantic foreground treatment. The
+optional per-album rating-tint comparison reuses the album's encoded Coil entry, decodes a 32 px
+software sample, and keeps only a bounded derived-color cache; presentation-theme tint remains the
+default.
 
 The lab state is neither a product setting nor persistent. Once a background design is accepted, its
 reviewed treatment belongs in the central theme policy and the receiver, browser server, variants,

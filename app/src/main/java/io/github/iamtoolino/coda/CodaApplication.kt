@@ -13,6 +13,7 @@ import io.github.iamtoolino.coda.player.PlaybackConnection
 import io.github.iamtoolino.coda.player.PlaybackService
 import io.github.iamtoolino.coda.player.SharedPreferencesAudioCleanupLedger
 import io.github.iamtoolino.coda.player.TransientAudioCleanupCoordinator
+import io.github.iamtoolino.coda.ui.clearAlbumRatingTintCache
 import io.github.iamtoolino.coda.ui.theme.clearArtworkColorCache
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -70,6 +71,7 @@ class CodaApplication : Application(), DefaultLifecycleObserver {
         if (namespace.isBlank()) return
         imageLoader.memoryCache?.clear()
         clearArtworkColorCache()
+        clearAlbumRatingTintCache()
         cacheCleanupScope.launch {
             imageLoader.diskCache?.clear()
             CarArtwork.clear(this@CodaApplication, namespace)
@@ -88,6 +90,7 @@ class CodaApplication : Application(), DefaultLifecycleObserver {
                 .commit()
             check(generationPersisted) { "Could not persist artwork cache generation" }
             clearArtworkColorCache()
+            clearAlbumRatingTintCache()
             imageLoader.memoryCache?.clear()
             _artworkGeneration.value = nextGeneration
         }

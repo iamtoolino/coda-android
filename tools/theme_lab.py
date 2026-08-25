@@ -14,40 +14,87 @@ from pathlib import Path
 
 ACTION = "io.github.iamtoolino.coda.debug.BACKGROUND_DESIGN_TUNING"
 RECEIVER = "io.github.iamtoolino.coda/.debug.BackgroundDesignTuningReceiver"
-VARIANTS = {"current", "oled_glow", "macos_field", "deep_artwork"}
-FIELDS = {
-    "artworkOpacity": (0.0, 0.40),
-    "blurRadiusDp": (0.0, 120.0),
-    "artworkScale": (1.0, 1.50),
-    "artworkSaturation": (0.0, 1.50),
+VARIANTS = {"oled_glow", "quiet_material", "oled_instrument", "sleeve_editorial"}
+NUMBER_FIELDS = {
     "accentOpacity": (0.0, 0.65),
     "glowOpacity": (0.0, 0.65),
     "vignetteOpacity": (0.0, 0.90),
     "blackFalloffOpacity": (0.0, 1.0),
-    "baseLuminance": (0.0, 0.10),
+    "primaryTextLuminance": (0.72, 1.0),
+    "secondaryTextLuminance": (0.42, 0.86),
+    "homeHeadingSizeSp": (22.0, 30.0),
+    "headingWeight": (400, 800),
+    "cardTitleSizeSp": (14.0, 18.0),
+    "ratingSizeDp": (22.0, 30.0),
+    "ratingRadiusDp": (6.0, 12.0),
+    "ratingBlackOpacity": (0.0, 0.85),
+    "ratingAccentOpacity": (0.0, 1.0),
+    "ratingOutlineOpacity": (0.0, 0.30),
+    "miniPlayerOpacity": (0.55, 1.0),
+    "miniPlayerAccentOpacity": (0.0, 0.20),
+    "miniPlayerOutlineOpacity": (0.0, 0.25),
+    "miniPlayerHaloOpacity": (0.0, 0.18),
+    "progressThicknessDp": (1.5, 4.0),
+    "progressHorizontalInsetDp": (0.0, 24.0),
+    "progressVerticalInsetDp": (0.0, 12.0),
+}
+CHOICE_FIELDS = {
+    "typeface": {"manrope", "system"},
+    "ratingTintSource": {"presentation", "album"},
+    "progressPlacement": {"bottom", "top"},
 }
 DEFAULT_STATE = {
-    "variant": "deep_artwork",
-    "artworkOpacity": 0.11,
-    "blurRadiusDp": 84.0,
-    "artworkScale": 1.24,
-    "artworkSaturation": 0.86,
-    "accentOpacity": 0.26,
-    "glowOpacity": 0.20,
+    "variant": "quiet_material",
+    "accentOpacity": 0.42,
+    "glowOpacity": 0.30,
     "vignetteOpacity": 0.62,
-    "blackFalloffOpacity": 0.90,
-    "baseLuminance": 0.0,
+    "blackFalloffOpacity": 0.88,
+    "primaryTextLuminance": 0.91,
+    "secondaryTextLuminance": 0.66,
+    "typeface": "manrope",
+    "homeHeadingSizeSp": 25.0,
+    "headingWeight": 600,
+    "cardTitleSizeSp": 15.5,
+    "ratingSizeDp": 24.0,
+    "ratingRadiusDp": 7.5,
+    "ratingBlackOpacity": 0.68,
+    "ratingAccentOpacity": 0.32,
+    "ratingOutlineOpacity": 0.10,
+    "ratingTintSource": "presentation",
+    "miniPlayerOpacity": 0.86,
+    "miniPlayerAccentOpacity": 0.07,
+    "miniPlayerOutlineOpacity": 0.08,
+    "miniPlayerHaloOpacity": 0.06,
+    "progressPlacement": "bottom",
+    "progressThicknessDp": 2.0,
+    "progressHorizontalInsetDp": 12.0,
+    "progressVerticalInsetDp": 6.0,
 }
 ADB_EXTRAS = {
-    "artworkOpacity": "artwork_opacity",
-    "blurRadiusDp": "blur_radius_dp",
-    "artworkScale": "artwork_scale",
-    "artworkSaturation": "artwork_saturation",
     "accentOpacity": "accent_opacity",
     "glowOpacity": "glow_opacity",
     "vignetteOpacity": "vignette_opacity",
     "blackFalloffOpacity": "black_falloff_opacity",
-    "baseLuminance": "base_luminance",
+    "primaryTextLuminance": "primary_text",
+    "secondaryTextLuminance": "secondary_text",
+    "typeface": "typeface",
+    "homeHeadingSizeSp": "heading_size",
+    "headingWeight": "heading_weight",
+    "cardTitleSizeSp": "card_title_size",
+    "ratingSizeDp": "rating_size",
+    "ratingRadiusDp": "rating_radius",
+    "ratingBlackOpacity": "rating_black",
+    "ratingAccentOpacity": "rating_accent",
+    "ratingOutlineOpacity": "rating_outline",
+    "ratingTintSource": "rating_tint_source",
+    "miniPlayerOpacity": "mini_opacity",
+    "miniPlayerAccentOpacity": "mini_accent",
+    "miniPlayerOutlineOpacity": "mini_outline",
+    "miniPlayerHaloOpacity": "mini_halo",
+    "progressPlacement": "progress_placement",
+    "progressThicknessDp": "progress_thickness",
+    "progressHorizontalInsetDp": "progress_horizontal_inset",
+    "progressVerticalInsetDp": "progress_vertical_inset",
 }
 REPO_ROOT = Path(__file__).resolve().parent.parent
 ADB_SCRIPT = REPO_ROOT / "scripts" / "adb.sh"
@@ -55,7 +102,7 @@ PAGE_TEMPLATE = (Path(__file__).parent / "theme-lab.html").read_text(encoding="u
 
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(description="Control Coda's debug artwork background")
+    parser = argparse.ArgumentParser(description="Control Coda's debug visual design")
     parser.add_argument("serial")
     parser.add_argument("--port", type=int, default=8787)
     parser.add_argument("--no-open", action="store_true")
@@ -72,20 +119,26 @@ def validated_number(value, name):
         number = float(value)
     except (TypeError, ValueError) as error:
         raise ValueError(f"{name} must be a number") from error
-    minimum, maximum = FIELDS[name]
+    minimum, maximum = NUMBER_FIELDS[name]
     if not minimum <= number <= maximum:
         raise ValueError(f"{name} must be between {minimum:g} and {maximum:g}")
-    return round(number, 3)
+    return int(number) if name == "headingWeight" else round(number, 3)
 
 
 def validated_state(value):
     variant = value.get("variant") if isinstance(value, dict) else None
     if variant not in VARIANTS:
-        raise ValueError("unknown background design")
-    return {
+        raise ValueError("unknown visual design")
+    result = {
         "variant": variant,
-        **{name: validated_number(value.get(name), name) for name in FIELDS},
+        **{name: validated_number(value.get(name), name) for name in NUMBER_FIELDS},
     }
+    for name, choices in CHOICE_FIELDS.items():
+        choice = value.get(name)
+        if choice not in choices:
+            raise ValueError(f"unknown {name}")
+        result[name] = choice
+    return result
 
 
 def run_adb(serial, arguments):
@@ -114,7 +167,13 @@ class ThemeLabServer(HTTPServer):
             "--es", "variant", next_state["variant"],
         ]
         for name, extra in ADB_EXTRAS.items():
-            arguments.extend(["--ef", extra, str(next_state[name])])
+            value = next_state[name]
+            if name in CHOICE_FIELDS:
+                arguments.extend(["--es", extra, str(value)])
+            elif name == "headingWeight":
+                arguments.extend(["--ei", extra, str(value)])
+            else:
+                arguments.extend(["--ef", extra, str(value)])
         run_adb(self.serial, arguments)
         with self.state_lock:
             self.state = next_state

@@ -157,17 +157,18 @@ With a booted emulator, run the credential-free Compose UI smoke test with an ex
 ./scripts/ui-test.sh emulator-5554
 ```
 
-Artwork-background experiments can be controlled from a local browser while a debug build is
+OLED visual-design experiments can be controlled from a local browser while a debug build is
 running on an emulator or device:
 
 ```sh
 ./scripts/theme-lab.sh emulator-5554
 ```
 
-The lab offers several starting designs and live controls for artwork blur, opacity, scale,
-saturation, accent glow, vignette, black falloff, and base luminance. It binds only to `127.0.0.1`,
-requires an explicit device serial, and communicates with a receiver present only in debug builds.
-It is temporary design tooling rather than a user-facing setting.
+The lab retains OLED Glow as a baseline and offers complete foreground presets with live controls
+for text, typography, rating material, rating tint ownership, mini-player separation, progress
+placement, and the shared artwork glow. It binds only to `127.0.0.1`, requires an explicit device
+serial, and communicates with a receiver present only in debug builds. It is temporary design
+tooling rather than a user-facing setting.
 
 The current implementation and verification boundaries are recorded in
 [docs/development-baseline.md](docs/development-baseline.md).

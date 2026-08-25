@@ -4,7 +4,6 @@ package io.github.iamtoolino.coda.ui.theme
 
 import android.graphics.Bitmap
 import android.graphics.Color as AndroidColor
-import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateColor
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.tween
@@ -26,15 +25,8 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.draw.BlurredEdgeTreatment
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
@@ -43,7 +35,6 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
 import coil3.imageLoader
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
@@ -106,14 +97,8 @@ private data class ArtworkColors(
     val surfaceVariant: Color,
 )
 
-private data class BackgroundArtwork(
-    val url: String,
-    val diskCacheKey: String?,
-    val memoryCacheKey: String,
-)
-
-private val LocalBackgroundArtwork = staticCompositionLocalOf<BackgroundArtwork?> { null }
 internal val LocalArtworkFieldBackgroundActive = staticCompositionLocalOf { false }
+internal val LocalVisualDesignTuning = staticCompositionLocalOf { BackgroundDesignTuning() }
 
 private val BrandColors = artworkColors(CodaAccentExtractor.GENERIC_FALLBACK)
 private const val ThemeTransitionDurationMillis = 850
@@ -154,7 +139,6 @@ internal fun RoutedCodaTheme(
     val context = LocalContext.current
     val commitGate = remember { ThemeCommitGate() }
     var committedColors by remember { mutableStateOf(BrandColors) }
-    var committedArtwork by remember { mutableStateOf<BackgroundArtwork?>(null) }
 
     LaunchedEffect(request) {
         val token = commitGate.begin()
@@ -163,7 +147,6 @@ internal fun RoutedCodaTheme(
             CodaThemeRequest.InheritPlayback -> Unit
             CodaThemeRequest.Brand -> {
                 committedColors = BrandColors
-                committedArtwork = null
             }
             is CodaThemeRequest.Artwork -> {
                 val cacheKey = "${AppGraph.cacheNamespace}:" +
@@ -172,11 +155,9 @@ internal fun RoutedCodaTheme(
                 if (cached != null) {
                     if (commitGate.isCurrent(token)) {
                         committedColors = cached
-                        committedArtwork = request.asBackgroundArtwork()
                     }
                     return@LaunchedEffect
                 }
-                var artworkReady = false
                 val colors = try {
                     val requestBuilder = ImageRequest.Builder(context)
                         .data(request.artworkUrl)
@@ -194,7 +175,6 @@ internal fun RoutedCodaTheme(
                     if (result == null) {
                         BrandColors
                     } else {
-                        artworkReady = true
                         withContext(Dispatchers.Default) {
                             val bitmap = result.image.toBitmap(32, 32, Bitmap.Config.ARGB_8888)
                             artworkColors(CodaAccentExtractor.extractOrFallback(bitmap))
@@ -209,23 +189,15 @@ internal fun RoutedCodaTheme(
                 if (!commitGate.isCurrent(token)) return@LaunchedEffect
                 if (colors !== BrandColors) ArtworkColorCache[cacheKey] = colors
                 committedColors = colors
-                committedArtwork = request.asBackgroundArtwork().takeIf { artworkReady }
             }
         }
     }
-    CompositionLocalProvider(LocalBackgroundArtwork provides committedArtwork) {
-        CodaMaterialTheme(committedColors, content)
-    }
+    CodaMaterialTheme(committedColors, content)
 }
-
-private fun CodaThemeRequest.Artwork.asBackgroundArtwork(): BackgroundArtwork = BackgroundArtwork(
-    url = artworkUrl,
-    diskCacheKey = diskCacheKey,
-    memoryCacheKey = memoryCacheKey,
-)
 
 @Composable
 private fun CodaMaterialTheme(colors: ArtworkColors, content: @Composable () -> Unit) {
+    val tuning = BackgroundDesignTuningStore.current.takeIf { BuildConfig.DEBUG && it.enabled }
     val transition = updateTransition(
         targetState = colors,
         label = "artwork theme",
@@ -272,6 +244,12 @@ private fun CodaMaterialTheme(colors: ArtworkColors, content: @Composable () -> 
         },
         label = "artwork surface variant",
     ) { it.surfaceVariant }
+    val primaryText = tuning?.let { warmInk(it.primaryTextLuminance) } ?: Color(0xFFF5F2F0)
+    val secondaryText = tuning?.let { warmInk(it.secondaryTextLuminance) } ?: Color(0xFFBBB7B5)
+    val typography = when (tuning?.typeface) {
+        DebugTypeface.SYSTEM -> systemTypography()
+        else -> CodaTypography
+    }
     val colorScheme = darkColorScheme(
         primary = accent,
         onPrimary = onAccent,
@@ -286,22 +264,32 @@ private fun CodaMaterialTheme(colors: ArtworkColors, content: @Composable () -> 
         tertiaryContainer = accentContainer,
         onTertiaryContainer = onAccentContainer,
         background = backgroundTop,
-        onBackground = Color(0xFFF5F2F0),
+        onBackground = primaryText,
         surface = backgroundBottom,
         surfaceVariant = surfaceVariant,
-        onSurface = Color(0xFFF5F2F0),
-        onSurfaceVariant = Color(0xFFBBB7B5),
+        onSurface = primaryText,
+        onSurfaceVariant = secondaryText,
         outline = Color(0xFF777270),
         outlineVariant = Color(0xFF45413F),
         surfaceTint = accent,
         inversePrimary = accent,
     )
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = CodaTypography,
-        content = content,
-    )
+    CompositionLocalProvider(LocalVisualDesignTuning provides (tuning ?: BackgroundDesignTuning())) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = typography,
+            content = content,
+        )
+    }
 }
+
+private fun warmInk(luminance: Float): Color = Color(
+    red = luminance,
+    green = luminance * 0.985f,
+    blue = luminance * 0.97f,
+)
+
+private fun systemTypography(): Typography = Typography()
 
 @Composable
 fun AdaptiveBackground(
@@ -312,9 +300,7 @@ fun AdaptiveBackground(
         Box(modifier = modifier.fillMaxSize()) { content() }
         return
     }
-    val tuning = BackgroundDesignTuningStore.current.takeIf {
-        BuildConfig.DEBUG && it.enabled && it.variant != BackgroundDesignVariant.CURRENT
-    }
+    val tuning = BackgroundDesignTuningStore.current.takeIf { BuildConfig.DEBUG && it.enabled }
     if (tuning != null) {
         ArtworkFieldBackground(modifier, tuning, content)
         return
@@ -340,41 +326,9 @@ private fun ArtworkFieldBackground(
     tuning: BackgroundDesignTuning,
     content: @Composable () -> Unit,
 ) {
-    val artwork = LocalBackgroundArtwork.current
     val accent = MaterialTheme.colorScheme.primary
-    val base = tuning.baseLuminance
-    val baseColor = Color(
-        red = base,
-        green = (base * 1.12f).coerceAtMost(1f),
-        blue = (base * 1.24f).coerceAtMost(1f),
-    )
     CompositionLocalProvider(LocalArtworkFieldBackgroundActive provides true) {
-        Box(modifier = modifier.fillMaxSize().background(baseColor)) {
-            Crossfade(
-                targetState = artwork,
-                modifier = Modifier.fillMaxSize(),
-                animationSpec = tween(ThemeTransitionDurationMillis, easing = ThemeTransitionEasing),
-                label = "background artwork",
-            ) { source ->
-                if (source != null && tuning.artworkOpacity > 0f) {
-                    AsyncImage(
-                        model = backgroundArtworkRequest(source),
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        colorFilter = ColorFilter.colorMatrix(
-                            ColorMatrix().apply { setToSaturation(tuning.artworkSaturation) },
-                        ),
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .scale(tuning.artworkScale)
-                            .blur(
-                                tuning.blurRadiusDp.dp,
-                                edgeTreatment = BlurredEdgeTreatment.Unbounded,
-                            )
-                            .alpha(tuning.artworkOpacity),
-                    )
-                }
-            }
+        Box(modifier = modifier.fillMaxSize().background(Color.Black)) {
             Box(
                 Modifier
                     .fillMaxSize()
@@ -428,19 +382,6 @@ private fun ArtworkFieldBackground(
             )
             content()
         }
-    }
-}
-
-@Composable
-private fun backgroundArtworkRequest(source: BackgroundArtwork): ImageRequest {
-    val builder = ImageRequest.Builder(LocalContext.current)
-        .data(source.url)
-        .size(160, 160)
-        .memoryCacheKey("background-field:${source.memoryCacheKey}")
-    return if (source.diskCacheKey == null) {
-        builder.diskCachePolicy(CachePolicy.DISABLED).build()
-    } else {
-        builder.diskCacheKey(source.diskCacheKey).build()
     }
 }
 
