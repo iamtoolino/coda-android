@@ -19,6 +19,10 @@
     .concept strong { display:block; margin-bottom:8px; font-size:19px; }
     .concept p { margin:0; color:var(--muted); line-height:1.45; }
     .concept .number { display:inline-flex; min-width:25px; height:25px; align-items:center; justify-content:center; margin-bottom:18px; border-radius:999px; color:#b9d9dc; background:#20282a; font-size:12px; font-weight:800; }
+    .stress { display:flex; align-items:center; gap:8px; margin-top:18px; padding:8px; border:1px solid var(--border); border-radius:16px; background:rgba(21,23,25,.72); }
+    .stress-label { margin:0 8px; color:var(--muted); font-size:13px; font-weight:700; }
+    .stress button { padding:8px 12px; border-radius:10px; font-size:13px; }
+    .stress button[data-selected="true"] { color:#071012; border-color:#75b5bc; background:#75b5bc; }
     .footer { display:flex; align-items:center; justify-content:space-between; gap:20px; margin-top:24px; }
     .target { font:600 13px/1.2 ui-monospace,SFMono-Regular,Menlo,monospace; color:#b9d9dc; }
     button { border:1px solid var(--border); border-radius:999px; padding:11px 17px; color:var(--text); background:#202326; font:inherit; cursor:pointer; }
@@ -63,6 +67,17 @@
         <strong>Session Button</strong>
         <p>Only transport remains in the body; one quiet artwork-edge button reveals every secondary detail.</p>
       </button>
+      <button class="concept" type="button" data-prototype="quiet-dock-wide">
+        <span class="number">6</span>
+        <strong>Quiet Dock Wide</strong>
+        <p>Quiet Dock gains equal-width utility capsules and an elastic metadata block supporting three title lines.</p>
+      </button>
+    </div>
+    <div class="stress" aria-label="Title stress test">
+      <p class="stress-label">Title stress</p>
+      <button type="button" data-title-stress="actual">Actual</button>
+      <button type="button" data-title-stress="two-lines">Two lines</button>
+      <button type="button" data-title-stress="three-lines">Three lines</button>
     </div>
     <div class="footer">
       <div class="target">Target: __TARGET_SERIAL__</div>
@@ -73,6 +88,7 @@
   <script>
     const status=document.querySelector("#status");
     const concepts=[...document.querySelectorAll("[data-prototype]")];
+    const titleStressButtons=[...document.querySelectorAll("[data-title-stress]")];
     const selectPrototype=async(prototype)=>{
       status.dataset.error="false";status.textContent="Applying concept…";
       try{
@@ -85,6 +101,18 @@
     concepts.forEach(card=>card.addEventListener("click",()=>selectPrototype(card.dataset.prototype)));
     const initialPrototype="__CURRENT_PROTOTYPE__";
     concepts.forEach(card=>card.dataset.selected=String(card.dataset.prototype===initialPrototype));
+    const selectTitleStress=async(titleStress)=>{
+      status.dataset.error="false";status.textContent="Applying title test…";
+      try{
+        const response=await fetch("/api/title-stress",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({titleStress})});
+        const result=await response.json();if(!response.ok)throw new Error(result.error||"Could not apply title test");
+        titleStressButtons.forEach(button=>button.dataset.selected=String(button.dataset.titleStress===titleStress));
+        status.textContent="Title test applied on __TARGET_SERIAL__.";
+      }catch(error){status.dataset.error="true";status.textContent=error.message||String(error)}
+    };
+    titleStressButtons.forEach(button=>button.addEventListener("click",()=>selectTitleStress(button.dataset.titleStress)));
+    const initialTitleStress="__CURRENT_TITLE_STRESS__";
+    titleStressButtons.forEach(button=>button.dataset.selected=String(button.dataset.titleStress===initialTitleStress));
     document.querySelector("#openCoda").addEventListener("click",async()=>{
       status.dataset.error="false";status.textContent="Opening Coda…";
       try{const response=await fetch("/api/open-coda",{method:"POST"}),result=await response.json();if(!response.ok)throw new Error(result.error||"Could not open Coda");status.textContent="Coda opened on __TARGET_SERIAL__."}

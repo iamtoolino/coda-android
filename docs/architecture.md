@@ -101,7 +101,7 @@ repopulate visible stale entries. Disconnect performs the same cache cleanup for
 
 The browser lab is a temporary debug seam for Now Playing visual experiments. Its loopback-only
 Python server requires one explicit ADB serial and currently switches between the production
-baseline and five non-persistent control-layout prototypes. The completed general-theme presets
+baseline and six non-persistent control-layout prototypes plus title-length stress cases. The completed general-theme presets
 and tuning payload have been removed; OLED Instrument is ordinary production policy.
 
 When a Now Playing prototype needs live values, add only the narrowly scoped controls and a

@@ -13,4 +13,13 @@ class NowPlayingPrototypeTest {
         assertNull(NowPlayingPrototype.fromWireName("old-theme-preset"))
         assertNull(NowPlayingPrototype.fromWireName(null))
     }
+
+    @Test
+    fun `title stress wire names reject obsolete theme values`() {
+        NowPlayingTitleStress.entries.forEach { stress ->
+            assertEquals(stress, NowPlayingTitleStress.fromWireName(stress.wireName))
+        }
+        assertNull(NowPlayingTitleStress.fromWireName("manrope"))
+        assertNull(NowPlayingTitleStress.fromWireName(null))
+    }
 }

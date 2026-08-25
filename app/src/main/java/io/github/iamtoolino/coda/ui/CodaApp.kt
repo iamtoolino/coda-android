@@ -2484,6 +2484,7 @@ private fun NowPlayingScreen(
 ) {
     val progress by playback.progress.collectAsStateWithLifecycle()
     val prototype by NowPlayingPrototypeStore.prototype.collectAsStateWithLifecycle()
+    val titleStress by NowPlayingPrototypeStore.titleStress.collectAsStateWithLifecycle()
     var showPlaybackDetails by rememberSaveable { mutableStateOf(false) }
     var showSessionSheet by rememberSaveable { mutableStateOf(false) }
     val ratings = LocalAlbumRatingCoordinator.current
@@ -2512,6 +2513,13 @@ private fun NowPlayingScreen(
     }
     val streamQuality = qualityLabel(state)
     val streamMode = streamModeLabel(state)
+    val displayTitle = when (titleStress) {
+        NowPlayingTitleStress.ACTUAL -> state.title
+        NowPlayingTitleStress.TWO_LINES ->
+            "Everything We Never Said Beneath the Northern Lights"
+        NowPlayingTitleStress.THREE_LINES ->
+            "The Extraordinary and Unnecessarily Elaborate Ballad of Satellites Falling Into the Sea"
+    }
     LaunchedEffect(ratingSeed, albumId) {
         if (albumId != null &&
             (ratingSeedState.key != albumId || ratingSeedState.value == null)
@@ -2609,20 +2617,27 @@ private fun NowPlayingScreen(
                             )
                         }
                         Spacer(Modifier.height(if (compact) 7.dp else 12.dp))
+                        val wideTitle = prototype == NowPlayingPrototype.QUIET_DOCK_WIDE
                         Text(
-                            state.title,
+                            displayTitle,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .heightIn(max = if (veryCompact) 48.dp else 54.dp),
+                                .heightIn(
+                                    max = if (wideTitle) {
+                                        if (veryCompact) 76.dp else 94.dp
+                                    } else {
+                                        if (veryCompact) 48.dp else 54.dp
+                                    },
+                                ),
                             autoSize = TextAutoSize.StepBased(
-                                minFontSize = 18.sp,
+                                minFontSize = if (wideTitle) 16.sp else 18.sp,
                                 maxFontSize = if (veryCompact) 24.sp else 28.sp,
                                 stepSize = 1.sp,
                             ),
                             fontSize = if (veryCompact) 24.sp else 28.sp,
                             fontWeight = FontWeight.Bold,
                             lineHeight = 1.16.em,
-                            maxLines = 2,
+                            maxLines = if (wideTitle) 3 else 2,
                             overflow = TextOverflow.Ellipsis,
                             textAlign = TextAlign.Center,
                         )
@@ -2731,13 +2746,16 @@ private fun NowPlayingScreen(
                                     onToggle = playback::togglePlayPause,
                                     onNext = playback::next,
                                 )
-                                if (prototype == NowPlayingPrototype.QUIET_DOCK) {
+                                if (prototype == NowPlayingPrototype.QUIET_DOCK ||
+                                    prototype == NowPlayingPrototype.QUIET_DOCK_WIDE
+                                ) {
                                     Spacer(Modifier.height(if (compact) 6.dp else 10.dp))
                                     QuietUtilityDock(
                                         remainingCount = remainingQueueCount,
                                         streamMode = streamMode,
                                         onOpenQueue = { navController.navigate("queue") },
                                         onOpenDetails = { showPlaybackDetails = true },
+                                        wide = prototype == NowPlayingPrototype.QUIET_DOCK_WIDE,
                                     )
                                 } else if (prototype == NowPlayingPrototype.BASELINE) {
                                     Spacer(Modifier.height(if (compact) 8.dp else 14.dp))
@@ -2894,17 +2912,20 @@ private fun QuietUtilityDock(
     streamMode: String,
     onOpenQueue: () -> Unit,
     onOpenDetails: () -> Unit,
+    wide: Boolean = false,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        val utilityModifier = if (wide) Modifier.weight(1f) else Modifier
         UtilityPill(
             icon = Icons.AutoMirrored.Filled.QueueMusic,
             label = "Queue · $remainingCount",
             contentDescription = "Open queue, $remainingCount tracks remaining",
             onClick = onOpenQueue,
+            modifier = utilityModifier,
         )
         Spacer(Modifier.width(10.dp))
         UtilityPill(
@@ -2912,6 +2933,7 @@ private fun QuietUtilityDock(
             label = streamMode,
             contentDescription = "Playback details, $streamMode",
             onClick = onOpenDetails,
+            modifier = utilityModifier,
         )
     }
 }
@@ -2953,9 +2975,10 @@ private fun UtilityPill(
     contentDescription: String,
     onClick: () -> Unit,
     artworkOverlay: Boolean = false,
+    modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .height(48.dp)
             .clip(CircleShape)
             .background(Color.Black.copy(alpha = if (artworkOverlay) 0.68f else 0.46f))
@@ -2968,6 +2991,7 @@ private fun UtilityPill(
             .semantics { this.contentDescription = contentDescription }
             .padding(horizontal = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center,
     ) {
         Icon(
             icon,
