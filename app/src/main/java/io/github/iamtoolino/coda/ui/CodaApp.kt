@@ -1835,8 +1835,6 @@ private fun ArtistHero(
         size = ArtworkSizes.HERO,
         preferExternal = true,
     )
-    val trackCount = albums.sumOf { it.songCount }
-    val duration = albums.sumOf { it.duration }
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -1864,11 +1862,7 @@ private fun ArtistHero(
         ) {
             Text(artist.name, fontSize = 38.sp, fontWeight = FontWeight.Bold)
             Text(
-                buildList {
-                    add("${albums.size} albums")
-                    if (trackCount > 0) add("$trackCount tracks")
-                    if (duration > 0) add(formatCollectionDuration(duration))
-                }.joinToString(" • "),
+                "${albums.size} ${if (albums.size == 1) "album" else "albums"}",
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
@@ -2790,7 +2784,7 @@ private fun UtilityPill(
             .background(Color.Black.copy(alpha = 0.46f))
             .border(
                 1.dp,
-                MaterialTheme.colorScheme.primary.copy(alpha = 0.20f),
+                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.14f),
                 CircleShape,
             )
             .clickable(onClick = onClick)
@@ -2802,7 +2796,7 @@ private fun UtilityPill(
         Icon(
             icon,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.size(19.dp),
         )
         Spacer(Modifier.width(7.dp))
@@ -2853,9 +2847,9 @@ private fun PlaybackDetailsSheet(
     }
 }
 
-private fun streamModeLabel(state: PlaybackUiState): String =
+internal fun streamModeLabel(state: PlaybackUiState): String =
     if (state.codec.equals("opus", ignoreCase = true)) {
-        "Transcoded · OPUS"
+        "Transcoded"
     } else {
         "Original"
     }
@@ -3017,6 +3011,10 @@ private fun QueueScreen(
                         Icon(Icons.Default.ClearAll, "Clear queue")
                     }
                 },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent,
+                    scrolledContainerColor = Color.Transparent,
+                ),
             )
         }
         itemsIndexed(state.queue, key = { index, item -> "${item.id}-$index" }) { index, item ->

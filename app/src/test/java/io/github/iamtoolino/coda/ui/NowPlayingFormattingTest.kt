@@ -7,6 +7,12 @@ import org.junit.Test
 
 class NowPlayingFormattingTest {
     @Test
+    fun `stream mode stays concise while quality carries codec details`() {
+        assertEquals("Transcoded", streamModeLabel(PlaybackUiState(codec = "opus")))
+        assertEquals("Original", streamModeLabel(PlaybackUiState(codec = "flac")))
+    }
+
+    @Test
     fun `cellular transcode retains its codec label without source measurements`() {
         assertEquals("OPUS", qualityLabel(PlaybackUiState(codec = "opus")))
     }
