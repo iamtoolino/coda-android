@@ -132,6 +132,7 @@ import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.setProgress
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.text.font.FontWeight
@@ -1895,6 +1896,7 @@ private fun AlbumHero(
                 Modifier.fillMaxSize(),
                 size = ArtworkSizes.HERO,
                 showRatingBadge = false,
+                contentScale = ContentScale.Fit,
             )
             Box(
                 Modifier
@@ -1969,7 +1971,10 @@ private fun AlbumHero(
                 listOfNotNull(
                     page.album.releaseYearLabel().takeIf { it.isNotBlank() },
                     "${page.songs.size} tracks",
-                    page.album.duration.takeIf { it > 0 }?.let(::formatCollectionDuration),
+                    (
+                        page.album.duration.takeIf { it > 0 }
+                            ?: page.songs.sumOf { it.duration }.takeIf { it > 0 }
+                    )?.let(::formatCompactCollectionDuration),
                 ).joinToString(" • "),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 13.sp,
@@ -1993,7 +1998,7 @@ private fun RoundActionButton(
     }
     val foreground = when {
         primary -> MaterialTheme.colorScheme.onPrimary
-        translucent -> Color.White
+        translucent -> Color(0xFFF1EEE9)
         else -> MaterialTheme.colorScheme.onSurfaceVariant
     }
     IconButton(
@@ -2135,6 +2140,7 @@ private fun Cover(
     modifier: Modifier,
     size: Int = ArtworkSizes.ALBUM_CARD,
     showRatingBadge: Boolean = true,
+    contentScale: ContentScale = ContentScale.Crop,
 ) {
     val source = navidromeCoverSource(album.coverArt ?: album.id, size)
     val ratingTint = MaterialTheme.colorScheme.primary
@@ -2154,7 +2160,7 @@ private fun Cover(
             AsyncImage(
                 model = artworkRequest(source),
                 contentDescription = album.name,
-                contentScale = ContentScale.Crop,
+                contentScale = contentScale,
                 modifier = Modifier.fillMaxSize(),
             )
         }
@@ -2272,7 +2278,7 @@ private fun AlbumDiscHeader(section: AlbumDiscSection) {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Text(
-            text = formatCollectionDuration(section.duration),
+            text = formatCompactCollectionDuration(section.duration),
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -2963,7 +2969,10 @@ private fun AlbumRatingStars(
     buttonSize: Dp = 34.dp,
     iconSize: Dp = 23.dp,
 ) {
-    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        modifier = modifier.semantics { stateDescription = "$rating of 5 stars" },
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
         (1..5).forEach { star ->
             IconButton(
                 onClick = { onRate(star) },
@@ -3135,6 +3144,18 @@ private fun formatCollectionDuration(seconds: Int): String {
     val remaining = seconds % 60
     return if (hours > 0) "%d:%02d:%02d".format(hours, minutes, remaining)
     else "%d:%02d".format(minutes, remaining)
+}
+
+internal fun formatCompactCollectionDuration(seconds: Int): String {
+    val totalMinutes = seconds.coerceAtLeast(0) / 60
+    if (totalMinutes < 1) return "<1m"
+    val hours = totalMinutes / 60
+    val minutes = totalMinutes % 60
+    return when {
+        hours == 0 -> "${minutes}m"
+        minutes == 0 -> "${hours}h"
+        else -> "${hours}h ${minutes}m"
+    }
 }
 
 private fun Album.releaseYearLabel(): String =

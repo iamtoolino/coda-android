@@ -97,19 +97,6 @@ offers an explicit artwork refresh: it clears Coil memory/disk data, Android Aut
 derived theme colors, then advances the persisted generation so in-flight old requests cannot
 repopulate visible stale entries. Disconnect performs the same cache cleanup for the old account.
 
-## Debug design tooling
-
-The browser lab is a temporary debug seam for Now Playing visual experiments. Its loopback-only
-Python server requires one explicit ADB serial and currently provides a clean workspace plus an Open
-Coda action. The completed control-layout prototypes and title stress cases have been removed; OLED
-Instrument with Quiet Dock is ordinary production policy.
-
-When a Now Playing prototype needs live values, add only the narrowly scoped controls and a
-debug-source-set receiver required for that experiment. Lab state is neither a product setting nor
-persistent. After a visual decision, bake the reviewed treatment into production and remove the
-prototype controls and receiver. Release inspection must confirm that no debug receiver or broadcast
-action enters the merged release manifest.
-
 ## Playback
 
 `PlaybackService` owns a Media3 `ExoPlayer` and `MediaLibrarySession`. `PlaybackConnection` is the
