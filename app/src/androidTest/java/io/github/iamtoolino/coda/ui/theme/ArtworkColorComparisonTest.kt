@@ -17,6 +17,7 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.util.Locale
 import java.util.concurrent.TimeUnit
+import kotlin.math.roundToInt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -88,7 +89,7 @@ class ArtworkColorComparisonTest {
             ComparisonRow(
                 album = album,
                 imageData = bitmap.jpegDataUrl(),
-                macV2 = MacArtworkAccentV2.extract(bitmap),
+                macV2 = CodaAccentExtractor.extractOrFallback(bitmap).toArgb(),
                 paletteDominant = palette.dominantSwatch.toCandidate(palettePopulation),
                 paletteVibrant = palette.vibrantSwatch.toCandidate(palettePopulation),
                 paletteMuted = palette.mutedSwatch.toCandidate(palettePopulation),
@@ -206,6 +207,12 @@ class ArtworkColorComparisonTest {
         Color.red(this),
         Color.green(this),
         Color.blue(this),
+    )
+
+    private fun CodaAccentColor.toArgb(): Int = Color.rgb(
+        (red.coerceIn(0.0, 1.0) * 255).roundToInt(),
+        (green.coerceIn(0.0, 1.0) * 255).roundToInt(),
+        (blue.coerceIn(0.0, 1.0) * 255).roundToInt(),
     )
 
     private fun String.escapeHtml(): String = buildString(length) {

@@ -75,8 +75,9 @@ the last committed palette until their replacement is ready, avoiding an interme
 transition. Once committed, every routed Material color interpolates through one synchronized
 850 ms ease-in-out transition, so backgrounds, surfaces, controls, progress, ratings, and their
 foreground colors cannot animate on independent timelines.
-Monochrome extraction falls back to neutral grey; missing or unreadable artwork falls back to Brand
-teal.
+The perceptual extractor selects a well-supported artwork hue family, then constrains lightness and
+chroma to a reliable UI range. Monochrome artwork produces a restrained derived neutral; missing or
+unreadable artwork falls back to Brand teal.
 
 ## Artwork
 

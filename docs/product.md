@@ -53,8 +53,8 @@ Coda is a personal, album-oriented Android client for Navidrome/OpenSubsonic.
   without artwork inherits playback and never uses its first track as a visual proxy.
 - Artist photography never owns the palette. Artist screens inherit playback, or Brand when nothing
   is playing.
-- Monochrome artwork uses neutral grey (`#8F9499`). Missing, unreadable, or otherwise unusable
-  artwork uses Brand teal.
+- Monochrome artwork uses a restrained neutral grey derived from the artwork. Missing, unreadable,
+  or otherwise unusable artwork uses Brand teal.
 - While a replacement artwork palette is loading, Coda retains the previous valid palette rather
   than flashing through Brand.
 - Every committed palette change crossfades together with the same 850 ms ease-in-out motion used
