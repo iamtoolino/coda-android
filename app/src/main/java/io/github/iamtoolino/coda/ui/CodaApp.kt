@@ -190,6 +190,7 @@ private val MiniPlayerVisualClearance = 104.dp
 private val HomeHeadingSize = 23.5.sp
 private val HomeHeadingWeight = FontWeight(650)
 private val CardTitleSize = 15.5.sp
+private const val CurrentTrackHighlightOpacity = 0.10f
 
 private enum class AlbumViewMode(
     val routeValue: String,
@@ -2226,7 +2227,7 @@ private fun SongRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(if (isPlaying) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent)
+            .background(currentTrackHighlight(isPlaying))
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 9.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -2277,6 +2278,13 @@ private fun AlbumDiscHeader(section: AlbumDiscSection) {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
+}
+
+@Composable
+private fun currentTrackHighlight(isPlaying: Boolean): Color = if (isPlaying) {
+    MaterialTheme.colorScheme.primary.copy(alpha = CurrentTrackHighlightOpacity)
+} else {
+    Color.Transparent
 }
 
 @Composable
@@ -3046,7 +3054,7 @@ private fun QueueRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(if (isPlaying) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent)
+            .background(currentTrackHighlight(isPlaying))
             .clickable(onClick = onClick)
             .padding(start = 12.dp, top = 8.dp, bottom = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
