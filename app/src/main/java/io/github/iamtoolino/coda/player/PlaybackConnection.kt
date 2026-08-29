@@ -453,7 +453,9 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
             albumId = extras?.getString("albumId"),
             artistId = extras?.getString("artistId"),
             artworkUrl = metadata?.artworkUri?.toString(),
-            artworkKey = extras?.getString("albumId") ?: item?.mediaId,
+            artworkKey = extras?.getString("coverArtId")
+                ?: extras?.getString("albumId")
+                ?: item?.mediaId,
             discNumber = extras?.takeIf { it.containsKey("discNumber") }?.getInt("discNumber"),
             codec = extras?.getString("codec"),
             bitDepth = extras?.takeIf { it.containsKey("bitDepth") }?.getInt("bitDepth"),
@@ -498,7 +500,9 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
                 artist = mediaItem.mediaMetadata.artist?.toString().orEmpty(),
                 album = mediaItem.mediaMetadata.albumTitle?.toString().orEmpty(),
                 artworkUrl = mediaItem.mediaMetadata.artworkUri?.toString(),
-                artworkKey = itemExtras?.getString("albumId") ?: mediaItem.mediaId,
+                artworkKey = itemExtras?.getString("coverArtId")
+                    ?: itemExtras?.getString("albumId")
+                    ?: mediaItem.mediaId,
                 trackNumber = itemExtras
                     ?.takeIf { it.containsKey("trackNumber") }
                     ?.getInt("trackNumber"),

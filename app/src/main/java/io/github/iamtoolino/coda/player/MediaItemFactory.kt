@@ -30,14 +30,14 @@ internal fun Song.toPlayableMediaItem(
 ): MediaItem {
     val coverUri = CarArtwork.cover(
         context,
-        albumId ?: coverArt,
+        albumArtworkId,
         size = ArtworkSizes.ALBUM_CARD,
         namespace = session.cacheNamespace,
     )
     val extras = Bundle().apply {
         putString("albumId", albumId)
         putString("artistId", artistId)
-        putString("coverArtId", albumId ?: coverArt)
+        putString("coverArtId", albumArtworkId)
         putString("cacheNamespace", session.cacheNamespace)
         putLong("accountGeneration", session.generation)
         putLong("durationMs", duration.coerceAtLeast(0) * 1_000L)

@@ -26,7 +26,10 @@ data class Album(
     val playCount: Long? = null,
     val starred: String? = null,
     val userRating: Int? = null,
-)
+) {
+    val artworkId: String
+        get() = coverArt?.takeIf { it.isNotBlank() } ?: id
+}
 
 enum class AlbumListType(val apiValue: String) {
     NEWEST("newest"),
@@ -70,6 +73,11 @@ data class Song(
 ) {
     val artistName: String
         get() = displayAlbumArtist?.takeIf { it.isNotBlank() } ?: artist
+
+    val albumArtworkId: String
+        get() = coverArt?.takeIf { it.isNotBlank() }
+            ?: albumId?.takeIf { it.isNotBlank() }
+            ?: id
 }
 
 @Serializable

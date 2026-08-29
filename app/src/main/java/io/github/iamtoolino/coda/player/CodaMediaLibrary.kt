@@ -617,7 +617,7 @@ internal class CodaMediaLibraryCallback(
                 .setArtworkUri(
                     CarArtwork.cover(
                         context,
-                        album.coverArt ?: album.id,
+                        album.artworkId,
                         ArtworkSizes.CAR_BROWSE_THUMBNAIL,
                         account.cacheNamespace,
                     ),
@@ -691,7 +691,7 @@ internal class CodaMediaLibraryCallback(
                 .setArtworkUri(
                     CarArtwork.cover(
                         context,
-                        song.albumId ?: song.coverArt,
+                        song.albumArtworkId,
                         ArtworkSizes.CAR_BROWSE_THUMBNAIL,
                         account.cacheNamespace,
                     ),

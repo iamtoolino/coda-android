@@ -137,6 +137,32 @@ class NavidromeModelsTest {
     }
 
     @Test
+    fun `album artwork identity prefers explicit cover art`() {
+        assertEquals(
+            "cover-1",
+            Album(id = "album-1", name = "Album", coverArt = "cover-1").artworkId,
+        )
+        assertEquals("album-1", Album(id = "album-1", name = "Album").artworkId)
+        assertEquals(
+            "cover-1",
+            Song(
+                id = "track-1",
+                title = "Track",
+                albumId = "album-1",
+                coverArt = "cover-1",
+            ).albumArtworkId,
+        )
+        assertEquals(
+            "album-1",
+            Song(id = "track-1", title = "Track", albumId = "album-1").albumArtworkId,
+        )
+        assertEquals(
+            "track-1",
+            Song(id = "track-1", title = "Track").albumArtworkId,
+        )
+    }
+
+    @Test
     fun `decodes cross client play queue position`() {
         val envelope = json.decodeFromString<SubsonicEnvelope>(
             """

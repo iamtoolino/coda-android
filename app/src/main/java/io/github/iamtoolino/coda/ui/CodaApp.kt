@@ -157,7 +157,6 @@ import io.github.iamtoolino.coda.AppGraph
 import io.github.iamtoolino.coda.CodaApplication
 import io.github.iamtoolino.coda.artwork.ArtworkSizes
 import io.github.iamtoolino.coda.artwork.ArtworkSource
-import io.github.iamtoolino.coda.artwork.localPlaybackArtworkSource
 import io.github.iamtoolino.coda.data.Album
 import io.github.iamtoolino.coda.data.AlbumListType
 import io.github.iamtoolino.coda.data.AlbumPage
@@ -360,12 +359,8 @@ fun CodaApp() {
         route != "now-playing" && route != "queue"
     val miniPlayerVisible = playbackState.currentSongId != null &&
         route != "now-playing" && route != "queue"
-    val playbackThemeSource = localPlaybackArtworkSource(
-        namespace = AppGraph.cacheNamespace,
-        generation = artworkGeneration,
-        artworkIdentity = playbackState.artworkKey ?: playbackState.currentSongId.orEmpty(),
-        url = playbackState.artworkUrl,
-    )
+    val playbackArtworkId = playbackState.artworkKey ?: playbackState.currentSongId
+    val playbackThemeSource = navidromeCoverSource(playbackArtworkId, ArtworkSizes.HERO)
     val playbackThemeRequest = playbackThemeSource?.let { source ->
         CodaThemeRequest.Artwork(
             identity = "album:${playbackState.artworkKey ?: playbackState.currentSongId}",
@@ -1433,7 +1428,7 @@ private fun AlbumScreen(
     )
     LaunchedEffect(coordinator, id) { coordinator.load(id) }
     val album = page?.album
-    val coverKey = album?.coverArt ?: album?.id
+    val coverKey = album?.artworkId
     val artworkSource = navidromeCoverSource(coverKey, ArtworkSizes.HERO)
     val themeRequest = when {
         page == null && error == null -> CodaThemeRequest.Pending
@@ -1674,7 +1669,7 @@ private fun playlistAlbumGroups(songs: List<Song>): List<PlaylistAlbumGroup> {
 @Composable
 private fun PlaylistAlbumHeader(songs: List<Song>) {
     val first = songs.firstOrNull() ?: return
-    val coverKey = first.albumId ?: first.coverArt
+    val coverKey = first.albumArtworkId
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -2116,7 +2111,7 @@ private fun Cover(
     showRatingBadge: Boolean = true,
     contentScale: ContentScale = ContentScale.Crop,
 ) {
-    val source = navidromeCoverSource(album.coverArt ?: album.id, size)
+    val source = navidromeCoverSource(album.artworkId, size)
     val ratingTint = MaterialTheme.colorScheme.primary
     val rating = LocalAlbumRatingCoordinator.current
         .state(album.id, album.userRating)
@@ -2271,7 +2266,7 @@ private fun currentTrackHighlight(isPlaying: Boolean): Color = if (isPlaying) {
 @Composable
 private fun ContinueCard(queue: PlayQueue, onClick: () -> Unit) {
     val song = queue.entry.firstOrNull { it.id == queue.current } ?: queue.entry.first()
-    val coverKey = song.albumId ?: song.coverArt ?: song.id
+    val coverKey = song.albumArtworkId
     val artworkSource = navidromeCoverSource(coverKey, ArtworkSizes.HERO)
     Box(
         modifier = Modifier
