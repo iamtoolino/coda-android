@@ -55,6 +55,7 @@ data class Song(
     val title: String,
     val album: String = "",
     val artist: String = "",
+    val displayAlbumArtist: String? = null,
     val albumId: String? = null,
     val artistId: String? = null,
     val coverArt: String? = null,
@@ -66,7 +67,10 @@ data class Song(
     val bitRate: Int? = null,
     val bitDepth: Int? = null,
     val samplingRate: Int? = null,
-)
+) {
+    val artistName: String
+        get() = displayAlbumArtist?.takeIf { it.isNotBlank() } ?: artist
+}
 
 @Serializable
 data class Playlist(

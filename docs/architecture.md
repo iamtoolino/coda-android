@@ -117,6 +117,9 @@ this path without depending on the phone `PlaybackConnection`.
 Playable Media3 items carry both album and artist IDs in their metadata, and the local playback
 snapshot preserves those IDs across service/process restoration. Now Playing navigation therefore
 uses the same restored authoritative queue metadata rather than resolving names back to library IDs.
+Song presentation centrally prefers the server's nonblank `displayAlbumArtist` over its track-level
+`artist`. The canonical value is written into Media3 metadata so the phone UI, queue, notification,
+lock screen, restored session, and Android Auto do not independently choose different artist labels.
 
 The player uses a Media3 `SimpleCache` as a transient audio cache with explicit resource eviction
 rather than a byte-based eviction policy. The queue defines its contents: whenever a queue exists, a

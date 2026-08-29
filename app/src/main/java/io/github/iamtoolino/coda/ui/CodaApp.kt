@@ -1698,7 +1698,7 @@ private fun PlaylistAlbumHeader(songs: List<Song>) {
                 overflow = TextOverflow.Ellipsis,
             )
             Text(
-                first.artist,
+                first.artistName,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -2219,9 +2219,9 @@ private fun SongRow(
         }
         Column(Modifier.weight(1f)) {
             Text(song.title, fontSize = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            if (showArtist && song.artist.isNotBlank()) {
+            if (showArtist && song.artistName.isNotBlank()) {
                 Text(
-                    song.artist,
+                    song.artistName,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     fontSize = 13.sp,
@@ -2333,7 +2333,7 @@ private fun ContinueCard(queue: PlayQueue, onClick: () -> Unit) {
                     color = Color.White,
                     fontSize = 19.sp,
                 )
-                Text(song.artist, color = Color.White.copy(alpha = 0.78f))
+                Text(song.artistName, color = Color.White.copy(alpha = 0.78f))
             }
         }
     }

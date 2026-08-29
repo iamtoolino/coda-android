@@ -103,6 +103,40 @@ class NavidromeModelsTest {
     }
 
     @Test
+    fun `song presentation prefers explicit album artist`() {
+        val song = json.decodeFromString<Song>(
+            """
+            {
+              "id": "track-1",
+              "title": "Trust Me, I'm a Doctor!",
+              "artist": "ZILF • Joe Campbell-Murray • Bret Ware",
+              "displayAlbumArtist": "ZILF"
+            }
+            """.trimIndent(),
+        )
+
+        assertEquals("ZILF • Joe Campbell-Murray • Bret Ware", song.artist)
+        assertEquals("ZILF", song.artistName)
+    }
+
+    @Test
+    fun `song presentation falls back when album artist is absent or blank`() {
+        assertEquals(
+            "Track Artist",
+            Song(id = "track-1", title = "Track", artist = "Track Artist").artistName,
+        )
+        assertEquals(
+            "Track Artist",
+            Song(
+                id = "track-2",
+                title = "Track",
+                artist = "Track Artist",
+                displayAlbumArtist = " ",
+            ).artistName,
+        )
+    }
+
+    @Test
     fun `decodes cross client play queue position`() {
         val envelope = json.decodeFromString<SubsonicEnvelope>(
             """

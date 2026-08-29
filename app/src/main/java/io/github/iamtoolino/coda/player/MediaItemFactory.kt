@@ -56,7 +56,7 @@ internal fun Song.toPlayableMediaItem(
     }
     val metadata = MediaMetadata.Builder()
         .setTitle(title)
-        .setArtist(artist)
+        .setArtist(artistName)
         .setAlbumTitle(album)
         .setArtworkUri(coverUri)
         .setExtras(extras)

@@ -685,9 +685,9 @@ internal class CodaMediaLibraryCallback(
         .setMediaMetadata(
             MediaMetadata.Builder()
                 .setTitle(song.title)
-                .setArtist(song.artist)
+                .setArtist(song.artistName)
                 .setAlbumTitle(song.album)
-                .setSubtitle(buildSubtitle(song.artist, song.album))
+                .setSubtitle(buildSubtitle(song.artistName, song.album))
                 .setArtworkUri(
                     CarArtwork.cover(
                         context,
