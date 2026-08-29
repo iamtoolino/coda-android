@@ -2520,7 +2520,10 @@ private fun NowPlayingScreen(
                             .height(artworkSize),
                     ) {
                         Artwork(
-                            source = playbackArtworkSource(
+                            source = navidromeCoverSource(
+                                state.artworkKey ?: state.currentSongId,
+                                ArtworkSizes.HERO,
+                            ) ?: playbackArtworkSource(
                                 state.artworkKey ?: state.currentSongId.orEmpty(),
                                 state.artworkUrl,
                             ),
