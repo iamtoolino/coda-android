@@ -392,28 +392,24 @@ internal class CodaMediaLibraryCallback(
             CodaMediaIds.RECENTLY_ADDED,
             "Recently added",
             MediaMetadata.MEDIA_TYPE_FOLDER_ALBUMS,
-            MediaMetadata.FOLDER_TYPE_ALBUMS,
             R.drawable.ic_car_added,
         )
         CodaMediaIds.RECENTLY_PLAYED -> categoryItem(
             CodaMediaIds.RECENTLY_PLAYED,
             "Recent",
             MediaMetadata.MEDIA_TYPE_FOLDER_ALBUMS,
-            MediaMetadata.FOLDER_TYPE_ALBUMS,
             R.drawable.ic_car_recent,
         )
         CodaMediaIds.ARTISTS -> categoryItem(
             CodaMediaIds.ARTISTS,
             "Artists",
             MediaMetadata.MEDIA_TYPE_FOLDER_ARTISTS,
-            MediaMetadata.FOLDER_TYPE_ARTISTS,
             R.drawable.ic_car_artists,
         )
         CodaMediaIds.PLAYLISTS -> categoryItem(
             CodaMediaIds.PLAYLISTS,
             "Playlists",
             MediaMetadata.MEDIA_TYPE_FOLDER_PLAYLISTS,
-            MediaMetadata.FOLDER_TYPE_PLAYLISTS,
             R.drawable.ic_car_playlists,
         )
         else -> when {
@@ -524,7 +520,6 @@ internal class CodaMediaLibraryCallback(
                 .setIsBrowsable(true)
                 .setIsPlayable(false)
                 .setMediaType(MediaMetadata.MEDIA_TYPE_FOLDER_MIXED)
-                .setFolderType(MediaMetadata.FOLDER_TYPE_MIXED)
                 .build(),
         )
         .build()
@@ -534,28 +529,24 @@ internal class CodaMediaLibraryCallback(
             CodaMediaIds.ARTISTS,
             "Artists",
             MediaMetadata.MEDIA_TYPE_FOLDER_ARTISTS,
-            MediaMetadata.FOLDER_TYPE_ARTISTS,
             R.drawable.ic_car_artists,
         ),
         categoryItem(
             CodaMediaIds.RECENTLY_ADDED,
             "Added",
             MediaMetadata.MEDIA_TYPE_FOLDER_ALBUMS,
-            MediaMetadata.FOLDER_TYPE_ALBUMS,
             R.drawable.ic_car_added,
         ),
         categoryItem(
             CodaMediaIds.RECENTLY_PLAYED,
             "Recent",
             MediaMetadata.MEDIA_TYPE_FOLDER_ALBUMS,
-            MediaMetadata.FOLDER_TYPE_ALBUMS,
             R.drawable.ic_car_recent,
         ),
         categoryItem(
             CodaMediaIds.PLAYLISTS,
             "Playlists",
             MediaMetadata.MEDIA_TYPE_FOLDER_PLAYLISTS,
-            MediaMetadata.FOLDER_TYPE_PLAYLISTS,
             R.drawable.ic_car_playlists,
         ),
     )
@@ -564,7 +555,6 @@ internal class CodaMediaLibraryCallback(
         id: String,
         title: String,
         mediaType: Int,
-        folderType: Int,
         @DrawableRes icon: Int? = null,
     ): MediaItem =
         MediaItem.Builder()
@@ -576,7 +566,6 @@ internal class CodaMediaLibraryCallback(
                     .setIsBrowsable(true)
                     .setIsPlayable(false)
                     .setMediaType(mediaType)
-                    .setFolderType(folderType)
                     .build(),
             )
             .build()
@@ -591,7 +580,6 @@ internal class CodaMediaLibraryCallback(
         CodaMediaIds.artistBucket(label),
         label,
         MediaMetadata.MEDIA_TYPE_FOLDER_ARTISTS,
-        MediaMetadata.FOLDER_TYPE_ARTISTS,
     )
 
     private fun artistBucket(name: String): String = name.trim()
