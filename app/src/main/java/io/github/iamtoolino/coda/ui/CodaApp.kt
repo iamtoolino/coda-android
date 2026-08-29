@@ -86,8 +86,6 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -481,7 +479,6 @@ fun CodaApp() {
                             arguments = listOf(navArgument("id") { type = NavType.StringType }),
                         ) { backStackEntry ->
                             PlaylistScreen(
-                                navController = navController,
                                 id = Uri.decode(backStackEntry.arguments?.getString("id").orEmpty()),
                                 playback = playback,
                                 playbackState = playbackState,
@@ -493,7 +490,7 @@ fun CodaApp() {
                             NowPlayingScreen(navController, playback, playbackState)
                         }
                         composable("queue") {
-                            QueueScreen(navController, playback, playbackState)
+                            QueueScreen(playback, playbackState)
                         }
                         }
                     }
@@ -1528,7 +1525,6 @@ private fun AlbumScreen(
 
 @Composable
 private fun PlaylistScreen(
-    navController: NavHostController,
     id: String,
     playback: PlaybackConnection,
     playbackState: PlaybackUiState,
@@ -1577,18 +1573,18 @@ private fun PlaylistScreen(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(bottom = miniPlayerClearance),
                 ) {
-                    item {
-                        DetailHeader(
-                            playlist?.name ?: "Playlist",
-                            navController,
-                            { coordinator.refresh() },
-                        )
+                    if (playlist == null) {
+                        item { Spacer(Modifier.statusBarsPadding().height(16.dp)) }
                     }
                     if (playlist == null && error == null) item { LoadingBlock() }
                     if (error != null) item { MessageCard("Could not load playlist", error.orEmpty()) }
                     playlist?.let { loaded ->
                         item {
-                            Column(Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
+                            Column(
+                                Modifier
+                                    .statusBarsPadding()
+                                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                            ) {
                                 Text(
                                     loaded.name,
                                     style = MaterialTheme.typography.headlineLarge.copy(
@@ -1806,23 +1802,6 @@ private fun ScreenHeader(
         }
         trailing()
     }
-}
-
-@Composable
-private fun DetailHeader(title: String, navController: NavHostController, onRefresh: () -> Unit) {
-    TopAppBar(
-        title = { Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis) },
-        navigationIcon = {
-            IconButton(onClick = { navController.popBackStack() }) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
-            }
-        },
-        actions = { IconButton(onClick = onRefresh) { Icon(Icons.Default.Refresh, "Refresh") } },
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Color.Transparent,
-            scrolledContainerColor = Color.Transparent,
-        ),
-    )
 }
 
 @Composable
@@ -3007,7 +2986,6 @@ private fun AlbumRatingStars(
 
 @Composable
 private fun QueueScreen(
-    navController: NavHostController,
     playback: PlaybackConnection,
     state: PlaybackUiState,
 ) {
@@ -3017,23 +2995,17 @@ private fun QueueScreen(
             .navigationBarsPadding(),
     ) {
         item {
-            TopAppBar(
-                title = { Text("Queue") },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
-                    }
-                },
-                actions = {
-                    IconButton(onClick = playback::clearQueue) {
-                        Icon(Icons.Default.ClearAll, "Clear queue")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent,
-                    scrolledContainerColor = Color.Transparent,
-                ),
-            )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .statusBarsPadding()
+                    .height(48.dp),
+                contentAlignment = Alignment.CenterEnd,
+            ) {
+                IconButton(onClick = playback::clearQueue) {
+                    Icon(Icons.Default.ClearAll, "Clear queue")
+                }
+            }
         }
         itemsIndexed(state.queue, key = { index, item -> "${item.id}-$index" }) { index, item ->
             QueueRow(
