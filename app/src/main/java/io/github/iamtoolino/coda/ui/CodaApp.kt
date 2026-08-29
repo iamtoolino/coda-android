@@ -2505,6 +2505,7 @@ private fun NowPlayingScreen(
     }
     val streamQuality = qualityLabel(state)
     val streamMode = streamModeLabel(state)
+    val streamCodec = codecLabel(state) ?: streamMode
     LaunchedEffect(ratingSeed, albumId) {
         if (albumId != null &&
             (ratingSeedState.key != albumId || ratingSeedState.value == null)
@@ -2667,14 +2668,15 @@ private fun NowPlayingScreen(
                             onToggle = playback::togglePlayPause,
                             onNext = playback::next,
                         )
-                        Spacer(Modifier.height(if (compact) 6.dp else 10.dp))
+                        Spacer(Modifier.height(if (compact) 14.dp else 18.dp))
                         QuietUtilityDock(
                             remainingCount = remainingQueueCount,
+                            streamCodec = streamCodec,
                             streamMode = streamMode,
                             onOpenQueue = { navController.navigate("queue") },
                             onOpenDetails = { showPlaybackDetails = true },
                         )
-                        Spacer(Modifier.height(if (compact) 5.dp else 10.dp))
+                        Spacer(Modifier.height(if (compact) 22.dp else 30.dp))
                     }
                 }
             }
@@ -2745,66 +2747,69 @@ private fun PrimaryPlaybackButton(
 @Composable
 private fun QuietUtilityDock(
     remainingCount: Int,
+    streamCodec: String,
     streamMode: String,
     onOpenQueue: () -> Unit,
     onOpenDetails: () -> Unit,
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 18.dp),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        UtilityPill(
+        QuietUtilityAction(
             icon = Icons.AutoMirrored.Filled.QueueMusic,
-            label = "Queue · $remainingCount",
+            label = remainingCount.toString(),
             contentDescription = "Open queue, $remainingCount tracks remaining",
             onClick = onOpenQueue,
         )
-        Spacer(Modifier.width(10.dp))
-        UtilityPill(
+        Spacer(Modifier.width(30.dp))
+        QuietUtilityAction(
             icon = Icons.Default.Info,
-            label = streamMode,
-            contentDescription = "Playback details, $streamMode",
+            label = streamCodec,
+            contentDescription = "Playback details, $streamMode, $streamCodec",
+            emphasizeLabel = streamMode == "Transcoded",
             onClick = onOpenDetails,
         )
     }
 }
 
 @Composable
-private fun UtilityPill(
+private fun QuietUtilityAction(
     icon: ImageVector,
     label: String,
     contentDescription: String,
+    emphasizeLabel: Boolean = false,
     onClick: () -> Unit,
 ) {
     Row(
         modifier = Modifier
             .height(48.dp)
-            .clip(CircleShape)
-            .background(Color.Black.copy(alpha = 0.46f))
-            .border(
-                1.dp,
-                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.14f),
-                CircleShape,
-            )
+            .clip(RoundedCornerShape(12.dp))
             .clickable(onClick = onClick)
             .semantics { this.contentDescription = contentDescription }
-            .padding(horizontal = 14.dp),
+            .padding(horizontal = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
     ) {
         Icon(
             icon,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.size(19.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.58f),
+            modifier = Modifier.size(15.dp),
         )
-        Spacer(Modifier.width(7.dp))
+        Spacer(Modifier.width(6.dp))
         Text(
             label,
-            fontSize = 12.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.onSurface,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Normal,
+            color = if (emphasizeLabel) {
+                MaterialTheme.colorScheme.primary.copy(alpha = 0.70f)
+            } else {
+                MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.62f)
+            },
             maxLines = 1,
         )
     }
@@ -2853,6 +2858,9 @@ internal fun streamModeLabel(state: PlaybackUiState): String =
     } else {
         "Original"
     }
+
+internal fun codecLabel(state: PlaybackUiState): String? =
+    (state.codec ?: state.sourceCodec)?.uppercase()
 
 @Composable
 internal fun SeekBar(
@@ -3166,7 +3174,7 @@ private fun formatDurationMs(milliseconds: Long): String {
 
 internal fun qualityLabel(state: PlaybackUiState): String? {
     val usesSourceFallback = state.codec == null
-    val codec = (state.codec ?: state.sourceCodec)?.uppercase() ?: return null
+    val codec = codecLabel(state) ?: return null
     val bitDepth = state.bitDepth ?: state.sourceBitDepth.takeIf { usesSourceFallback }
     val samplingRate = state.samplingRate ?: state.sourceSamplingRate.takeIf { usesSourceFallback }
     val bitRate = state.bitRate ?: state.sourceBitRate.takeIf { usesSourceFallback }

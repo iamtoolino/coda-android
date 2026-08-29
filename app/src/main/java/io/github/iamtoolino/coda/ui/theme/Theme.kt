@@ -61,6 +61,7 @@ private const val ThemeTransitionDurationMillis = 850
 private val ThemeTransitionEasing = CubicBezierEasing(0.42f, 0f, 0.58f, 1f)
 private const val PrimaryInkLuminance = 0.77f
 private const val SecondaryInkLuminance = 0.44f
+private const val NeutralInkBrightnessScale = 1.14f
 private const val ArtworkBroadGlowOpacity = 0.42f
 private const val ArtworkFocusedGlowOpacity = 0.30f
 private const val ArtworkVignetteOpacity = 0.62f
@@ -205,8 +206,8 @@ private fun CodaMaterialTheme(colors: ArtworkColors, content: @Composable () -> 
         },
         label = "artwork surface variant",
     ) { it.surfaceVariant }
-    val primaryText = warmInk(PrimaryInkLuminance)
-    val secondaryText = warmInk(SecondaryInkLuminance)
+    val primaryText = warmInk(PrimaryInkLuminance * NeutralInkBrightnessScale)
+    val secondaryText = warmInk(SecondaryInkLuminance * NeutralInkBrightnessScale)
     val colorScheme = darkColorScheme(
         primary = accent,
         onPrimary = onAccent,

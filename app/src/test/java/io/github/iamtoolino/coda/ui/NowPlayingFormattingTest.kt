@@ -14,7 +14,13 @@ class NowPlayingFormattingTest {
 
     @Test
     fun `cellular transcode retains its codec label without source measurements`() {
+        assertEquals("OPUS", codecLabel(PlaybackUiState(codec = "opus")))
         assertEquals("OPUS", qualityLabel(PlaybackUiState(codec = "opus")))
+    }
+
+    @Test
+    fun `codec label falls back to restored source metadata`() {
+        assertEquals("FLAC", codecLabel(PlaybackUiState(sourceCodec = "flac")))
     }
 
     @Test
@@ -34,6 +40,7 @@ class NowPlayingFormattingTest {
 
     @Test
     fun `missing codec has no quality label`() {
+        assertNull(codecLabel(PlaybackUiState()))
         assertNull(qualityLabel(PlaybackUiState()))
     }
 
