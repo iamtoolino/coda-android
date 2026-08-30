@@ -5,6 +5,8 @@ import coil3.ImageLoader
 import coil3.SingletonImageLoader
 import coil3.disk.DiskCache
 import coil3.imageLoader
+import coil3.network.okhttp.OkHttpNetworkFetcherFactory
+import io.github.iamtoolino.coda.artwork.ArtworkRetryInterceptor
 import io.github.iamtoolino.coda.player.CarArtwork
 import io.github.iamtoolino.coda.player.PlaybackConnection
 import io.github.iamtoolino.coda.player.PlaybackService
@@ -20,6 +22,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okio.Path.Companion.toOkioPath
+import okhttp3.OkHttpClient
+import java.util.concurrent.TimeUnit
 
 class CodaApplication : Application() {
     private val cacheCleanupScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -41,6 +45,14 @@ class CodaApplication : Application() {
                         )
                         .maxSizeBytes(ARTWORK_DISK_CACHE_BYTES)
                         .build()
+                }
+                .components {
+                    add(ArtworkRetryInterceptor())
+                    add(
+                        OkHttpNetworkFetcherFactory(
+                            callFactory = { ARTWORK_HTTP_CLIENT },
+                        ),
+                    )
                 }
                 .build()
         }
@@ -95,5 +107,9 @@ class CodaApplication : Application() {
         const val ARTWORK_GENERATION_KEY = "generation"
         const val ARTWORK_CACHE_DIRECTORY = "phone-artwork"
         const val ARTWORK_DISK_CACHE_BYTES = 10L * 1024L * 1024L * 1024L
+        val ARTWORK_HTTP_CLIENT: OkHttpClient = OkHttpClient.Builder()
+            .connectTimeout(10, TimeUnit.SECONDS)
+            .readTimeout(15, TimeUnit.SECONDS)
+            .build()
     }
 }

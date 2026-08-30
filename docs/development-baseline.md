@@ -47,6 +47,16 @@ The UI tests render `LoginScreen` and the Now Playing seek control in isolation,
 request, and do not depend on credentials or existing app data. Live Navidrome, audio, lifecycle,
 TalkBack, and car checks remain separate.
 
+To run the explicit live artwork diagnostic against an already connected emulator, use:
+
+```sh
+./scripts/check-artwork-loading.sh emulator-5554
+```
+
+The script refuses physical-device serials, bypasses Coil memory and disk reads, and loads 100
+canonical 1200 px album covers through Coda's production image loader. Its library-derived TSV
+report is written to `/tmp` by default and must not be committed.
+
 ## Repository hygiene baseline
 
 Build outputs, IDE state, local SDK configuration, signing material, databases, logs, reports,
