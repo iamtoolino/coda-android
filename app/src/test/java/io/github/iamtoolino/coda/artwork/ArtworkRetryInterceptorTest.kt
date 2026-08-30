@@ -2,9 +2,19 @@ package io.github.iamtoolino.coda.artwork
 
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ArtworkRetryInterceptorTest {
+    @Test
+    fun `successful empty artwork response is converted into a retryable failure`() {
+        assertTrue(shouldRejectEmptyArtworkResponse(isSuccessful = true, contentLength = 0L))
+        assertFalse(shouldRejectEmptyArtworkResponse(isSuccessful = true, contentLength = 42L))
+        assertFalse(shouldRejectEmptyArtworkResponse(isSuccessful = true, contentLength = -1L))
+        assertFalse(shouldRejectEmptyArtworkResponse(isSuccessful = false, contentLength = 0L))
+    }
+
     @Test
     fun `retryable failures use both delays and stop on success`() = runBlocking {
         var attempts = 0

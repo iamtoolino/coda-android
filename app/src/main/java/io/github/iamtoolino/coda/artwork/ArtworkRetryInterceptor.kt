@@ -5,6 +5,24 @@ import coil3.request.ErrorResult
 import coil3.request.ImageResult
 import java.io.IOException
 import kotlinx.coroutines.delay
+import okhttp3.Interceptor as OkHttpInterceptor
+import okhttp3.Response
+
+internal class RejectEmptyArtworkResponseInterceptor : OkHttpInterceptor {
+    override fun intercept(chain: OkHttpInterceptor.Chain): Response {
+        val response = chain.proceed(chain.request())
+        if (shouldRejectEmptyArtworkResponse(response.isSuccessful, response.body.contentLength())) {
+            response.close()
+            throw IOException("Artwork response body was empty")
+        }
+        return response
+    }
+}
+
+internal fun shouldRejectEmptyArtworkResponse(
+    isSuccessful: Boolean,
+    contentLength: Long,
+): Boolean = isSuccessful && contentLength == 0L
 
 internal class ArtworkRetryInterceptor(
     private val retryDelaysMillis: List<Long> = listOf(250L, 750L),

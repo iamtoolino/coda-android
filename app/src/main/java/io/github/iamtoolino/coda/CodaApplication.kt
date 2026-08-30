@@ -7,6 +7,7 @@ import coil3.disk.DiskCache
 import coil3.imageLoader
 import coil3.network.okhttp.OkHttpNetworkFetcherFactory
 import io.github.iamtoolino.coda.artwork.ArtworkRetryInterceptor
+import io.github.iamtoolino.coda.artwork.RejectEmptyArtworkResponseInterceptor
 import io.github.iamtoolino.coda.player.CarArtwork
 import io.github.iamtoolino.coda.player.PlaybackConnection
 import io.github.iamtoolino.coda.player.PlaybackService
@@ -110,6 +111,7 @@ class CodaApplication : Application() {
         val ARTWORK_HTTP_CLIENT: OkHttpClient = OkHttpClient.Builder()
             .connectTimeout(10, TimeUnit.SECONDS)
             .readTimeout(15, TimeUnit.SECONDS)
+            .addInterceptor(RejectEmptyArtworkResponseInterceptor())
             .build()
     }
 }

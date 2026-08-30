@@ -94,7 +94,9 @@ is displayed at multiple sizes. Playback uses Android Auto's already-persistent 
 artwork and disables Coil disk writes for that source to avoid storing the same bytes twice.
 Phone artwork uses a dedicated OkHttp client with 10-second connect and 15-second read timeouts.
 Transient network-I/O failures receive two cancellation-aware retries after 250 ms and 750 ms;
-HTTP errors, decode errors, and local sources do not retry.
+HTTP errors, decode errors, and local sources do not retry. A successful HTTP response that explicitly
+declares a zero-byte body is rejected before Coil can commit it, so the same bounded retry policy
+handles transient empty responses instead of poisoning the encoded disk cache.
 
 OpenSubsonic metadata does not provide a reliable artwork revision. The Connection screen therefore
 offers an explicit artwork refresh: it clears Coil memory/disk data, Android Auto artwork, and

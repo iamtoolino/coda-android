@@ -15,6 +15,11 @@ internal data class ArtworkSource(
     val memoryCacheKey: String,
 )
 
+private const val ARTWORK_CACHE_SCHEMA_VERSION = 2
+
+private fun artworkCachePrefix(namespace: String, generation: Long): String =
+    "$namespace:artwork-v$ARTWORK_CACHE_SCHEMA_VERSION-g$generation"
+
 internal fun navidromeArtworkSource(
     namespace: String,
     generation: Long,
@@ -24,7 +29,7 @@ internal fun navidromeArtworkSource(
 ): ArtworkSource? {
     val id = artworkId?.takeIf(String::isNotBlank) ?: return null
     val resolvedUrl = url?.takeIf(String::isNotBlank) ?: return null
-    val sourceKey = "$namespace:artwork-v$generation:cover:$id:$size"
+    val sourceKey = "${artworkCachePrefix(namespace, generation)}:cover:$id:$size"
     return ArtworkSource(
         url = resolvedUrl,
         diskCacheKey = sourceKey,
@@ -40,7 +45,7 @@ internal fun externalArtistArtworkSource(
     url: String?,
 ): ArtworkSource? {
     val resolvedUrl = url?.takeIf(String::isNotBlank) ?: return null
-    val sourceKey = "$namespace:artwork-v$generation:external-artist:$artistId"
+    val sourceKey = "${artworkCachePrefix(namespace, generation)}:external-artist:$artistId"
     return ArtworkSource(
         url = resolvedUrl,
         diskCacheKey = sourceKey,
@@ -58,6 +63,7 @@ internal fun localPlaybackArtworkSource(
     return ArtworkSource(
         url = resolvedUrl,
         diskCacheKey = null,
-        memoryCacheKey = "$namespace:artwork-v$generation:local-playback:$artworkIdentity",
+        memoryCacheKey =
+            "${artworkCachePrefix(namespace, generation)}:local-playback:$artworkIdentity",
     )
 }
