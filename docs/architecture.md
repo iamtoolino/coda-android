@@ -180,10 +180,13 @@ every 15 seconds while playing; pause, background, and queue-edit events do not 
 are cancelled when playback stops. This writer belongs to `PlaybackService`; the phone controller
 only renders state and issues user-requested player commands.
 
-Home performs opportunistic queue reads when it opens, refreshes, or returns to the foreground. A
-cold-start queue last written by Android is restored paused. A non-empty queue written by another
-client is exposed separately as a Continue candidate and never replaces the local paused queue until
-the user accepts it. Queue-read failures do not fail Home's library content.
+The activity performs an opportunistic queue read whenever the phone UI enters the foreground; Home
+also reads when opened or explicitly refreshed. If a foreground read finds a queue written by
+another client before the user interacts or navigates, the navigation stack is popped directly to
+Home so intermediate detail screens are never exposed during the transition. A cold-start queue
+last written by Android is restored paused. A non-empty queue written by another client is exposed
+separately as a Continue candidate and never replaces the local paused queue until the user accepts
+it. Queue-read failures do not fail Home's library content.
 
 The playback service also persists an account-scoped local queue snapshot containing song metadata,
 the current index, and position. It restores that snapshot synchronously before publishing a new

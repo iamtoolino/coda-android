@@ -189,6 +189,13 @@ private val HomeHeadingWeight = FontWeight(650)
 private val CardTitleSize = 15.5.sp
 private const val CurrentTrackHighlightOpacity = 0.10f
 
+internal fun shouldReturnHomeForExternalQueue(
+    foregroundRoute: String?,
+    currentRoute: String?,
+): Boolean = foregroundRoute != null &&
+    foregroundRoute != "home" &&
+    currentRoute == foregroundRoute
+
 private enum class AlbumViewMode(
     val routeValue: String,
     val title: String,
@@ -349,6 +356,34 @@ fun CodaApp() {
     val entry by navController.currentBackStackEntryAsState()
     val visibleEntries by navController.visibleEntries.collectAsStateWithLifecycle()
     val route = entry?.destination?.route.orEmpty()
+    val lifecycleOwner = LocalLifecycleOwner.current
+    var handoffForegroundRoute by remember { mutableStateOf<String?>(null) }
+    DisposableEffect(lifecycleOwner, playback, navController) {
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_RESUME -> {
+                    val foregroundRoute = navController.currentDestination?.route
+                    handoffForegroundRoute = foregroundRoute
+                    playback.refreshHandoffQueue {
+                        val currentRoute = navController.currentDestination?.route
+                        val shouldReturnHome = shouldReturnHomeForExternalQueue(
+                            foregroundRoute = handoffForegroundRoute,
+                            currentRoute = currentRoute,
+                        )
+                        handoffForegroundRoute = null
+                        if (shouldReturnHome) {
+                            navController.popBackStack("home", inclusive = false)
+                        }
+                    }
+                }
+
+                Lifecycle.Event.ON_PAUSE -> handoffForegroundRoute = null
+                else -> Unit
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
     // The current entry changes at pop start; visible entries retain the outgoing player until its
     // animation ends, preventing the scaffold bottom bar from resizing it mid-transition.
     val fullScreenPlayerVisible = visibleEntries.any { visibleEntry ->
@@ -387,7 +422,16 @@ fun CodaApp() {
             LocalMiniPlayerOverlayClearance provides miniPlayerClearance,
         ) {
             AdaptiveBackground {
-                Box(Modifier.fillMaxSize()) {
+                Box(
+                    Modifier
+                        .fillMaxSize()
+                        .pointerInput(Unit) {
+                            awaitEachGesture {
+                                awaitFirstDown(requireUnconsumed = false)
+                                handoffForegroundRoute = null
+                            }
+                        },
+                ) {
                     Scaffold(
                         modifier = Modifier.fillMaxSize(),
                         containerColor = Color.Transparent,
@@ -532,24 +576,12 @@ private fun HomeScreen(
     val miniPlayerClearance = LocalMiniPlayerOverlayClearance.current
     val scope = rememberCoroutineScope()
     val handoffQueue by playback.handoffQueue.collectAsStateWithLifecycle()
-    val lifecycleOwner = LocalLifecycleOwner.current
     val listState = rememberRestorableLazyListState(
         contentReady = true,
         maxIndex = 6,
     )
 
     LaunchedEffect(playback) { playback.refreshHandoffQueue() }
-    DisposableEffect(playback) {
-        playback.setHomeVisible(true)
-        onDispose { playback.setHomeVisible(false) }
-    }
-    DisposableEffect(lifecycleOwner, playback) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) playback.refreshHandoffQueue()
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
-    }
 
     PullToRefreshBox(
         isRefreshing = home.isRefreshing,

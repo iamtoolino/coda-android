@@ -139,9 +139,9 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
     private var playbackError: String? = null
     private var queueSnapshot: List<QueueEntry> = emptyList()
     private var pendingHandoffRefresh = false
+    private var pendingExternalHandoff: (() -> Unit)? = null
     private var coldStartRestorePending = true
     private var handoffSessionGeneration: Long? = null
-    private var homeVisible = false
     private var queueMutationGeneration = 0L
     private val queueMutationRequests = Channel<PreparedQueueMutation>(Channel.UNLIMITED)
     private val queueMutationWorker = launchQueueMutationWorker()
@@ -194,7 +194,11 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
                 pendingPlayback = null
                 refreshState(rebuildQueue = true)
                 startProgressUpdates()
-                if (pendingHandoffRefresh) refreshHandoffQueue()
+                if (pendingHandoffRefresh) {
+                    val onExternalQueue = pendingExternalHandoff
+                    pendingExternalHandoff = null
+                    refreshHandoffQueue(onExternalQueue)
+                }
             },
             ContextCompat.getMainExecutor(context),
         )
@@ -295,6 +299,7 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
         while (queueMutationRequests.tryReceive().isSuccess) Unit
         handoffRefreshJob?.cancel()
         pendingHandoffRefresh = false
+        pendingExternalHandoff = null
         coldStartRestorePending = true
         handoffSessionGeneration = null
         _handoffQueue.value = null
@@ -308,10 +313,11 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
         refreshState(rebuildQueue = true)
     }
 
-    fun refreshHandoffQueue() {
+    fun refreshHandoffQueue(onExternalQueue: (() -> Unit)? = null) {
         val player = controller
         if (player == null) {
             pendingHandoffRefresh = true
+            if (onExternalQueue != null) pendingExternalHandoff = onExternalQueue
             return
         }
         pendingHandoffRefresh = false
@@ -351,17 +357,12 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
                     _handoffQueue.value = null
                     enqueueRestore(requireNotNull(queue), startPlayback = false)
                 }
-                HandoffDisposition.OFFER_EXTERNAL -> _handoffQueue.value = queue
+                HandoffDisposition.OFFER_EXTERNAL -> {
+                    _handoffQueue.value = queue
+                    onExternalQueue?.invoke()
+                }
             }
         }
-    }
-
-    fun setHomeVisible(visible: Boolean) {
-        homeVisible = visible
-    }
-
-    fun onAppForegrounded() {
-        if (homeVisible) refreshHandoffQueue()
     }
 
     private fun runWhenConnected(action: (MediaController) -> Unit) {

@@ -5,9 +5,6 @@ import coil3.ImageLoader
 import coil3.SingletonImageLoader
 import coil3.disk.DiskCache
 import coil3.imageLoader
-import androidx.lifecycle.DefaultLifecycleObserver
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.ProcessLifecycleOwner
 import io.github.iamtoolino.coda.player.CarArtwork
 import io.github.iamtoolino.coda.player.PlaybackConnection
 import io.github.iamtoolino.coda.player.PlaybackService
@@ -24,7 +21,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okio.Path.Companion.toOkioPath
 
-class CodaApplication : Application(), DefaultLifecycleObserver {
+class CodaApplication : Application() {
     private val cacheCleanupScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val _artworkGeneration = MutableStateFlow(0L)
     val artworkGeneration: StateFlow<Long> = _artworkGeneration.asStateFlow()
@@ -55,15 +52,10 @@ class CodaApplication : Application(), DefaultLifecycleObserver {
             PlaybackService::clearTransientAudioCachesFor,
         )
         playback = PlaybackConnection(this)
-        ProcessLifecycleOwner.get().lifecycle.addObserver(this)
     }
 
     internal fun requestTransientAudioCleanup(namespace: String) {
         transientAudioCleanup.request(namespace)
-    }
-
-    override fun onStart(owner: LifecycleOwner) {
-        playback.onAppForegrounded()
     }
 
     fun clearArtworkCaches(namespace: String) {
