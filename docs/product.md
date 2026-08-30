@@ -77,7 +77,8 @@ Coda is a personal, album-oriented Android client for Navidrome/OpenSubsonic.
 - Track presentation prefers Navidrome's explicit display album artist and falls back to the track
   artist only when no album artist is available. The same artist label is used by the phone UI,
   queue, notifications, lock screen, restoration, and Android Auto.
-- The current track is highlighted in album, playlist, and queue views.
+- The current track is highlighted in album, playlist, and queue views. Opening Queue positions the
+  list around that track once, then leaves manual scrolling undisturbed.
 - Playback begins progressively; it must not wait for a full-file download.
 - Wi-Fi/Ethernet streams the original file. Cellular requests Opus and leaves bitrate selection to the server.
 - A rolling transient cache begins filling when a queue exists, with the current track followed by

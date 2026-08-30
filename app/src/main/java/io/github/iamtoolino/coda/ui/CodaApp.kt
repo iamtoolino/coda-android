@@ -196,6 +196,11 @@ internal fun shouldReturnHomeForExternalQueue(
     foregroundRoute != "home" &&
     currentRoute == foregroundRoute
 
+internal fun queueOpeningFirstVisibleItemIndex(
+    currentIndex: Int,
+    queueSize: Int,
+): Int = if (currentIndex in 0 until queueSize) currentIndex else 0
+
 private enum class AlbumViewMode(
     val routeValue: String,
     val title: String,
@@ -3019,7 +3024,24 @@ private fun QueueScreen(
     playback: PlaybackConnection,
     state: PlaybackUiState,
 ) {
+    val openingIndex = queueOpeningFirstVisibleItemIndex(
+        currentIndex = state.currentIndex,
+        queueSize = state.queue.size,
+    )
+    val listState = rememberLazyListState(initialFirstVisibleItemIndex = openingIndex)
+    var positionedAtCurrentTrack by remember {
+        mutableStateOf(state.currentIndex in state.queue.indices)
+    }
+    LaunchedEffect(state.currentIndex, state.queue.size) {
+        if (!positionedAtCurrentTrack && state.currentIndex in state.queue.indices) {
+            listState.scrollToItem(
+                queueOpeningFirstVisibleItemIndex(state.currentIndex, state.queue.size),
+            )
+            positionedAtCurrentTrack = true
+        }
+    }
     LazyColumn(
+        state = listState,
         modifier = Modifier
             .fillMaxSize()
             .navigationBarsPadding(),
