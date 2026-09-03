@@ -170,6 +170,16 @@ class NavidromeClient(
 
     suspend fun playQueue(): PlayQueue? = call("getPlayQueue").playQueue
 
+    suspend fun bookmarks(): List<Bookmark> = call("getBookmarks").bookmarks?.bookmark.orEmpty()
+
+    suspend fun createBookmark(songId: String, comment: String) {
+        callPost("createBookmark", listOf("id" to songId, "position" to 0, "comment" to comment))
+    }
+
+    suspend fun deleteBookmark(songId: String) {
+        callPost("deleteBookmark", listOf("id" to songId))
+    }
+
     suspend fun scrobble(
         songId: String,
         submission: Boolean,

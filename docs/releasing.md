@@ -87,6 +87,9 @@ another ignored directory; do not commit local release audits.
     - Android Auto DHU cold start, browse, search, artwork, complete album/playlist playback, queue,
       split-screen controls, and recovery without opening the phone activity.
     - A physical phone/car path for material media-session or Android Auto changes.
+    - Album continuation: natural completion while screen-off, foreground refresh after macOS writes,
+      resume at the canonical track boundary, and final-track marker removal. Best-effort pending
+      bookmark work need not survive process death; local playback restoration must still work.
 
 11. Only after the candidate is approved, create an annotated `vX.Y.Z` tag, publish the corresponding
     GitHub release, and attach `app-release.apk`. Include the APK SHA-256 digest and signing-certificate

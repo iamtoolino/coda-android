@@ -70,6 +70,8 @@ data class Song(
     val bitRate: Int? = null,
     val bitDepth: Int? = null,
     val samplingRate: Int? = null,
+    val type: String? = null,
+    val mediaType: String? = null,
 ) {
     val artistName: String
         get() = displayAlbumArtist?.takeIf { it.isNotBlank() } ?: artist
@@ -120,7 +122,20 @@ internal data class SubsonicResponse(
     val playlist: Playlist? = null,
     val searchResult3: SearchResult? = null,
     val playQueue: PlayQueue? = null,
+    val bookmarks: BookmarkList? = null,
 )
+
+@Serializable
+data class Bookmark(
+    val entry: Song? = null,
+    val comment: String? = null,
+    val position: Long = 0,
+    val created: String? = null,
+    val changed: String? = null,
+)
+
+@Serializable
+internal data class BookmarkList(val bookmark: List<Bookmark> = emptyList())
 
 @Serializable
 internal data class SubsonicError(

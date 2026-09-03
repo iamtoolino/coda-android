@@ -13,7 +13,7 @@ internal val LocalArtworkGeneration = staticCompositionLocalOf { 0L }
 
 @Composable
 internal fun navidromeCoverSource(artworkId: String?, size: Int): ArtworkSource? =
-    navidromeArtworkSource(
+    if (!AppGraph.navidrome.isConfigured) null else navidromeArtworkSource(
         namespace = AppGraph.cacheNamespace,
         generation = LocalArtworkGeneration.current,
         artworkId = artworkId,

@@ -13,7 +13,7 @@ Coda is a personal, album-oriented Android client for Navidrome/OpenSubsonic.
 
 ## Navigation
 
-- Home: Continue Playing, Artists, Recently Added, Recent Releases, Recently Played, and
+- Home: Continue Playing, Artists, Recently Added, Recent Releases, Recently Played, Continue Listening, and
   Playlists.
 - Home renders every section immediately and fills sections independently as their requests finish.
   A slow or failed section does not block successful sections; transient network failures receive
@@ -89,6 +89,19 @@ Coda is a personal, album-oriented Android client for Navidrome/OpenSubsonic.
   skipping, restoring Coda, or accepting a queue handoff do not.
 
 ## Cross-client queue
+
+Album continuation is independent of saved-queue handoff. The Continue Listening shelf shows at
+most twenty unfinished albums, newest first, with artwork/title/album artist only and no disclosure
+chevron. The local current album stays hidden while playing or paused, including restored queues.
+Tapping a card validates its saved song, replaces the queue with the complete canonical album, and
+plays from that song's beginning while staying on Home. Invalid targets do nothing. Ordinary album
+Play still starts at track one. Bookmark refresh alone never navigates.
+
+Only natural track completion advances album progress; final canonical-track completion removes it,
+even for isolated tracks or one-track albums. Recording works without the phone UI, is best effort,
+and has no process-death outbox. See [album-resume.md](album-resume.md) for the shared bookmark
+reservation, retention, and interoperability rules. Android Auto records progress but does not
+expose the new shelf as a browse root.
 
 - On cold start, Coda restores its own last saved Navidrome queue and position without autoplaying.
 - The playback service keeps an account-scoped local snapshot so cold restoration works immediately

@@ -110,7 +110,12 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
             )
             .setHandleAudioBecomingNoisy(true)
             .build()
-        scrobbler = ScrobbleCoordinator(scrobbleScope) { songId, submission, eventTime ->
+        scrobbler = ScrobbleCoordinator(
+            scrobbleScope,
+            onCompleted = {
+                if (player.timelineBelongsToCurrentAccount()) AppGraph.albumResume?.completed(it)
+            },
+        ) { songId, submission, eventTime ->
             val account = AppGraph.sessionSnapshot() ?: return@ScrobbleCoordinator null
             suspend {
                 if (!AppGraph.isCurrent(account)) throw CancellationException("Account changed")

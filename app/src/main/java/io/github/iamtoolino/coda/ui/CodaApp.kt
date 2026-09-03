@@ -367,6 +367,7 @@ fun CodaApp() {
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_RESUME -> {
+                    AppGraph.albumResume?.refresh()
                     val foregroundRoute = navController.currentDestination?.route
                     handoffForegroundRoute = foregroundRoute
                     playback.refreshHandoffQueue {
@@ -581,9 +582,13 @@ private fun HomeScreen(
     val miniPlayerClearance = LocalMiniPlayerOverlayClearance.current
     val scope = rememberCoroutineScope()
     val handoffQueue by playback.handoffQueue.collectAsStateWithLifecycle()
+    val resume = requireNotNull(AppGraph.albumResume)
+    val resumeItems by resume.items.collectAsStateWithLifecycle()
+    val localPlayback by playback.state.collectAsStateWithLifecycle()
+    val visibleResumeItems = resumeItems.filter { it.album.id != localPlayback.albumId }
     val listState = rememberRestorableLazyListState(
         contentReady = true,
-        maxIndex = 6,
+        maxIndex = 7,
     )
 
     LaunchedEffect(playback) { playback.refreshHandoffQueue() }
@@ -592,6 +597,7 @@ private fun HomeScreen(
         isRefreshing = home.isRefreshing,
         onRefresh = {
             home.refreshAll()
+            resume.refresh()
             playback.refreshHandoffQueue()
         },
         modifier = Modifier.fillMaxSize(),
@@ -698,6 +704,20 @@ private fun HomeScreen(
                             navController.navigate(
                                 "albums/${AlbumViewMode.RECENTLY_PLAYED.routeValue}",
                             )
+                        },
+                    )
+                }
+            }
+            if (visibleResumeItems.isNotEmpty()) {
+                item(key = "album-resume") {
+                    AlbumShelf(
+                        title = "Continue Listening",
+                        albums = visibleResumeItems.map { it.album },
+                        showRatingBadge = false,
+                        onAlbum = { album ->
+                            visibleResumeItems.firstOrNull { it.album.id == album.id }?.let {
+                                resume.continueListening(it, playback::playSongs)
+                            }
                         },
                     )
                 }
@@ -2068,11 +2088,12 @@ private fun ArtistCard(
 }
 
 @Composable
-private fun AlbumShelf(
+internal fun AlbumShelf(
     title: String,
     albums: List<Album>,
     onAlbum: (Album) -> Unit,
     onMore: (() -> Unit)? = null,
+    showRatingBadge: Boolean = true,
 ) {
     Column {
         Row(
@@ -2097,7 +2118,10 @@ private fun AlbumShelf(
             horizontalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             items(albums, key = { it.id }) { album ->
-                AlbumCard(album, onClick = { onAlbum(album) }, modifier = Modifier.width(144.dp))
+                AlbumCard(
+                    album, onClick = { onAlbum(album) }, modifier = Modifier.width(144.dp),
+                    showRatingBadge = showRatingBadge,
+                )
             }
         }
     }
@@ -2109,6 +2133,7 @@ private fun AlbumCard(
     modifier: Modifier = Modifier,
     subtitle: String = album.artist,
     artworkSize: Int = ArtworkSizes.ALBUM_CARD,
+    showRatingBadge: Boolean = true,
     onClick: () -> Unit,
 ) {
     Column(modifier = modifier.clickable(onClick = onClick)) {
@@ -2119,6 +2144,7 @@ private fun AlbumCard(
                 .aspectRatio(1f)
                 .clip(RoundedCornerShape(14.dp)),
             size = artworkSize,
+            showRatingBadge = showRatingBadge,
         )
         Spacer(Modifier.height(8.dp))
         Text(

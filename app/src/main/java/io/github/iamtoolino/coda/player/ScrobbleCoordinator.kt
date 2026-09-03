@@ -107,6 +107,7 @@ internal typealias ScrobbleOperation = suspend () -> Unit
 
 internal class ScrobbleCoordinator(
     private val scope: CoroutineScope,
+    private val onCompleted: (String) -> Unit = {},
     private val operationFactory: (
         songId: String,
         submission: Boolean,
@@ -143,6 +144,7 @@ internal class ScrobbleCoordinator(
                 }
 
                 is ScrobbleAction.Submission -> {
+                    onCompleted(action.occurrence.songId)
                     launch(action.occurrence.songId, submission = true)?.let(::trackSubmission)
                 }
             }

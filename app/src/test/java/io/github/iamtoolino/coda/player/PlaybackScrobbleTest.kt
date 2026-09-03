@@ -8,6 +8,18 @@ import org.junit.Test
 
 class PlaybackScrobbleTest {
     @Test
+    fun `completion callback is independent of scrobble operation availability`() = runBlocking {
+        val completed = mutableListOf<String>()
+        val coordinator = ScrobbleCoordinator(this, onCompleted = { completed += it }) { _, _, _ -> null }
+        coordinator.synchronize("first")
+        coordinator.transition("second", PlaybackTransition.MANUAL)
+        assertTrue(completed.isEmpty())
+        coordinator.transition("third", PlaybackTransition.AUTOMATIC)
+        coordinator.playbackEnded()
+        coordinator.playbackEnded()
+        assertEquals(listOf("second", "third"), completed)
+    }
+    @Test
     fun `automatic transition submits outgoing occurrence and begins next`() {
         val policy = ScrobblePolicy()
         val first = policy.synchronize("first").single() as ScrobbleAction.NowPlaying

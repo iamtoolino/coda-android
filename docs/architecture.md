@@ -56,6 +56,24 @@ application-owned pending-cleanup ledger before work starts. An active playback 
 deletion and acknowledges it only after success; an interrupted or inactive-service request is
 replayed the next time the service starts.
 
+## Album continuation
+
+`AppGraph` owns one `AlbumResumeCoordinator` and Main-dispatched supervisor scope per authenticated
+account, independent of Compose and service recreation. Session rotation cancels that scope, clears
+its presentation, and guards every request through `withCurrentSession` plus the captured generation.
+`PlaybackService` feeds natural completions from the existing scrobble occurrence policy before and
+independently of scrobble HTTP submission. The coordinator resolves song eligibility and canonical
+album membership, then serializes one bookmark mutation per completion. No durable outbox exists.
+
+Session initialization, UI foregrounding, and Home pull-to-refresh coalesce bookmark reads. Home
+only observes the capped item flow and filters the current album; returning to Home does not fetch
+bookmarks. Failures retain good shelf data without delaying other shelves. Successful writes update
+the presentation provisionally, never as a basis for cleanup. Fresh snapshots alone drive recent-20
+housekeeping. A revision gate rejects stale refresh results; a shared write mutex prevents cleanup
+from racing local progress writes. The protocol's unavoidable cross-client deletion race remains.
+See [album-resume.md](album-resume.md). Bookmark JSON contains no playback position or duplicated
+album metadata, and is never logged. No debug lab or new dependency is involved.
+
 ## Theme ownership
 
 `CodaThemeRouter` resolves semantic theme requests before the root Compose theme is applied. It

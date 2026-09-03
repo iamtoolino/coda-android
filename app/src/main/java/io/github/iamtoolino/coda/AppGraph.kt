@@ -5,6 +5,11 @@ import io.github.iamtoolino.coda.data.CredentialStore
 import io.github.iamtoolino.coda.data.NavidromeClient
 import io.github.iamtoolino.coda.data.ServerCredentials
 import io.github.iamtoolino.coda.data.queueClientName
+import io.github.iamtoolino.coda.data.AlbumResumeCoordinator
+import io.github.iamtoolino.coda.data.AlbumResumeWriter
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import java.security.MessageDigest
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -22,6 +27,9 @@ internal data class NavidromeSession(
 )
 
 object AppGraph {
+    private var albumResumeScope: CoroutineScope? = null
+    internal var albumResume: AlbumResumeCoordinator? = null
+        private set
     private lateinit var credentialStore: CredentialStore
     private var queueWriterName = NavidromeClient.CLIENT_NAME
     private var nextGeneration = 0L
@@ -61,6 +69,9 @@ object AppGraph {
     }
 
     fun logout() {
+        albumResumeScope?.cancel()
+        albumResumeScope = null
+        albumResume = null
         credentialStore.clear()
         session = NavidromeSession(
             client = NavidromeClient("", "", ""),
@@ -71,12 +82,36 @@ object AppGraph {
     }
 
     private fun useCredentials(credentials: ServerCredentials) {
+        albumResumeScope?.cancel()
         session = NavidromeSession(
             client = credentials.toClient(),
             cacheNamespace = credentials.cacheNamespace(),
             generation = ++nextGeneration,
         )
+        val captured = session
+        val resumeScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+        albumResumeScope = resumeScope
+        albumResume = AlbumResumeCoordinator(
+            scope = resumeScope,
+            loadBookmarks = { withAlbumResumeSession(captured) { bookmarks() } },
+            loadSong = { id -> withAlbumResumeSession(captured) { song(id) } },
+            loadAlbum = { id -> withAlbumResumeSession(captured) { album(id) } },
+            upsert = { id, comment ->
+                withAlbumResumeSession(captured) { createBookmark(id, comment) }
+            },
+            delete = { id -> withAlbumResumeSession(captured) { deleteBookmark(id) } },
+            writer = AlbumResumeWriter(NavidromeClient.CLIENT_NAME, "Android", BuildConfig.VERSION_NAME),
+        ).also { it.refresh() }
         _credentials.value = credentials
+    }
+
+    private suspend fun <T> withAlbumResumeSession(
+        captured: NavidromeSession,
+        request: suspend NavidromeClient.() -> T,
+    ): T {
+        currentCoroutineContext().ensureActive()
+        ensureSessionGeneration(captured.generation, session.generation)
+        return withCurrentSession(request)
     }
 
     internal fun sessionSnapshot(): NavidromeSession? = session.takeIf { it.client.isConfigured }
