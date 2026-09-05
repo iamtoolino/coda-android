@@ -206,17 +206,4 @@ class AlbumResumeTest {
         assertTrue(coordinator.items.value.isEmpty())
     }
 
-    @Test fun `resume validates target and plays entire album with canonical art`() = runBlocking {
-        var plays = 0
-        val coordinator = coordinator(this)
-        val item = AlbumResumeItem(page.album, "first", "last", "")
-        coordinator.continueListening(item) { songs, index ->
-            plays++
-            assertEquals(1, index)
-            assertEquals(listOf("first", "last"), songs.map { it.id })
-            assertTrue(songs.all { it.coverArt == "al-cover" })
-        }.join()
-        coordinator.continueListening(item.copy(resumeSongId = "gone")) { _, _ -> plays++ }.join()
-        assertEquals(1, plays)
-    }
 }

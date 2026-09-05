@@ -118,7 +118,6 @@ internal class AlbumResumeCoordinator(
     val items = _items.asStateFlow()
     private var refreshJob: Job? = null
     private var mutationJob: Job? = null
-    private var continuationJob: Job? = null
     private val writes = Mutex()
     private var revision = 0L
 
@@ -179,21 +178,6 @@ internal class AlbumResumeCoordinator(
             }
         }
         return requireNotNull(mutationJob)
-    }
-
-    fun continueListening(item: AlbumResumeItem, play: (List<Song>, Int) -> Unit): Job {
-        continuationJob?.cancel()
-        continuationJob = scope.launch {
-            bestEffort {
-                val page = loadAlbum(item.album.id)
-                currentCoroutineContext().ensureActive()
-                val index = page.songs.indexOfFirst { it.id == item.resumeSongId }
-                if (index >= 0) {
-                    play(page.songs.map { it.copy(coverArt = page.album.artworkId) }, index)
-                }
-            }
-        }
-        return requireNotNull(continuationJob)
     }
 
     private suspend fun bestEffort(action: suspend () -> Unit) {

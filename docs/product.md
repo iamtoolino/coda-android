@@ -92,10 +92,13 @@ Coda is a personal, album-oriented Android client for Navidrome/OpenSubsonic.
 
 Album continuation is independent of saved-queue handoff. The Continue Listening shelf shows at
 most twenty unfinished albums, newest first, with artwork/title/album artist only and no disclosure
-chevron. The local current album stays hidden while playing or paused, including restored queues.
-Tapping a card validates its saved song, replaces the queue with the complete canonical album, and
-plays from that song's beginning while staying on Home. Invalid targets do nothing. Ordinary album
-Play still starts at track one. Bookmark refresh alone never navigates.
+chevron, including the local current album while playing or paused/restored. Cards open ordinary
+album detail without changing playback. A small inline Resume row above the saved track offers Play
+and Append for the canonical suffix, highlighted continuously through the final track and across
+disc headings. Play starts that suffix at its beginning; Append preserves playback and stays paused
+with an empty queue. Both stay in detail and preserve the bookmark. Hide this treatment only when
+the album is the current playback entry. Invalid targets omit it. Ordinary album Play still starts
+at track one, and individual track taps retain normal behavior. Bookmark refresh never navigates.
 
 Only natural track completion advances album progress; final canonical-track completion removes it,
 even for isolated tracks or one-track albums. Recording works without the phone UI, is best effort,

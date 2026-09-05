@@ -29,7 +29,7 @@ import org.junit.runner.RunWith
 class AlbumResumeShelfTest {
     @get:Rule val composeRule = createComposeRule()
 
-    @Test fun resumeShelfUsesPlainCardsAndDirectPlaybackAction() {
+    @Test fun resumeShelfUsesPlainCardsAndAlbumNavigation() {
         var selected = ""
         composeRule.setContent {
             val ratings = AlbumRatingCoordinator(rememberCoroutineScope()) { _, _ -> }
@@ -54,12 +54,12 @@ class AlbumResumeShelfTest {
         composeRule.onNodeWithText("Continue Listening").assertIsDisplayed()
         composeRule.onNodeWithContentDescription("See all").assertDoesNotExist()
         composeRule.onNodeWithText("5").assertDoesNotExist()
-        composeRule.onNodeWithText("A Long Album Title for Testing").performClick()
-        composeRule.runOnIdle { assertEquals("one", selected) }
         val image = composeRule.onRoot().captureToImage().asAndroidBitmap()
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         File(context.getExternalFilesDir(null), "album-resume-shelf.png").outputStream().use {
             image.compress(Bitmap.CompressFormat.PNG, 100, it)
         }
+        composeRule.onNodeWithText("A Long Album Title for Testing").performClick()
+        composeRule.runOnIdle { assertEquals("one", selected) }
     }
 }

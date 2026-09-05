@@ -63,15 +63,35 @@ and that small cross-client race are accepted. Twenty is a shared target, not a 
 
 Home places Continue Listening between Recently Played and Playlists. Plain cards show artwork,
 album title, and album artist, without rating badges, resume-track text, runtime, or a chevron.
-Hide the local current album even paused/restored, without expiry; keep its server marker intact.
-Tapping fetches the album, validates the target, and starts the full album at that song's beginning,
-remaining on Home with the mini-player. Failed lookup/missing target leaves playback untouched,
-without fallback to track one or deleting the marker. Bookmark refresh never navigates.
+Include the local current album while playing or paused/restored. Tapping only opens normal album
+detail; it never fetches songs to start playback or changes the queue.
+
+Album detail resolves the saved target in its already-loaded canonical tracklist. Immediately above
+that track, a small bookmark and RESUME label accompany icon-only Play and Append actions using the
+album header's icons with accessible names and 48 dp touch targets. A continuous 10% theme-accent
+background with rounded outer corners encloses the saved track and every subsequent track,
+including intervening disc headings. The hero and its whole-album actions remain unchanged.
+
+Resume Play replaces the queue with that canonical suffix and starts at its beginning. Resume
+Append uses the existing append path, preserving playback and remaining paused with an empty queue.
+The shared append path explicitly clears retained play intent when empty, including after clearing
+a playing queue.
+Both use canonical album artwork, stay in album detail, and never edit the bookmark. Individual
+track taps retain ordinary whole-album playback at the tapped index. Android has no internal
+track-to-queue drag/drop or track-selection mechanism, so no Resume drag gesture is added.
+
+Hide the entire detail treatment when this album is the current playback entry, including while
+paused/restored; songs elsewhere in the queue do not suppress it. Observe playback and bookmark
+changes without reloading or navigating. Missing targets or failed album loads omit the treatment,
+without fallback to track one or deleting the bookmark. Bookmark refresh never navigates.
 
 ## Verification
 
 `./scripts/verify.sh` covers protocol, eligibility, ordering, retention, serial writes, refresh races,
-failure retention, cancellation, continuation, and completion independence from scrobbling.
-`./scripts/ui-test.sh <explicit-emulator-serial>` includes a credential-free plain-shelf UI test.
+failure retention, cancellation, detail target resolution, and completion independence from scrobbling.
+`./scripts/ui-test.sh <explicit-emulator-serial>` includes credential-free shelf and detail tests for
+suffix actions, multidisc targets, live current-album suppression, missing targets, compact layout,
+large text, and accessible touch targets. Local silent Media3 fixtures verify
+empty-queue pause and populated-queue playback/index/position preservation on append.
 Live cross-client testing remains separate: finish tracks on each platform, foreground the other,
 resume an album, and verify isolated/final completions and screen-off playback against a real server.

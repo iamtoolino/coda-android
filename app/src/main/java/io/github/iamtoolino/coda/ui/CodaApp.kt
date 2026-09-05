@@ -584,8 +584,6 @@ private fun HomeScreen(
     val handoffQueue by playback.handoffQueue.collectAsStateWithLifecycle()
     val resume = requireNotNull(AppGraph.albumResume)
     val resumeItems by resume.items.collectAsStateWithLifecycle()
-    val localPlayback by playback.state.collectAsStateWithLifecycle()
-    val visibleResumeItems = resumeItems.filter { it.album.id != localPlayback.albumId }
     val listState = rememberRestorableLazyListState(
         contentReady = true,
         maxIndex = 7,
@@ -708,16 +706,14 @@ private fun HomeScreen(
                     )
                 }
             }
-            if (visibleResumeItems.isNotEmpty()) {
+            if (resumeItems.isNotEmpty()) {
                 item(key = "album-resume") {
                     AlbumShelf(
                         title = "Continue Listening",
-                        albums = visibleResumeItems.map { it.album },
+                        albums = resumeItems.map { it.album },
                         showRatingBadge = false,
                         onAlbum = { album ->
-                            visibleResumeItems.firstOrNull { it.album.id == album.id }?.let {
-                                resume.continueListening(it, playback::playSongs)
-                            }
+                            navController.navigate("album/${Uri.encode(album.id)}")
                         },
                     )
                 }
@@ -1476,6 +1472,8 @@ private fun AlbumScreen(
     val state = coordinator.state
     val page = state.value.takeIf { state.key == id }
     val error = state.errorMessage.takeIf { state.key == id }
+    val resumeItems by requireNotNull(AppGraph.albumResume).items.collectAsStateWithLifecycle()
+    val resumeIndex = albumResumeIndex(page, resumeItems, playbackState.albumId)
     val discSections = remember(page?.songs) { albumDiscSections(page?.songs.orEmpty()) }
     val showDiscHeaders = shouldShowDiscHeaders(discSections)
     val listState = rememberRestorableLazyListState(
@@ -1548,27 +1546,22 @@ private fun AlbumScreen(
                                 },
                             )
                         }
-                        discSections.forEach { section ->
-                            if (showDiscHeaders) {
-                                item(key = "disc:${section.number}:${section.songs.first().index}") {
-                                    AlbumDiscHeader(section)
-                                }
-                            }
-                            items(
-                                items = section.songs,
-                                key = { it.value.id },
-                            ) { indexedSong ->
-                                val song = indexedSong.value
-                                SongRow(
-                                    song,
-                                    isPlaying = playbackState.currentSongId == song.id,
-                                    showArtist = false,
-                                    onClick = {
-                                        playback.playSongs(loaded.songs, indexedSong.index)
-                                    },
-                                )
-                            }
-                        }
+                        albumTrackItems(
+                            page = loaded,
+                            sections = discSections,
+                            resumeIndex = resumeIndex,
+                            currentSongId = playbackState.currentSongId,
+                            onResumePlay = playback::playSongs,
+                            onResumeAppend = { songs ->
+                                playback.appendSongs(songs)
+                                Toast.makeText(
+                                    context,
+                                    "Remaining tracks appended to queue",
+                                    Toast.LENGTH_SHORT,
+                                ).show()
+                            },
+                            onSong = { index -> playback.playSongs(loaded.songs, index) },
+                        )
                     }
                 }
             }
@@ -2255,10 +2248,11 @@ private fun ArtistRow(artist: Artist, onClick: () -> Unit) {
 }
 
 @Composable
-private fun SongRow(
+internal fun SongRow(
     song: Song,
     isPlaying: Boolean = false,
     showArtist: Boolean = true,
+    horizontalPadding: Dp = 16.dp,
     onClick: () -> Unit = {},
 ) {
     Row(
@@ -2266,7 +2260,7 @@ private fun SongRow(
             .fillMaxWidth()
             .background(currentTrackHighlight(isPlaying))
             .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 9.dp),
+            .padding(horizontal = horizontalPadding, vertical = 9.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(Modifier.width(40.dp), contentAlignment = Alignment.Center) {
@@ -2297,11 +2291,11 @@ private fun SongRow(
 }
 
 @Composable
-private fun AlbumDiscHeader(section: AlbumDiscSection) {
+internal fun AlbumDiscHeader(section: AlbumDiscSection, horizontalPadding: Dp = 18.dp) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 18.dp, end = 18.dp, top = 12.dp, bottom = 4.dp),
+            .padding(start = horizontalPadding, end = horizontalPadding, top = 12.dp, bottom = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(

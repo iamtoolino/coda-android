@@ -89,8 +89,10 @@ genuine Media3 completion. Seeking near the end or manually skipping does not co
 
 Album continuation is separate from queue handoff: finishing a track records the next canonical
 album track, and finishing the final track removes that album's marker. Home shows up to twenty
-unfinished albums between Recently Played and Playlists, excluding the local current album even
-when paused. Tapping one stays on Home and starts the full album queue at the saved track boundary.
+unfinished albums between Recently Played and Playlists, including the current album. Tapping one
+opens album detail. Inline Resume Play/Append actions operate on the saved track and highlighted
+remaining tracks without leaving detail. Only the current album’s detail treatment is hidden,
+including while paused; ordinary album Play still starts at track one.
 Recording is best effort, including screen-off and Android Auto playback; it is not a durable
 offline sync queue. The first track's ordinary music bookmark is reserved and can be overwritten
 or deleted. See [the album-resume contract](docs/album-resume.md) for compatibility and tradeoffs.

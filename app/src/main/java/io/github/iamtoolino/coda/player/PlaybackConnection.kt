@@ -4,6 +4,7 @@ import android.content.ComponentName
 import android.content.Context
 import androidx.core.content.ContextCompat
 import androidx.media3.common.C
+import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
@@ -408,12 +409,7 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
                     if (request.startPlayback) player.play()
                 }
                 is PreparedQueueMutation.Append -> {
-                    if (player.mediaItemCount == 0) {
-                        player.setMediaItems(mediaItems)
-                        player.prepare()
-                    } else {
-                        player.addMediaItems(mediaItems)
-                    }
+                    player.appendQueueItems(mediaItems)
                 }
             }
         }
@@ -595,5 +591,17 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
             override val generation: Long,
             override val session: NavidromeSession,
         ) : PreparedQueueMutation
+    }
+}
+
+/** Append preserves playback, but an empty queue must not inherit an old play intent. */
+internal fun Player.appendQueueItems(items: List<MediaItem>) {
+    if (items.isEmpty()) return
+    if (mediaItemCount == 0) {
+        pause()
+        setMediaItems(items)
+        prepare()
+    } else {
+        addMediaItems(items)
     }
 }
