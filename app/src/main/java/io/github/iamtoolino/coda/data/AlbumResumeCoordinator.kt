@@ -16,13 +16,20 @@ import kotlinx.serialization.json.Json
 
 @Serializable
 internal data class AlbumResumeWriter(
-    val client: String,
-    val platform: String,
-    val appVersion: String,
+    val client: String? = null,
+    val platform: String? = null,
+    val appVersion: String? = null,
 )
 
 @Serializable
 internal data class AlbumResumeMarker(
+    val protocol: String,
+    val protocolVersion: Int,
+    val resumeSongId: String,
+)
+
+@Serializable
+private data class AlbumResumeComment(
     val protocol: String,
     val protocolVersion: Int,
     val resumeSongId: String,
@@ -43,7 +50,7 @@ internal fun parseAlbumResumeMarker(comment: String?): AlbumResumeMarker? =
 internal fun albumResumeComment(songId: String, writer: AlbumResumeWriter? = null): String? {
     val id = songId.trim().takeIf(String::isNotEmpty) ?: return null
     for (metadata in listOf(writer, null)) {
-        val comment = markerJson.encodeToString(AlbumResumeMarker(PROTOCOL, 1, id, metadata))
+        val comment = markerJson.encodeToString(AlbumResumeComment(PROTOCOL, 1, id, metadata))
         if (comment.toByteArray(Charsets.UTF_8).size <= 255) return comment
     }
     return null

@@ -15,7 +15,11 @@ song, position zero (omitted zero on read is acceptable), with compact UTF-8 JSO
 
 The three non-writer fields are required, with exact protocol/version and a nonempty song ID.
 Ignore unknown fields and accept arbitrary key order. Reject malformed/unsupported markers.
-Writer is optional diagnostic metadata, never ownership or ordering. Omit it when necessary to
+Writer is optional diagnostic metadata, never ownership or ordering. Its `client`, `platform`, and
+`appVersion` strings are each optional. Coda writers continue supplying all three when space permits.
+Progress readers on both platforms ignore the entire `writer` field, including missing, partial,
+or incorrectly typed values; it must not invalidate otherwise valid progress. Diagnostic tools may
+inspect it independently. Omit it when necessary to
 fit the 255-byte UTF-8 ceiling; never upload an oversized record. There is no installation ID.
 Album identity and presentation come from the bookmark's media entry; timestamps come from the
 server. Do not log private bookmark payloads or authenticated URLs.

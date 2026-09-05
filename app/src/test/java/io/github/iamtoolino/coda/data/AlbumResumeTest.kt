@@ -35,7 +35,7 @@ class AlbumResumeTest {
         val writer = AlbumResumeWriter("Coda", "Android", "ü".repeat(300))
         val comment = requireNotNull(albumResumeComment("last", writer))
         assertTrue(comment.toByteArray().size <= 255)
-        assertNull(parseAlbumResumeMarker(comment)?.writer)
+        assertFalse(comment.contains("\"writer\""))
         assertEquals("last", parseAlbumResumeMarker(comment)?.resumeSongId)
         assertNull(albumResumeComment("ü".repeat(200)))
         assertNull(albumResumeComment(" "))
@@ -45,6 +45,18 @@ class AlbumResumeTest {
         assertEquals("last", parseAlbumResumeMarker(
             """{"extra":true,"resumeSongId":"last","protocolVersion":1,"protocol":"album-resume-bookmark"}""",
         )?.resumeSongId)
+    }
+
+    @Test fun `reader ignores diagnostics while writer still supplies them`() {
+        val comment = requireNotNull(albumResumeComment("last", AlbumResumeWriter("Coda", "Android", "1")))
+        assertTrue(comment.contains("\"client\":\"Coda\""))
+        assertTrue(comment.contains("\"platform\":\"Android\""))
+        assertTrue(comment.contains("\"appVersion\":\"1\""))
+        for (writer in listOf("null", "{}", """{"client":"Android"}""", """{"platform":42}""", "false", "\"diagnostic\"")) {
+            assertEquals("last", parseAlbumResumeMarker(
+                """{"protocol":"album-resume-bookmark","protocolVersion":1,"resumeSongId":"last","writer":$writer}""",
+            )?.resumeSongId)
+        }
     }
 
     @Test fun `bookmark zero omission and media classification decode`() {
