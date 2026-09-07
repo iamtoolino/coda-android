@@ -38,6 +38,7 @@ internal fun Song.toPlayableMediaItem(
         putString("albumId", albumId)
         putString("artistId", artistId)
         putString("coverArtId", albumArtworkId)
+        putString("canonicalAlbumCoverArt", canonicalAlbumCoverArt)
         putString("cacheNamespace", session.cacheNamespace)
         putLong("accountGeneration", session.generation)
         putLong("durationMs", duration.coerceAtLeast(0) * 1_000L)

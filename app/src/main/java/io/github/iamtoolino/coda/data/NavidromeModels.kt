@@ -72,13 +72,16 @@ data class Song(
     val samplingRate: Int? = null,
     val type: String? = null,
     val mediaType: String? = null,
+    // Album-page metadata, kept separate from a song’s potentially embedded coverArt.
+    val canonicalAlbumCoverArt: String? = null,
 ) {
     val artistName: String
         get() = displayAlbumArtist?.takeIf { it.isNotBlank() } ?: artist
 
     val albumArtworkId: String
-        get() = coverArt?.takeIf { it.isNotBlank() }
+        get() = canonicalAlbumCoverArt?.takeIf { it.isNotBlank() }
             ?: albumId?.takeIf { it.isNotBlank() }
+            ?: coverArt?.takeIf { it.isNotBlank() }
             ?: id
 }
 

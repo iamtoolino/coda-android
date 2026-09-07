@@ -103,6 +103,14 @@ unreadable artwork falls back to Brand teal.
 
 ## Artwork
 
+Album artwork is resolved before song artwork: an explicit canonical cover from a loaded album
+page, then the song's album ID, then its own cover ID or song ID when no album is known. A song's
+`coverArt` may identify embedded track artwork and must not override album identity. Loaded album
+pages attach `canonicalAlbumCoverArt` to their songs; playback metadata and local snapshots preserve
+that distinction. Legacy snapshots without it use the album-ID fallback. Playback, Android Auto,
+queue handoff presentation, and bookmark-derived Home cards share this policy without per-song
+album requests.
+
 Phone artwork uses four server-source buckets: 420 px for the high-volume Albums grid and playlist
 thumbnails, 500 px for artist cards and rows, 600 px for Home album cards, and 1200 px for phone
 heroes, Continue, Now Playing, and theme extraction. Android Auto requests 320 px browse thumbnails

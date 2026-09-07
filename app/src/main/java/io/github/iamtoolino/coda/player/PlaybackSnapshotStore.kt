@@ -74,6 +74,7 @@ private fun MediaItem.snapshotSong(): Song? {
         albumId = extras?.getString("albumId"),
         artistId = extras?.getString("artistId"),
         coverArt = extras?.getString("coverArtId"),
+        canonicalAlbumCoverArt = extras?.getString("canonicalAlbumCoverArt"),
         track = extras?.getInt("trackNumber")?.takeIf { extras.containsKey("trackNumber") },
         discNumber = extras?.getInt("discNumber")?.takeIf { extras.containsKey("discNumber") },
         duration = ((extras?.getLong("durationMs") ?: 0L) / 1_000L)

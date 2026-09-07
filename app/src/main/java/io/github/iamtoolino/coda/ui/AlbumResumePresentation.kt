@@ -50,7 +50,7 @@ internal fun LazyListScope.albumTrackItems(
 ) {
     // The already-loaded page is canonical. No click-time fetch or bookmark mutation is needed.
     val remaining = resumeIndex?.let { index ->
-        page.songs.drop(index).map { it.copy(coverArt = page.album.artworkId) }
+        page.songs.drop(index).map { it.copy(canonicalAlbumCoverArt = page.album.artworkId) }
     }.orEmpty()
     sections.forEach { section ->
         if (shouldShowDiscHeaders(sections)) {

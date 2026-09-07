@@ -18,7 +18,8 @@ class PlaybackSnapshotStoreTest {
                     artist = "Korn",
                     albumId = "album-1",
                     artistId = "artist-1",
-                    coverArt = "cover-1",
+                    coverArt = "track-cover",
+                    canonicalAlbumCoverArt = "album-cover",
                     track = 1,
                     duration = 258,
                     suffix = "flac",
@@ -31,6 +32,16 @@ class PlaybackSnapshotStoreTest {
         )
 
         assertEquals(snapshot, PlaybackSnapshotCodec.decode(PlaybackSnapshotCodec.encode(snapshot)))
+    }
+
+    @Test
+    fun `legacy snapshot with embedded cover restores using album identity`() {
+        val snapshot = requireNotNull(PlaybackSnapshotCodec.decode(
+            """{"cacheNamespace":"fixture","songs":[{"id":"track","title":"Track",
+                "albumId":"album","coverArt":"embedded"}],"currentIndex":0,"positionMs":1234}""",
+        ))
+        assertEquals("album", snapshot.songs.single().albumArtworkId)
+        assertEquals(1234L, snapshot.positionMs)
     }
 
     @Test

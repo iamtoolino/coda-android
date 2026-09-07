@@ -137,14 +137,14 @@ class NavidromeModelsTest {
     }
 
     @Test
-    fun `album artwork identity prefers explicit cover art`() {
+    fun `album artwork uses album metadata while songs prefer album identity over embedded art`() {
         assertEquals(
             "cover-1",
             Album(id = "album-1", name = "Album", coverArt = "cover-1").artworkId,
         )
         assertEquals("album-1", Album(id = "album-1", name = "Album").artworkId)
         assertEquals(
-            "cover-1",
+            "album-1",
             Song(
                 id = "track-1",
                 title = "Track",
@@ -160,6 +160,16 @@ class NavidromeModelsTest {
             "track-1",
             Song(id = "track-1", title = "Track").albumArtworkId,
         )
+    }
+
+    @Test
+    fun `explicit canonical album cover survives song fallback and blank identities`() {
+        val song = Song("track", "Track", albumId = "album", coverArt = "embedded")
+        assertEquals("album", song.albumArtworkId)
+        assertEquals("album-cover", song.copy(canonicalAlbumCoverArt = "album-cover").albumArtworkId)
+        assertEquals("album", song.copy(canonicalAlbumCoverArt = " ").albumArtworkId)
+        assertEquals("embedded", song.copy(albumId = " ").albumArtworkId)
+        assertEquals("track", song.copy(albumId = null, coverArt = " ").albumArtworkId)
     }
 
     @Test

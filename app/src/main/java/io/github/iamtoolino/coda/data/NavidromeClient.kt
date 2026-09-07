@@ -135,7 +135,11 @@ class NavidromeClient(
     suspend fun album(id: String): AlbumPage {
         val detail = call("getAlbum", "id" to id).album
             ?: error("Album was not returned by the server")
-        return AlbumPage(detail.album(), detail.song.sortedWith(songOrder))
+        val album = detail.album()
+        return AlbumPage(
+            album,
+            detail.song.sortedWith(songOrder).map { it.copy(canonicalAlbumCoverArt = album.artworkId) },
+        )
     }
 
     suspend fun song(id: String): Song = call("getSong", "id" to id).song

@@ -43,8 +43,8 @@ class AlbumResumeApiTest {
     @Test fun `canonical sort preserves explicit zeros missing defaults and server order ties`() = runBlocking {
         val http = OkHttpClient.Builder().addInterceptor { chain ->
             Response.Builder().request(chain.request()).protocol(Protocol.HTTP_1_1).code(200).message("OK")
-                .body("""{"subsonic-response":{"status":"ok","album":{"id":"album","name":"Album","song":[
-                    {"id":"z","title":"Same","track":1},
+                .body("""{"subsonic-response":{"status":"ok","album":{"id":"album","name":"Album","coverArt":"canonical-cover","song":[
+                    {"id":"z","title":"Same","track":1,"coverArt":"embedded-cover"},
                     {"id":"a","title":"Same","track":1},
                     {"id":"missing","title":"No number"},
                     {"id":"zero","title":"Zero","discNumber":0,"track":0},
@@ -54,5 +54,7 @@ class AlbumResumeApiTest {
         val page = NavidromeClient("https://example.test", "test", "test", http).album("album")
         assertEquals(listOf("zero", "z", "a", "missing", "disc2"), page.songs.map { it.id })
         assertTrue(page.songs.first().discNumber == 0)
+        assertTrue(page.songs.all { it.albumArtworkId == page.album.artworkId })
+        assertEquals("embedded-cover", page.songs.first { it.id == "z" }.coverArt)
     }
 }

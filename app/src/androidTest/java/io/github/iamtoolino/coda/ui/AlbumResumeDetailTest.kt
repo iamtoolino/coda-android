@@ -86,7 +86,7 @@ class AlbumResumeDetailTest {
         composeRule.runOnIdle {
             assertEquals(listOf("s2", "s3", "s4"), appended.map { it.id })
             assertTrue(played.isEmpty())
-            assertTrue(appended.all { it.coverArt == "canonical-cover" })
+            assertTrue(appended.all { it.albumArtworkId == "canonical-cover" })
         }
         play.performClick()
         composeRule.runOnIdle { assertEquals(appended, played) }

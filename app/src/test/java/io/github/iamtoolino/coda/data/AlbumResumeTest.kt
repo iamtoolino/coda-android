@@ -81,6 +81,11 @@ class AlbumResumeTest {
         assertNull(albumResumeAction(first.copy(type = "podcast"), page))
     }
 
+    @Test fun `bookmark shelf uses album identity instead of anchor embedded artwork`() {
+        val marker = bookmark("album").copy(entry = first.copy(coverArt = "embedded-cover"))
+        assertEquals("album", albumResumeBuckets(listOf(marker)).single().item.album.artworkId)
+    }
+
     @Test fun `raw timestamp fallback deduplication and foreign exclusion match macOS`() {
         val old = bookmark("same", "a")
         val newer = old.copy(changed = "z", entry = first.copy(id = "z-anchor", albumId = "same"))
