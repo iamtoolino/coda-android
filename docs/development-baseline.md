@@ -16,11 +16,9 @@ authoritative specifications.
 - **Manual/platform integration checks:** real server playback, audio focus, process death and media
   buttons, Android Auto Desktop Head Unit, physical phone/car behavior, and visual quality. These
   require explicit scenarios and are not folded into the deterministic suite.
-- **Confirmed broken at this baseline:** none. Missing automation and untested device/server
-  combinations are verification gaps, not claims that those paths are correct.
-- **Historical inputs:** `../android-accent-color-handoff.md` and `../queue-handoff-android.md`
-  explain prior decisions. They are not current specifications where they disagree with product,
-  architecture, `AGENTS.md`, or code.
+- **Known limitations:** see `releasing.md` for current verification gaps and deferred issues.
+  Historical implementation handoffs are retained in Git history; use the current product and
+  architecture documents for active decisions.
 - **Platform-specific:** Media3 service/session ownership, foreground-service behavior, Android Auto,
   Android Keystore, connectivity policy, system bars, and Android lifecycle behavior must remain
   native Android implementations rather than direct macOS ports.
@@ -43,8 +41,8 @@ With a booted emulator, run the credential-free Compose UI tests using its expli
 ./scripts/ui-test.sh emulator-5554
 ```
 
-The UI tests render `LoginScreen` and the Now Playing seek control in isolation, perform no server
-request, and do not depend on credentials or existing app data. Live Navidrome, audio, lifecycle,
+The deterministic UI tests cover isolated phone UI and local playback fixtures, perform no server
+requests, and do not depend on credentials or existing app data. Live Navidrome, audio, lifecycle,
 TalkBack, and car checks remain separate.
 
 To run the explicit live artwork diagnostic against an already connected emulator, use:
