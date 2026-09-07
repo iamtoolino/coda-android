@@ -17,7 +17,7 @@ Coda is an independent community project and is not affiliated with or endorsed 
   <img src="docs/screenshots/06_now_playing_2.webp" width="23%" alt="Now playing screen">
 </p>
 
-The Connection screen shows the last server check, server/API versions, and Android build details. Copy diagnostics excludes server address, account, and client name.
+The Connection screen shows the last server check, server/API versions, and Android build details.
 
 ## Why Coda exists
 

@@ -1,8 +1,5 @@
 package io.github.iamtoolino.coda.ui
 
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
 import android.os.Build
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -12,7 +9,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.platform.LocalContext
 import io.github.iamtoolino.coda.AppGraph
 import io.github.iamtoolino.coda.BuildConfig
 import io.github.iamtoolino.coda.data.ServerDiagnostics
@@ -48,7 +44,6 @@ internal fun ConnectionScreen(
     onDisconnect: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
-    val context = LocalContext.current
     val diagnostics = remember(credentials) {
         RemoteDetailCoordinator<Unit, ServerDiagnostics>(scope, Unit) {
             AppGraph.withCurrentSession { serverDiagnostics() }
@@ -59,11 +54,11 @@ internal fun ConnectionScreen(
     val info = state.value
     val status = when {
         state.isLoading -> "Checking…"
-        state.errorMessage != null -> "Could not reach server — check connection and try again"
-        else -> "Server responded successfully"
+        state.errorMessage != null -> "Unreachable"
+        else -> "OK"
     }
     val serverRows = listOf(
-        "Last check" to status,
+        "Connection" to status,
         "Server" to credentials.serverUrl,
         "Account" to credentials.username,
         "Client" to (info?.clientName ?: "Not checked"),
@@ -75,7 +70,6 @@ internal fun ConnectionScreen(
             false -> "Not supported"
             null -> "Not reported"
         },
-        "Playback engine" to "AndroidX Media3 / ExoPlayer",
     )
     val buildRows = listOf(
         "Version" to "${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
@@ -110,21 +104,11 @@ internal fun ConnectionScreen(
                 .padding(start = 24.dp, end = 24.dp, top = 20.dp, bottom = 120.dp),
             verticalArrangement = Arrangement.spacedBy(22.dp),
         ) {
-            Text("Coda", style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold)
-            DiagnosticSection("Connection", serverRows)
+            DiagnosticSection(null, serverRows)
             OutlinedButton(onClick = { diagnostics.refresh() }, enabled = !state.isLoading, modifier = Modifier.fillMaxWidth()) {
                 Text("Check connection")
             }
             DiagnosticSection("Build", buildRows)
-            OutlinedButton(onClick = {
-                // Exclude account, server URL, and device-derived client name from shared diagnostics.
-                val publicRows = serverRows.filterNot { it.first in setOf("Server", "Account", "Client") }
-                val report = (publicRows + buildRows).joinToString("\n", prefix = "Coda diagnostics\n") { "${it.first}: ${it.second}" }
-                val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                clipboard.setPrimaryClip(ClipData.newPlainText("Coda diagnostics", report))
-            }, modifier = Modifier.fillMaxWidth()) { Text("Copy diagnostics") }
-            Text("Copied diagnostics exclude your server address, account and client name.", style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant)
             Text(
                 text = "If artwork was changed on the server, clear Coda's image cache to fetch it again.",
                 style = MaterialTheme.typography.bodyMedium,
@@ -171,10 +155,10 @@ private fun ConnectionValue(label: String, value: String) {
 }
 
 @Composable
-private fun DiagnosticSection(title: String, values: List<Pair<String, String>>) {
+private fun DiagnosticSection(title: String?, values: List<Pair<String, String>>) {
     Surface(shape = RoundedCornerShape(20.dp), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)) {
         Column(Modifier.fillMaxWidth().padding(18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-            Text(title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            if (title != null) Text(title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
             values.forEach { (label, value) -> ConnectionValue(label, value) }
         }
     }

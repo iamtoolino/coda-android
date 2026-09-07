@@ -143,4 +143,4 @@ expose the new shelf as a browse root.
 
 ## Connection diagnostics
 
-The Home profile button opens Connection with app/build information and a one-shot server check. Check connection retries on demand; the last result is not a continuous connectivity guarantee. Missing server metadata is shown as not reported. Copy diagnostics excludes server address, account, client name, and credentials. Artwork refresh and Disconnect remain available.
+The Home profile button opens Connection with app/build information and a compact Connection status row from a one-shot server check. Check connection retries on demand; the last result is not a continuous connectivity guarantee. Missing server metadata is shown as not reported. Artwork refresh and Disconnect remain available.
