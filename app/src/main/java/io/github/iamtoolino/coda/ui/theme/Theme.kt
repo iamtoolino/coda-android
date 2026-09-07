@@ -20,6 +20,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -254,12 +255,18 @@ fun AdaptiveBackground(
         Box(modifier = modifier.fillMaxSize()) { content() }
         return
     }
-    ArtworkFieldBackground(modifier, content)
+    ArtworkFieldBackground(modifier, content = content)
+}
+
+@Composable
+internal fun NowPlayingBackground(artworkBottom: Dp, content: @Composable () -> Unit) {
+    ArtworkFieldBackground(Modifier, artworkBottom, content)
 }
 
 @Composable
 private fun ArtworkFieldBackground(
     modifier: Modifier,
+    artworkBottom: Dp? = null,
     content: @Composable () -> Unit,
 ) {
     val accent = MaterialTheme.colorScheme.primary
@@ -271,13 +278,17 @@ private fun ArtworkFieldBackground(
                     .drawWithCache {
                         val longestSide = maxOf(size.width, size.height)
                         val shortestSide = minOf(size.width, size.height)
+                        val nowPlaying = artworkBottom != null
+                        val ambientCenter = artworkBottom?.let {
+                            Offset(-size.width * 0.35f, it.toPx() + 40f * density)
+                        }
                         val broadGlow = Brush.radialGradient(
                             colors = listOf(
-                                accent.copy(alpha = ArtworkBroadGlowOpacity),
+                                accent.copy(alpha = if (nowPlaying) 0.36f else ArtworkBroadGlowOpacity),
                                 Color.Transparent,
                             ),
-                            center = Offset(size.width * 0.34f, size.height * 0.38f),
-                            radius = longestSide * 0.72f,
+                            center = ambientCenter ?: Offset(size.width * 0.34f, size.height * 0.38f),
+                            radius = longestSide * if (nowPlaying) 1.15f else 0.72f,
                         )
                         val coreGlow = Brush.radialGradient(
                             colorStops = arrayOf(
@@ -310,7 +321,7 @@ private fun ArtworkFieldBackground(
                         )
                         onDrawBehind {
                             drawRect(broadGlow)
-                            drawRect(coreGlow)
+                            if (!nowPlaying) drawRect(coreGlow)
                             drawRect(vignette)
                             drawRect(blackFalloff)
                         }

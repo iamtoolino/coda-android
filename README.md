@@ -45,7 +45,8 @@ recommendation feeds, or extensive configuration screens.
 - Album, artist, and track search.
 - Five-star album ratings written directly to the server.
 - Cross-client Continue Listening album cards, compatible with Coda macOS through server bookmarks.
-- Now Playing shows the observed audio format with separate source details, without guessing transcoding.
+- Now Playing groups album artwork and metadata above the seek bar and neutral playback controls.
+  It shows the observed audio format with separate source details, without guessing transcoding.
 - A real playback queue shared by the phone UI, media notification, and Android Auto.
 - Server-authoritative playlists that retain their exact track order and are presented in album
   sections.

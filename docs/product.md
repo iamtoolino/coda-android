@@ -40,6 +40,9 @@ Coda is a personal, album-oriented Android client for Navidrome/OpenSubsonic.
 
 ## Visual theme
 
+Album and artist detail hero images fade into the existing page background without an opaque black
+band. Artist hero text and album playback/rating controls remain outside the image fade.
+
 - Coda uses an artwork-led dark theme with one consistent palette across the visible phone UI.
 - Brand teal (`#2B7A82`) is used before login and whenever no usable artwork-owned theme exists.
   The login Connect action uses Brand gold (`#D19433`).
@@ -66,7 +69,8 @@ Coda is a personal, album-oriented Android client for Navidrome/OpenSubsonic.
 
 ## Playback
 
-- Now Playing keeps the artwork and standard seek bar, gives album rating prominent direct controls,
+- Now Playing places track metadata and labeled, prominent album rating stars below its immersive artwork,
+  groups the neutral standard seek bar with neutral transport controls,
   and anchors its three transport controls above a centered, low-emphasis footer. The footer exposes
   only the remaining queue count and active codec; tapping either opens the dedicated queue or a
   bottom sheet showing the observed playing format separately from server source metadata. Unknown

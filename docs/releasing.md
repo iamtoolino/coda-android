@@ -108,5 +108,15 @@ CODA_SIGNING_KEY_PASSWORD
 When checking Now Playing, compare original FLAC, original Opus, and a requested Opus stream.
 The neutral indicator must follow the selected audio format, omit unknown measurements, and keep
 source details separate. Check switching tracks and restoring a paused session before playback.
+Check the Now Playing layout with long text and increased font size on a compact phone: rating,
+seek, transport, and footer actions must remain reachable. Include missing artwork in the check.
+Inspect album and artist discography hero transitions, including missing artwork; text and hero
+controls must remain legible and interactive while the image fades into the page background.
 
 Check Connection diagnostics on a reachable and unreachable server; verify optional server fields remain unknown when absent.
+
+Known deferred limitation: the current Now Playing layout clips the queue/format footer at 200%
+system text size on a 1080×2424 emulator (420 dpi); at 1080×1920 it hides the footer and crowds
+transport against gesture navigation. At 100% and 130%, all controls were visible with short
+metadata. Long metadata and error messages were not exhaustively tested. This limitation is
+accepted for current personal use, not evidence that the large-text release check passes.
