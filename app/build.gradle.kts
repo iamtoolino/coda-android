@@ -18,12 +18,15 @@ plugins {
     id("org.jetbrains.kotlin.plugin.serialization")
 }
 
-fun gitValue(vararg arguments: String): String? {
+fun gitValue(vararg arguments: String): String? = try {
     val result = providers.exec {
         commandLine("git", *arguments)
         isIgnoreExitValue = true
     }
-    return if (result.result.get().exitValue == 0) result.standardOutput.asText.get().trim() else null
+    if (result.result.get().exitValue == 0) result.standardOutput.asText.get().trim() else null
+} catch (_: Exception) {
+    // Source archives can be built on machines without the Git executable.
+    null
 }
 
 val sourceCommit = gitValue("rev-parse", "--short=12", "HEAD") ?: "Unknown"

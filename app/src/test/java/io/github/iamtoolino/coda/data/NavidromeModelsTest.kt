@@ -18,6 +18,17 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 
 class NavidromeModelsTest {
     @Test
+    fun `diagnostics identify the API client rather than the queue writer`() = runBlocking {
+        var requestedClient: String? = null
+        val client = testClient(queueClientName = "Coda on test device") { request ->
+            requestedClient = request.url.queryParameter("c")
+        }
+        val diagnostics = client.serverDiagnostics()
+        assertEquals(NavidromeClient.CLIENT_NAME, requestedClient)
+        assertEquals(requestedClient, diagnostics.clientName)
+    }
+
+    @Test
     fun `decodes optional server diagnostic fields without inventing support`() {
         val legacy = json.decodeFromString<SubsonicEnvelope>("""{"subsonic-response":{"status":"ok","version":"1.16.1"}}""").response
         assertEquals("1.16.1", legacy.version)

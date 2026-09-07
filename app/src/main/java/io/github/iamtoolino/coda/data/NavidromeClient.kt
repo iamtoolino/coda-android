@@ -70,7 +70,7 @@ class NavidromeClient(
 
     internal suspend fun serverDiagnostics(): ServerDiagnostics {
         val response = call("ping")
-        return ServerDiagnostics(response.type, response.serverVersion, response.version, response.openSubsonic, queueClientName)
+        return ServerDiagnostics(response.type, response.serverVersion, response.version, response.openSubsonic, CLIENT_NAME)
     }
 
     suspend fun ping() {
