@@ -68,6 +68,11 @@ class NavidromeClient(
     val isConfigured: Boolean
         get() = baseUrl.isNotBlank() && username.isNotBlank() && password.isNotBlank()
 
+    internal suspend fun serverDiagnostics(): ServerDiagnostics {
+        val response = call("ping")
+        return ServerDiagnostics(response.type, response.serverVersion, response.version, response.openSubsonic, queueClientName)
+    }
+
     suspend fun ping() {
         call("ping")
     }
@@ -356,3 +361,11 @@ class NavidromeClient(
             .thenBy { it.title.lowercase() }
     }
 }
+
+internal data class ServerDiagnostics(
+    val software: String?,
+    val serverVersion: String?,
+    val apiVersion: String?,
+    val openSubsonic: Boolean?,
+    val clientName: String,
+)

@@ -108,3 +108,5 @@ CODA_SIGNING_KEY_PASSWORD
 When checking Now Playing, compare original FLAC, original Opus, and a requested Opus stream.
 The neutral indicator must follow the selected audio format, omit unknown measurements, and keep
 source details separate. Check switching tracks and restoring a paused session before playback.
+
+Check Connection diagnostics on a reachable and unreachable server; verify optional server fields remain unknown when absent and copied diagnostics omit server/account/client details.

@@ -18,6 +18,23 @@ plugins {
     id("org.jetbrains.kotlin.plugin.serialization")
 }
 
+fun gitValue(vararg arguments: String): String? {
+    val result = providers.exec {
+        commandLine("git", *arguments)
+        isIgnoreExitValue = true
+    }
+    return if (result.result.get().exitValue == 0) result.standardOutput.asText.get().trim() else null
+}
+
+val sourceCommit = gitValue("rev-parse", "--short=12", "HEAD") ?: "Unknown"
+val sourceTag = (gitValue("describe", "--tags", "--exact-match", "HEAD") ?: "Untagged")
+    .replace("\\", "\\\\").replace("\"", "\\\"")
+val sourceState = when (gitValue("status", "--porcelain")) {
+    null -> "Unknown"
+    "" -> "Clean"
+    else -> "Modified"
+}
+
 android {
     namespace = "io.github.iamtoolino.coda"
     compileSdk = 36
@@ -28,6 +45,9 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "0.1.0"
+        buildConfigField("String", "GIT_COMMIT", "\"$sourceCommit\"")
+        buildConfigField("String", "GIT_TAG", "\"$sourceTag\"")
+        buildConfigField("String", "SOURCE_STATE", "\"$sourceState\"")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
     }

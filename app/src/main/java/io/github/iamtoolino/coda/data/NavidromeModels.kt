@@ -115,6 +115,10 @@ internal data class SubsonicEnvelope(
 @Serializable
 internal data class SubsonicResponse(
     val status: String,
+    val version: String? = null,
+    val type: String? = null,
+    val serverVersion: String? = null,
+    val openSubsonic: Boolean? = null,
     val error: SubsonicError? = null,
     val albumList2: AlbumList? = null,
     val artists: ArtistIndexes? = null,

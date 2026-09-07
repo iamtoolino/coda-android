@@ -18,6 +18,19 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 
 class NavidromeModelsTest {
     @Test
+    fun `decodes optional server diagnostic fields without inventing support`() {
+        val legacy = json.decodeFromString<SubsonicEnvelope>("""{"subsonic-response":{"status":"ok","version":"1.16.1"}}""").response
+        assertEquals("1.16.1", legacy.version)
+        assertNull(legacy.type)
+        assertNull(legacy.serverVersion)
+        assertNull(legacy.openSubsonic)
+        val modern = json.decodeFromString<SubsonicEnvelope>("""{"subsonic-response":{"status":"ok","version":"1.16.1","type":"navidrome","serverVersion":"test-version","openSubsonic":true}}""").response
+        assertEquals("navidrome", modern.type)
+        assertEquals("test-version", modern.serverVersion)
+        assertEquals(true, modern.openSubsonic)
+    }
+
+    @Test
     fun `default API client bounds complete calls`() {
         assertEquals(
             NavidromeClient.API_CALL_TIMEOUT_MILLIS,

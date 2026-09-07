@@ -240,3 +240,5 @@ Now Playing reads selected audio track formats through the MediaController, supp
 player. Requested stream variants and source metadata are not evidence of the received format.
 Track changes update the observed codec, sample rate, channel count, and known average bitrate;
 source measurements remain separate, including after cold restoration.
+
+Connection diagnostics use the existing keyed remote-resource coordinator and AppGraph.withCurrentSession for a bounded ping. Optional response envelope metadata supplies server/API versions and OpenSubsonic support; unknown fields remain unknown. BuildConfig embeds Git revision, exact tag when available, and source state at build time. No credentials or server details are embedded in the build.
