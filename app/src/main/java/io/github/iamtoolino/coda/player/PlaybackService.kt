@@ -349,22 +349,9 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
                             isFullyCached(currentKey))
                     if (!shouldReplace) return@map item
                     changed = true
-                    val extras = item.mediaMetadata.extras?.let(::Bundle) ?: Bundle()
-                    if (mobile) {
-                        extras.putString("codec", "opus")
-                        extras.remove("bitDepth")
-                        extras.remove("samplingRate")
-                        extras.remove("bitRate")
-                    } else {
-                        extras.putString("codec", extras.getString("sourceCodec"))
-                        copyInt(extras, "sourceBitDepth", "bitDepth")
-                        copyInt(extras, "sourceSamplingRate", "samplingRate")
-                        copyInt(extras, "sourceBitRate", "bitRate")
-                    }
                     item.buildUpon()
                         .setUri(account.client.streamUrl(item.mediaId, mobile))
                         .setCustomCacheKey(streamCacheKey(requireNotNull(namespace), item.mediaId, variant))
-                        .setMediaMetadata(item.mediaMetadata.buildUpon().setExtras(extras).build())
                         .build()
                 }
                 if (!changed) return@launch
@@ -385,10 +372,6 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
         val contentLength = ContentMetadata.getContentLength(cache.getContentMetadata(cacheKey))
         return contentLength != C.LENGTH_UNSET.toLong() && contentLength > 0 &&
             cache.isCached(cacheKey, 0, contentLength)
-    }
-
-    private fun copyInt(extras: Bundle, source: String, target: String) {
-        if (extras.containsKey(source)) extras.putInt(target, extras.getInt(source)) else extras.remove(target)
     }
 
     private fun clearTransientAudioCaches(namespaces: Set<String>) {

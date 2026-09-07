@@ -7,20 +7,14 @@ import org.junit.Test
 
 class NowPlayingFormattingTest {
     @Test
-    fun `stream mode stays concise while quality carries codec details`() {
-        assertEquals("Transcoded", streamModeLabel(PlaybackUiState(codec = "opus")))
-        assertEquals("Original", streamModeLabel(PlaybackUiState(codec = "flac")))
-    }
-
-    @Test
     fun `cellular transcode retains its codec label without source measurements`() {
         assertEquals("OPUS", codecLabel(PlaybackUiState(codec = "opus")))
         assertEquals("OPUS", qualityLabel(PlaybackUiState(codec = "opus")))
     }
 
     @Test
-    fun `codec label falls back to restored source metadata`() {
-        assertEquals("FLAC", codecLabel(PlaybackUiState(sourceCodec = "flac")))
+    fun `source metadata is not presented as observed playback`() {
+        assertNull(codecLabel(PlaybackUiState(sourceCodec = "flac")))
     }
 
     @Test
@@ -45,10 +39,10 @@ class NowPlayingFormattingTest {
     }
 
     @Test
-    fun `restored item falls back to preserved source measurements`() {
+    fun `source measurements are available separately before playback`() {
         assertEquals(
             "FLAC • 16/44.1 kHz • 1048 kb/s",
-            qualityLabel(
+            sourceQualityLabel(
                 PlaybackUiState(
                     sourceCodec = "flac",
                     sourceBitDepth = 16,

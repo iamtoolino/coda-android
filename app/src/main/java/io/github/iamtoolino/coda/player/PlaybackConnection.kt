@@ -4,6 +4,8 @@ import android.content.ComponentName
 import android.content.Context
 import androidx.core.content.ContextCompat
 import androidx.media3.common.C
+import androidx.media3.common.Format
+import androidx.media3.common.Tracks
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
@@ -107,6 +109,7 @@ data class PlaybackUiState(
     val bitDepth: Int? = null,
     val samplingRate: Int? = null,
     val bitRate: Int? = null,
+    val channelCount: Int? = null,
     val sourceCodec: String? = null,
     val sourceBitDepth: Int? = null,
     val sourceSamplingRate: Int? = null,
@@ -441,6 +444,7 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
         val item = player.currentMediaItem
         val metadata = item?.mediaMetadata
         val extras = metadata?.extras
+        val format = player.currentTracks.selectedAudioFormat()
         _state.value = PlaybackUiState(
             connected = true,
             currentSongId = item?.mediaId,
@@ -454,10 +458,10 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
                 ?: extras?.getString("albumId")
                 ?: item?.mediaId,
             discNumber = extras?.takeIf { it.containsKey("discNumber") }?.getInt("discNumber"),
-            codec = extras?.getString("codec"),
-            bitDepth = extras?.takeIf { it.containsKey("bitDepth") }?.getInt("bitDepth"),
-            samplingRate = extras?.takeIf { it.containsKey("samplingRate") }?.getInt("samplingRate"),
-            bitRate = extras?.takeIf { it.containsKey("bitRate") }?.getInt("bitRate"),
+            codec = format?.sampleMimeType?.let(::audioCodecName),
+            samplingRate = format?.sampleRate?.takeIf { it > 0 },
+            bitRate = format?.averageBitrate?.takeIf { it >= 1_000 }?.div(1_000),
+            channelCount = format?.channelCount?.takeIf { it > 0 },
             sourceCodec = extras?.getString("sourceCodec"),
             sourceBitDepth = extras?.takeIf { it.containsKey("sourceBitDepth") }
                 ?.getInt("sourceBitDepth"),
@@ -604,4 +608,28 @@ internal fun Player.appendQueueItems(items: List<MediaItem>) {
     } else {
         addMediaItems(items)
     }
+}
+
+@androidx.annotation.OptIn(UnstableApi::class)
+internal fun Tracks.selectedAudioFormat(): Format? {
+    for (group in groups) {
+        if (group.type != C.TRACK_TYPE_AUDIO) continue
+        for (index in 0 until group.length) {
+            if (group.isTrackSelected(index)) return group.getTrackFormat(index)
+        }
+    }
+    return null
+}
+
+internal fun audioCodecName(mime: String): String? = when (mime) {
+    "audio/flac" -> "FLAC"
+    "audio/opus" -> "OPUS"
+    "audio/mp4a-latm" -> "AAC"
+    "audio/mpeg" -> "MP3"
+    "audio/vorbis" -> "VORBIS"
+    "audio/alac" -> "ALAC"
+    "audio/raw" -> "PCM"
+    "audio/ac3" -> "AC3"
+    "audio/eac3", "audio/eac3-joc" -> "EAC3"
+    else -> null
 }

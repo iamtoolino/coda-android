@@ -48,12 +48,7 @@ internal fun Song.toPlayableMediaItem(
         bitDepth?.let { putInt("sourceBitDepth", it) }
         samplingRate?.let { putInt("sourceSamplingRate", it) }
         bitRate?.let { putInt("sourceBitRate", it) }
-        putString("codec", if (mobile) "opus" else suffix)
-        if (!mobile) {
-            bitDepth?.let { putInt("bitDepth", it) }
-            samplingRate?.let { putInt("samplingRate", it) }
-            bitRate?.let { putInt("bitRate", it) }
-        }
+
     }
     val metadata = MediaMetadata.Builder()
         .setTitle(title)

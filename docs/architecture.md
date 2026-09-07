@@ -235,3 +235,8 @@ invalidation cancels and invalidates pending restoration, and the service rechec
 the main thread immediately before mutating or preparing the player. Every playable item also carries
 that generation; the service rejects an obsolete or unidentified timeline before queue saving,
 snapshot publication, preparation, or prefetch can continue.
+
+Now Playing reads selected audio track formats through the MediaController, supplied by the service
+player. Requested stream variants and source metadata are not evidence of the received format.
+Track changes update the observed codec, sample rate, channel count, and known average bitrate;
+source measurements remain separate, including after cold restoration.

@@ -2545,8 +2545,7 @@ private fun NowPlayingScreen(
         state.queue.size
     }
     val streamQuality = qualityLabel(state)
-    val streamMode = streamModeLabel(state)
-    val streamCodec = codecLabel(state) ?: streamMode
+    val streamCodec = codecLabel(state) ?: "Details"
     LaunchedEffect(ratingSeed, albumId) {
         if (albumId != null &&
             (ratingSeedState.key != albumId || ratingSeedState.value == null)
@@ -2716,7 +2715,6 @@ private fun NowPlayingScreen(
                         QuietUtilityDock(
                             remainingCount = remainingQueueCount,
                             streamCodec = streamCodec,
-                            streamMode = streamMode,
                             onOpenQueue = { navController.navigate("queue") },
                             onOpenDetails = { showPlaybackDetails = true },
                         )
@@ -2726,7 +2724,7 @@ private fun NowPlayingScreen(
             }
             if (showPlaybackDetails) {
                 PlaybackDetailsSheet(
-                    streamMode = streamMode,
+                    sourceQuality = sourceQualityLabel(state),
                     streamQuality = streamQuality,
                     onDismiss = { showPlaybackDetails = false },
                 )
@@ -2792,7 +2790,6 @@ private fun PrimaryPlaybackButton(
 private fun QuietUtilityDock(
     remainingCount: Int,
     streamCodec: String,
-    streamMode: String,
     onOpenQueue: () -> Unit,
     onOpenDetails: () -> Unit,
 ) {
@@ -2813,8 +2810,7 @@ private fun QuietUtilityDock(
         QuietUtilityAction(
             icon = Icons.Default.Info,
             label = streamCodec,
-            contentDescription = "Playback details, $streamMode, $streamCodec",
-            emphasizeLabel = streamMode == "Transcoded",
+            contentDescription = "Playback details, $streamCodec",
             onClick = onOpenDetails,
         )
     }
@@ -2825,7 +2821,6 @@ private fun QuietUtilityAction(
     icon: ImageVector,
     label: String,
     contentDescription: String,
-    emphasizeLabel: Boolean = false,
     onClick: () -> Unit,
 ) {
     Row(
@@ -2849,11 +2844,7 @@ private fun QuietUtilityAction(
             label,
             fontSize = 11.sp,
             fontWeight = FontWeight.Normal,
-            color = if (emphasizeLabel) {
-                MaterialTheme.colorScheme.primary.copy(alpha = 0.70f)
-            } else {
-                MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.62f)
-            },
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.62f),
             maxLines = 1,
         )
     }
@@ -2861,7 +2852,7 @@ private fun QuietUtilityAction(
 
 @Composable
 private fun PlaybackDetailsSheet(
-    streamMode: String,
+    sourceQuality: String?,
     streamQuality: String?,
     onDismiss: () -> Unit,
 ) {
@@ -2873,38 +2864,32 @@ private fun PlaybackDetailsSheet(
                 .padding(horizontal = 24.dp, vertical = 8.dp),
         ) {
             Text(
-                "Playback signal",
+                "Playback details",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
             )
             Spacer(Modifier.height(8.dp))
             Text(
-                streamMode,
+                "Playing",
                 color = MaterialTheme.colorScheme.primary,
                 style = MaterialTheme.typography.titleMedium,
             )
-            streamQuality?.let {
-                Spacer(Modifier.height(6.dp))
-                Text(
-                    it,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.bodyMedium,
-                )
+            Text(
+                streamQuality ?: "Format not available yet",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            sourceQuality?.let {
+                Spacer(Modifier.height(16.dp))
+                Text("Source", style = MaterialTheme.typography.titleMedium)
+                Text(it, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             Spacer(Modifier.height(24.dp))
         }
     }
 }
 
-internal fun streamModeLabel(state: PlaybackUiState): String =
-    if (state.codec.equals("opus", ignoreCase = true)) {
-        "Transcoded"
-    } else {
-        "Original"
-    }
-
-internal fun codecLabel(state: PlaybackUiState): String? =
-    (state.codec ?: state.sourceCodec)?.uppercase()
+internal fun codecLabel(state: PlaybackUiState): String? = state.codec?.uppercase()
 
 @Composable
 internal fun SeekBar(
@@ -3226,17 +3211,24 @@ private fun formatDurationMs(milliseconds: Long): String {
     return "%d:%02d".format(seconds / 60, seconds % 60)
 }
 
-internal fun qualityLabel(state: PlaybackUiState): String? {
-    val usesSourceFallback = state.codec == null
-    val codec = codecLabel(state) ?: return null
-    val bitDepth = state.bitDepth ?: state.sourceBitDepth.takeIf { usesSourceFallback }
-    val samplingRate = state.samplingRate ?: state.sourceSamplingRate.takeIf { usesSourceFallback }
-    val bitRate = state.bitRate ?: state.sourceBitRate.takeIf { usesSourceFallback }
-    val parts = mutableListOf(codec)
-    if (bitDepth != null && samplingRate != null) {
+internal fun qualityLabel(state: PlaybackUiState): String? = audioQualityLabel(
+    state.codec, state.bitDepth, state.samplingRate, state.bitRate, state.channelCount,
+)
+
+internal fun sourceQualityLabel(state: PlaybackUiState): String? = audioQualityLabel(
+    state.sourceCodec, state.sourceBitDepth, state.sourceSamplingRate, state.sourceBitRate, null,
+)
+
+private fun audioQualityLabel(
+    codec: String?, bitDepth: Int?, samplingRate: Int?, bitRate: Int?, channels: Int?,
+): String? {
+    val parts = mutableListOf(codec?.uppercase() ?: return null)
+    if (samplingRate != null) {
         val khz = samplingRate / 1_000.0
-        parts += "$bitDepth/${if (khz % 1.0 == 0.0) khz.toInt() else khz} kHz"
+        val rate = "${if (khz % 1.0 == 0.0) khz.toInt() else khz} kHz"
+        parts += if (bitDepth != null) "$bitDepth/$rate" else rate
     }
+    channels?.let { parts += when (it) { 1 -> "Mono"; 2 -> "Stereo"; else -> "$it channels" } }
     bitRate?.let { parts += "$it kb/s" }
     return parts.joinToString(" • ")
 }
