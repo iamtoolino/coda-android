@@ -103,8 +103,9 @@ at track one, and individual track taps retain normal behavior. Bookmark refresh
 
 Only natural track completion advances album progress; final canonical-track completion removes it,
 even for isolated tracks or one-track albums. Recording works without the phone UI, is best effort,
-and has no process-death outbox. See [album-resume.md](album-resume.md) for the shared bookmark
-reservation, retention, and interoperability rules. Android Auto records progress but does not
+and has no process-death outbox. See the [canonical macOS-hosted protocol](https://github.com/iamtoolino/coda-macos/blob/main/docs/album-resume-bookmarks.md)
+for shared bookmark reservation, retention, and interoperability rules, and
+[Android integration notes](album-resume.md). Android Auto records progress but does not
 expose the new shelf as a browse root.
 
 - On cold start, Coda restores its own last saved Navidrome queue and position without autoplaying.

@@ -75,7 +75,9 @@ Failures retain good shelf data without delaying other shelves. Successful write
 the presentation provisionally, never as a basis for cleanup. Fresh snapshots alone drive recent-20
 housekeeping. A revision gate rejects stale refresh results; a shared write mutex prevents cleanup
 from racing local progress writes. The protocol's unavoidable cross-client deletion race remains.
-See [album-resume.md](album-resume.md). Bookmark JSON contains no playback position or duplicated
+The [macOS-hosted protocol](https://github.com/iamtoolino/coda-macos/blob/main/docs/album-resume-bookmarks.md)
+is authoritative for the shared record and interoperability rules; [album-resume.md](album-resume.md)
+contains Android integration notes only. Bookmark JSON contains no playback position or duplicated
 album metadata, and is never logged. No debug lab or new dependency is involved.
 
 ## Theme ownership

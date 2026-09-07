@@ -98,7 +98,8 @@ remaining tracks without leaving detail. Only the current album’s detail treat
 including while paused; ordinary album Play still starts at track one.
 Recording is best effort, including screen-off and Android Auto playback; it is not a durable
 offline sync queue. The first track's ordinary music bookmark is reserved and can be overwritten
-or deleted. See [the album-resume contract](docs/album-resume.md) for compatibility and tradeoffs.
+or deleted. See the [canonical album-resume protocol](https://github.com/iamtoolino/coda-macos/blob/main/docs/album-resume-bookmarks.md)
+for compatibility and tradeoffs, and [Android integration notes](docs/album-resume.md).
 
 ## Android Auto
 
