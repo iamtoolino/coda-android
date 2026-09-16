@@ -69,8 +69,8 @@ Session initialization, UI foregrounding, and Home pull-to-refresh coalesce book
 only observes the capped item flow, including the current album; returning to Home does not fetch
 bookmarks. Cards navigate to the existing keyed album detail coordinator. Detail observes bookmark
 and current-entry state, resolves the target from the loaded canonical page, and renders a continuous
-suffix treatment. Its Play/Append actions send that suffix through `PlaybackConnection` using the
-existing account-guarded queue mutation path; there is no separate asynchronous continuation fetch.
+suffix treatment. Play sends the entire canonical album plus the saved start index through
+`PlaybackConnection`; Append sends only the suffix. Both use the existing account-guarded queue mutation path; there is no separate asynchronous continuation fetch.
 Failures retain good shelf data without delaying other shelves. Successful writes update
 the presentation provisionally, never as a basis for cleanup. Fresh snapshots alone drive recent-20
 housekeeping. A revision gate rejects stale refresh results; a shared write mutex prevents cleanup

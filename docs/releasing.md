@@ -120,3 +120,7 @@ system text size on a 1080×2424 emulator (420 dpi); at 1080×1920 it hides the 
 transport against gesture navigation. At 100% and 130%, all controls were visible with short
 metadata. Long metadata and error messages were not exhaustively tested. This limitation is
 accepted for current personal use, not evidence that the large-text release check passes.
+
+Check album Resume Play queues the entire canonical album at the saved index, including backward
+skips to earlier tracks. Resume Append must add only the remainder without changing playback or
+starting an empty queue. Neither action writes a bookmark.

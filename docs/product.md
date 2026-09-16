@@ -99,8 +99,9 @@ Album continuation is independent of saved-queue handoff. The Continue Listening
 most twenty unfinished albums, newest first, with artwork/title/album artist only and no disclosure
 chevron, including the local current album while playing or paused/restored. Cards open ordinary
 album detail without changing playback. A small inline Resume row above the saved track offers Play
-and Append for the canonical suffix, highlighted continuously through the final track and across
-disc headings. Play starts that suffix at its beginning; Append preserves playback and stays paused
+and Append alongside a highlighted canonical suffix through the final track and across disc
+headings. Play queues the entire canonical album and starts at the saved track, preserving earlier
+tracks for backward navigation; Append adds only the suffix, preserves playback, and stays paused
 with an empty queue. Both stay in detail and preserve the bookmark. Hide this treatment only when
 the album is the current playback entry. Invalid targets omit it. Ordinary album Play still starts
 at track one, and individual track taps retain normal behavior. Bookmark refresh never navigates.

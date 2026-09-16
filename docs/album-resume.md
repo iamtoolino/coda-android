@@ -32,8 +32,9 @@ album header's icons with accessible names and 48 dp touch targets. A continuous
 background with rounded outer corners encloses the saved track and every subsequent track,
 including intervening disc headings. The hero and its whole-album actions remain unchanged.
 
-Resume Play replaces the queue with that canonical suffix and starts at its beginning. Resume
-Append uses the existing append path, preserving playback and remaining paused with an empty queue.
+Resume Play replaces the queue with the entire canonical album and starts at the saved track;
+earlier tracks remain available for backward navigation. Resume Append adds only the canonical
+suffix through the existing append path, preserving playback and remaining paused with an empty queue.
 The shared append path explicitly clears retained play intent when empty, including after clearing
 a playing queue.
 Both use canonical album artwork, stay in album detail, and never edit the bookmark. Individual

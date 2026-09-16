@@ -44,14 +44,13 @@ internal fun LazyListScope.albumTrackItems(
     sections: List<AlbumDiscSection>,
     resumeIndex: Int?,
     currentSongId: String?,
-    onResumePlay: (List<Song>) -> Unit,
+    onResumePlay: (List<Song>, Int) -> Unit,
     onResumeAppend: (List<Song>) -> Unit,
     onSong: (Int) -> Unit,
 ) {
     // The already-loaded page is canonical. No click-time fetch or bookmark mutation is needed.
-    val remaining = resumeIndex?.let { index ->
-        page.songs.drop(index).map { it.copy(canonicalAlbumCoverArt = page.album.artworkId) }
-    }.orEmpty()
+    val albumSongs = page.songs.map { it.copy(canonicalAlbumCoverArt = page.album.artworkId) }
+    val remaining = resumeIndex?.let(albumSongs::drop).orEmpty()
     sections.forEach { section ->
         if (shouldShowDiscHeaders(sections)) {
             item(key = "disc:${section.number}:${section.songs.first().index}") {
@@ -69,7 +68,7 @@ internal fun LazyListScope.albumTrackItems(
             ) {
                 if (indexed.index == resumeIndex) {
                     AlbumResumeMarker(
-                        onPlay = { onResumePlay(remaining) },
+                        onPlay = { onResumePlay(albumSongs, indexed.index) },
                         onAppend = { onResumeAppend(remaining) },
                     )
                 }
@@ -117,7 +116,7 @@ internal fun AlbumResumeMarker(onPlay: () -> Unit, onAppend: () -> Unit) {
         Text("RESUME", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
         Spacer(Modifier.weight(1f))
         IconButton(onClick = onPlay, modifier = Modifier.size(48.dp)) {
-            Icon(Icons.Default.PlayArrow, "Play remaining tracks", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            Icon(Icons.Default.PlayArrow, "Resume album playback", tint = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         IconButton(onClick = onAppend, modifier = Modifier.size(48.dp)) {
             Icon(Icons.AutoMirrored.Filled.PlaylistAdd, "Append remaining tracks to queue",

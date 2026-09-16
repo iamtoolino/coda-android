@@ -18,6 +18,7 @@ Coda is an independent community project and is not affiliated with or endorsed 
 - Album-first browsing with chronological discographies, multidisc releases, ratings, and search.
 - A visible queue with saved position and handoff between compatible clients, plus album continuation
   across Coda for Android and macOS.
+- Album Resume Play keeps the whole album queued at the saved track; Append adds the remainder.
 - Original-format streaming on Wi-Fi, server-configured Opus on cellular, and scrobbling.
 - Android Auto, notification and Bluetooth controls, and a dedicated immersive Now Playing view.
 

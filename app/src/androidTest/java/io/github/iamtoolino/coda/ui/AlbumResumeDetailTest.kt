@@ -48,6 +48,7 @@ class AlbumResumeDetailTest {
     private val target = mutableStateOf("s2")
     private val currentAlbum = mutableStateOf<String?>("elsewhere")
     private var played = emptyList<Song>()
+    private var playedIndex = -1
     private var appended = emptyList<Song>()
     private var clickedIndex = -1
 
@@ -62,7 +63,7 @@ class AlbumResumeDetailTest {
                             albumTrackItems(
                                 page, albumDiscSections(page.songs),
                                 albumResumeIndex(page, bookmarks, currentAlbum.value), null,
-                                onResumePlay = { played = it },
+                                onResumePlay = { songs, index -> played = songs; playedIndex = index },
                                 onResumeAppend = { appended = it },
                                 onSong = { clickedIndex = it },
                             )
@@ -73,11 +74,11 @@ class AlbumResumeDetailTest {
         }
     }
 
-    @Test fun inlineActionsUseCanonicalSuffixAndOrdinaryTrackClickKeepsItsIndex() {
+    @Test fun resumePlayKeepsWholeAlbumWhileAppendUsesCanonicalSuffix() {
         show()
         composeRule.onNodeWithText("RESUME").assertIsDisplayed()
         composeRule.onNodeWithText("DISC 2").assertIsDisplayed()
-        val play = composeRule.onNodeWithContentDescription("Play remaining tracks")
+        val play = composeRule.onNodeWithContentDescription("Resume album playback")
         val append = composeRule.onNodeWithContentDescription("Append remaining tracks to queue")
         play.assertWidthIsAtLeast(48.dp).assertHeightIsAtLeast(48.dp)
         append.assertWidthIsAtLeast(48.dp).assertHeightIsAtLeast(48.dp)
@@ -89,7 +90,11 @@ class AlbumResumeDetailTest {
             assertTrue(appended.all { it.albumArtworkId == "canonical-cover" })
         }
         play.performClick()
-        composeRule.runOnIdle { assertEquals(appended, played) }
+        composeRule.runOnIdle {
+            assertEquals(page.songs.map { it.id }, played.map { it.id })
+            assertEquals(1, playedIndex)
+            assertTrue(played.all { it.albumArtworkId == "canonical-cover" })
+        }
         composeRule.onNodeWithText("Track 4").performClick()
         composeRule.runOnIdle { assertEquals(3, clickedIndex) }
     }
@@ -99,13 +104,16 @@ class AlbumResumeDetailTest {
         composeRule.onNodeWithText("RESUME").assertIsDisplayed()
         composeRule.runOnIdle { currentAlbum.value = "fixture" }
         composeRule.onNodeWithText("RESUME").assertDoesNotExist()
-        composeRule.onNodeWithContentDescription("Play remaining tracks").assertDoesNotExist()
+        composeRule.onNodeWithContentDescription("Resume album playback").assertDoesNotExist()
         composeRule.runOnIdle { currentAlbum.value = "other" }
         composeRule.onNodeWithText("RESUME").assertIsDisplayed()
         for (id in listOf("s1", "s3", "s4")) {
             composeRule.runOnIdle { target.value = id }
-            composeRule.onNodeWithContentDescription("Play remaining tracks").performClick()
-            composeRule.runOnIdle { assertEquals(page.songs.dropWhile { it.id != id }.map { it.id }, played.map { it.id }) }
+            composeRule.onNodeWithContentDescription("Resume album playback").performClick()
+            composeRule.runOnIdle {
+                assertEquals(page.songs.map { it.id }, played.map { it.id })
+                assertEquals(page.songs.indexOfFirst { it.id == id }, playedIndex)
+            }
         }
         composeRule.runOnIdle { target.value = "missing" }
         composeRule.onNodeWithText("RESUME").assertDoesNotExist()
@@ -115,7 +123,7 @@ class AlbumResumeDetailTest {
     @Test fun compactLargeTextKeepsResumeActionsVisible() {
         show(fontScale = 1.5f)
         composeRule.onNodeWithText("RESUME").assertIsDisplayed()
-        composeRule.onNodeWithContentDescription("Play remaining tracks").assertIsDisplayed()
+        composeRule.onNodeWithContentDescription("Resume album playback").assertIsDisplayed()
         composeRule.onNodeWithContentDescription("Append remaining tracks to queue").assertIsDisplayed()
         capture("album-resume-detail-large-text.png")
     }
