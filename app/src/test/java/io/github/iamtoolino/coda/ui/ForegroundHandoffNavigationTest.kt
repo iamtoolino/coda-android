@@ -6,9 +6,11 @@ import org.junit.Test
 
 class ForegroundHandoffNavigationTest {
     @Test
-    fun `external queue returns an untouched detail route directly to home`() {
+    fun `external queue only returns untouched now playing to home`() {
         assertTrue(shouldReturnHomeForExternalQueue("now-playing", "now-playing"))
-        assertTrue(shouldReturnHomeForExternalQueue("album/{id}", "album/{id}"))
+        assertFalse(shouldReturnHomeForExternalQueue("album/{id}", "album/{id}"))
+        assertFalse(shouldReturnHomeForExternalQueue("queue", "queue"))
+        assertFalse(shouldReturnHomeForExternalQueue("search", "search"))
     }
 
     @Test

@@ -362,8 +362,9 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
                     enqueueRestore(requireNotNull(queue), startPlayback = false)
                 }
                 HandoffDisposition.OFFER_EXTERNAL -> {
+                    val isNewOffer = queue != _handoffQueue.value
                     _handoffQueue.value = queue
-                    onExternalQueue?.invoke()
+                    if (isNewOffer) onExternalQueue?.invoke()
                 }
             }
         }

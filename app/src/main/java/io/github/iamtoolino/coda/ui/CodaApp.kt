@@ -194,8 +194,7 @@ private const val CurrentTrackHighlightOpacity = 0.10f
 internal fun shouldReturnHomeForExternalQueue(
     foregroundRoute: String?,
     currentRoute: String?,
-): Boolean = foregroundRoute != null &&
-    foregroundRoute != "home" &&
+): Boolean = foregroundRoute == "now-playing" &&
     currentRoute == foregroundRoute
 
 internal fun queueOpeningFirstVisibleItemIndex(
@@ -330,28 +329,42 @@ fun CodaApp() {
     val visibleEntries by navController.visibleEntries.collectAsStateWithLifecycle()
     val route = entry?.destination?.route.orEmpty()
     val lifecycleOwner = LocalLifecycleOwner.current
-    var handoffForegroundRoute by remember { mutableStateOf<String?>(null) }
+    val homeListState = rememberLazyListState()
+    val handoffQueue by playback.handoffQueue.collectAsStateWithLifecycle()
+    var handoffForegroundEntry by remember { mutableStateOf<String?>(null) }
+    var handoffReveal by remember { mutableStateOf<HomeHandoffReveal?>(null) }
+    LaunchedEffect(entry?.id, handoffQueue) {
+        if (handoffForegroundEntry != entry?.id) handoffForegroundEntry = null
+        handoffReveal?.let { reveal ->
+            if (reveal.entryId != entry?.id || reveal.queue != handoffQueue) handoffReveal = null
+        }
+    }
     DisposableEffect(lifecycleOwner, playback, navController) {
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_RESUME -> {
                     AppGraph.albumResume?.refresh()
-                    val foregroundRoute = navController.currentDestination?.route
-                    handoffForegroundRoute = foregroundRoute
+                    val foregroundEntry = navController.currentBackStackEntry
+                    handoffForegroundEntry = foregroundEntry?.id
                     playback.refreshHandoffQueue {
-                        val currentRoute = navController.currentDestination?.route
-                        val shouldReturnHome = shouldReturnHomeForExternalQueue(
-                            foregroundRoute = handoffForegroundRoute,
-                            currentRoute = currentRoute,
-                        )
-                        handoffForegroundRoute = null
-                        if (shouldReturnHome) {
-                            navController.popBackStack("home", inclusive = false)
+                        val currentEntry = navController.currentBackStackEntry
+                        val untouched = foregroundEntry?.id == handoffForegroundEntry &&
+                            foregroundEntry?.id == currentEntry?.id
+                        if (untouched && shouldReturnHomeForExternalQueue(
+                                foregroundEntry?.destination?.route, currentEntry?.destination?.route,
+                            )) {
+                            playback.handoffQueue.value?.let { queue ->
+                                handoffReveal = HomeHandoffReveal(requireNotNull(currentEntry).id, queue)
+                            }
                         }
+                        handoffForegroundEntry = null
                     }
                 }
 
-                Lifecycle.Event.ON_PAUSE -> handoffForegroundRoute = null
+                Lifecycle.Event.ON_PAUSE -> {
+                    handoffForegroundEntry = null
+                    handoffReveal = null
+                }
                 else -> Unit
             }
         }
@@ -402,10 +415,32 @@ fun CodaApp() {
                         .pointerInput(Unit) {
                             awaitEachGesture {
                                 awaitFirstDown(requireUnconsumed = false)
-                                handoffForegroundRoute = null
+                                handoffForegroundEntry = null
+                                handoffReveal = null
                             }
                         },
                 ) {
+                    handoffReveal?.takeIf { it.entryId == entry?.id && it.queue == handoffQueue }
+                        ?.let { reveal ->
+                            androidx.compose.runtime.key(reveal) {
+                                HomeHandoffPreparation(
+                                    onReady = {
+                                        if (handoffReveal == reveal &&
+                                            navController.currentBackStackEntry?.id == reveal.entryId &&
+                                            playback.handoffQueue.value == reveal.queue
+                                        ) {
+                                            // Apply before Home's first returning measure; no animated scroll
+                                            // or saved-position restoration can flash beneath the NPS fade.
+                                            homeListState.requestScrollToItem(0)
+                                            navController.popBackStack("home", inclusive = false)
+                                            handoffReveal = null
+                                        }
+                                    },
+                                ) { preparedList ->
+                                    HomeScreen(navController, playback, home, preparedList, refreshOnEnter = false)
+                                }
+                            }
+                        }
                     Scaffold(
                         modifier = Modifier.fillMaxSize(),
                         containerColor = Color.Transparent,
@@ -417,7 +452,7 @@ fun CodaApp() {
                             startDestination = "home",
                             modifier = Modifier.padding(padding),
                         ) {
-                        composable("home") { HomeScreen(navController, playback, home) }
+                        composable("home") { HomeScreen(navController, playback, home, homeListState) }
                         composable("artists") { ArtistsScreen(navController) }
                         composable("albums") {
                             AlbumsScreen(navController, AlbumViewMode.RECENTLY_ADDED)
@@ -546,18 +581,17 @@ private fun HomeScreen(
     navController: NavHostController,
     playback: PlaybackConnection,
     home: HomeCoordinator,
+    listState: LazyListState,
+    refreshOnEnter: Boolean = true,
 ) {
     val miniPlayerClearance = LocalMiniPlayerOverlayClearance.current
     val scope = rememberCoroutineScope()
     val handoffQueue by playback.handoffQueue.collectAsStateWithLifecycle()
     val resume = requireNotNull(AppGraph.albumResume)
     val resumeItems by resume.items.collectAsStateWithLifecycle()
-    val listState = rememberRestorableLazyListState(
-        contentReady = true,
-        maxIndex = 7,
-    )
-
-    LaunchedEffect(playback) { playback.refreshHandoffQueue() }
+    LaunchedEffect(playback, refreshOnEnter) {
+        if (refreshOnEnter) playback.refreshHandoffQueue()
+    }
 
     PullToRefreshBox(
         isRefreshing = home.isRefreshing,

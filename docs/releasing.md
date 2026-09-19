@@ -124,3 +124,7 @@ accepted for current personal use, not evidence that the large-text release chec
 Check album Resume Play queues the entire canonical album at the saved index, including backward
 skips to earlier tracks. Resume Append must add only the remainder without changing playback or
 starting an empty queue. Neither action writes a bookmark.
+
+Check a new external queue while paused Now Playing is open: Home's Continue card must be ready
+before dismissal, including after scrolling Home and opening an intermediate album. Repeated offers,
+ordinary browsing, interaction during the read, and resumed playback must not cause navigation.

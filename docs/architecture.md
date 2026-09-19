@@ -219,8 +219,13 @@ only renders state and issues user-requested player commands.
 
 The activity performs an opportunistic queue read whenever the phone UI enters the foreground; Home
 also reads when opened or explicitly refreshed. If a foreground read finds a queue written by
-another client before the user interacts or navigates, the navigation stack is popped directly to
-Home so intermediate detail screens are never exposed during the transition. A cold-start queue
+another client, only a new offer on untouched paused Now Playing may reveal Home. Home's list state
+is owned beside navigation. A temporary, inaccessible Home beneath Now Playing measures the Continue
+card at the top without refreshing the queue; layout readiness then requests Home's native scroll to
+item zero and pops directly to Home with the existing navigation transition. Intermediate detail
+screens and the old Home scroll position are never exposed. Entry identity, current offer, lifecycle,
+and user interaction guard preparation; playback intent clears the offer, canceling a pending reveal.
+Repeated identical offers do not trigger another reveal. Ordinary browsing keeps its position. A cold-start queue
 last written by Android is restored paused. A non-empty queue written by another client is exposed
 separately as a Continue candidate and never replaces the local paused queue until the user accepts
 it. Queue-read failures do not fail Home's library content.
