@@ -34,7 +34,9 @@
 - The car host may cold-start and control Coda without launching the phone UI. Preserve Media3
   playback resumption and `MediaButtonReceiver` behavior when changing the service or manifest.
 - The queue defines the rolling audio cache. As soon as a non-empty queue exists, cache the current
-  track and then the next three sequentially. Preserve that bounded window across process/service
+  track and then the next three sequentially. The queue cache prototype may explicitly expand this
+  window to the entire remaining queue; persist the mode and stream variants, include appended
+  tracks automatically, and reset it on replacement, clear, or disconnect. Preserve the window across process/service
   recreation, prune entries outside it when the queue or current item changes, and clear it when the
   queue is emptied or the account disconnects. It is not an offline library. Phone artwork and
   Android Auto artwork have separate cache policies.

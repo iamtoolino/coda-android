@@ -65,6 +65,7 @@ import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.ClearAll
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Pause
@@ -128,6 +129,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.disabled
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.semantics.semantics
@@ -3002,6 +3004,7 @@ private fun QueueScreen(
     playback: PlaybackConnection,
     state: PlaybackUiState,
 ) {
+    val cacheWholeQueue by playback.cacheWholeQueue.collectAsStateWithLifecycle()
     val openingIndex = queueOpeningFirstVisibleItemIndex(
         currentIndex = state.currentIndex,
         queueSize = state.queue.size,
@@ -3032,8 +3035,11 @@ private fun QueueScreen(
                     .height(48.dp),
                 contentAlignment = Alignment.CenterEnd,
             ) {
-                IconButton(onClick = playback::clearQueue) {
-                    Icon(Icons.Default.ClearAll, "Clear queue")
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    QueueCacheAction(cacheWholeQueue, state.queue.isNotEmpty(), playback::cacheRemainingQueue)
+                    IconButton(onClick = playback::clearQueue) {
+                        Icon(Icons.Default.ClearAll, "Clear queue")
+                    }
                 }
             }
         }
@@ -3211,4 +3217,27 @@ private fun <T> Result<T>.onFailureUnlessCancelled(
 ): Result<T> = onFailure { error ->
     if (error is CancellationException) throw error
     action(error)
+}
+
+@Composable
+internal fun QueueCacheAction(
+    cacheWholeQueue: Boolean,
+    hasQueue: Boolean,
+    onEnable: () -> Unit,
+) {
+    IconButton(
+        onClick = { if (!cacheWholeQueue) onEnable() },
+        enabled = hasQueue,
+        modifier = Modifier.semantics {
+            selected = cacheWholeQueue
+            stateDescription = if (cacheWholeQueue) "Whole queue caching on" else "Normal caching"
+        },
+    ) {
+        Icon(
+            Icons.Default.Download,
+            "Cache this queue",
+            tint = if (cacheWholeQueue) MaterialTheme.colorScheme.primary else
+                MaterialTheme.colorScheme.onSurface,
+        )
+    }
 }

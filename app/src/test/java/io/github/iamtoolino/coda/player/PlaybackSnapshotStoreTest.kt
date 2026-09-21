@@ -6,6 +6,19 @@ import org.junit.Assert.assertNull
 import org.junit.Test
 
 class PlaybackSnapshotStoreTest {
+    @Test fun `whole queue cache mode and stream variants survive restoration`() {
+        val snapshot = PlaybackSnapshot("fixture", listOf(Song("one", "One")), 0, 15L,
+            cacheWholeQueue = true, cacheVariants = listOf("opus"))
+        assertEquals(snapshot, PlaybackSnapshotCodec.decode(PlaybackSnapshotCodec.encode(snapshot)))
+    }
+    @Test fun `previous prototype opt in migrates to whole queue mode`() {
+        val snapshot = requireNotNull(PlaybackSnapshotCodec.decode(
+            """{"cacheNamespace":"fixture","songs":[],"currentIndex":0,"positionMs":0,
+                "cacheThrough":10,"cacheVariants":["opus"]}""",
+        ))
+        assertEquals(true, snapshot.cacheWholeQueue)
+        assertEquals(listOf("opus"), snapshot.cacheVariants)
+    }
     @Test
     fun `snapshot codec preserves queue metadata and position`() {
         val snapshot = PlaybackSnapshot(
@@ -42,6 +55,8 @@ class PlaybackSnapshotStoreTest {
         ))
         assertEquals("album", snapshot.songs.single().albumArtworkId)
         assertEquals(1234L, snapshot.positionMs)
+        assertEquals(false, snapshot.cacheWholeQueue)
+        assertEquals(emptyList<String>(), snapshot.cacheVariants)
     }
 
     @Test

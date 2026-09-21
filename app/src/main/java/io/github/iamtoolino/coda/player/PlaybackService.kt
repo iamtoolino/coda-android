@@ -37,6 +37,8 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -52,6 +54,7 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
     private lateinit var queueSync: SharedQueueSyncCoordinator
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val scrobbleScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    private var cacheWholeQueue = false
     private var prefetchJob: Job? = null
     private var cleanupJob: Job? = null
     private var snapshotJob: Job? = null
@@ -142,7 +145,7 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
         player.setWakeMode(C.WAKE_MODE_NETWORK)
         player.addListener(this)
         restoreLocalSnapshot()
-        libraryCallback = CodaMediaLibraryCallback(this, scope)
+        libraryCallback = CodaMediaLibraryCallback(this, scope, ::cacheRemainingQueue, ::resetExpandedCache)
         val sessionBuilder = MediaLibrarySession.Builder(
             this,
             player,
@@ -197,9 +200,15 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
         val account = AppGraph.sessionSnapshot() ?: return
         val snapshot = snapshotStore.load(account.cacheNamespace) ?: return
         snapshotTemplate = snapshot
+        cacheWholeQueue = snapshot.cacheWholeQueue
         val mobile = isMobileNetwork(this)
         player.setMediaItems(
-            snapshot.songs.map { it.toPlayableMediaItem(this, mobile, account) },
+            snapshot.songs.mapIndexed { index, song ->
+                val cachedMobile = if (cacheWholeQueue) {
+                    snapshot.cacheVariants.getOrNull(index)?.let { it == "opus" } ?: mobile
+                } else mobile
+                song.toPlayableMediaItem(this, cachedMobile, account)
+            },
             snapshot.currentIndex.coerceIn(snapshot.songs.indices),
             snapshot.positionMs.coerceAtLeast(0),
         )
@@ -216,13 +225,18 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
             return
         }
         if (rebuildQueue || snapshotTemplate?.cacheNamespace != account.cacheNamespace) {
-            snapshotTemplate = player.playbackSnapshot(account)
+            snapshotTemplate = player.playbackSnapshot(account)?.copy(
+                cacheVariants = if (cacheWholeQueue) (0 until player.mediaItemCount).map {
+                    player.getMediaItemAt(it).localConfiguration?.customCacheKey?.substringAfterLast(':') ?: "raw"
+                } else emptyList(),
+            )
         }
         val template = snapshotTemplate ?: return
         snapshotWrites.trySend(
             template.copy(
                 currentIndex = player.currentMediaItemIndex,
                 positionMs = player.currentPosition.coerceAtLeast(0),
+                cacheWholeQueue = cacheWholeQueue,
             ),
         )
     }
@@ -249,6 +263,7 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
             player.clearMediaItems()
             return
         }
+        if (player.mediaItemCount == 0) cacheWholeQueue = false
         queueSync.onPlayerEvents(
             hasPlaybackIntent = player.hasLocalPlaybackIntent(),
             isPlaying = player.isPlaying,
@@ -258,7 +273,7 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
             events.contains(Player.EVENT_TIMELINE_CHANGED) ||
             events.contains(Player.EVENT_PLAYBACK_STATE_CHANGED)
         ) {
-            maintainFourTrackWindow()
+            maintainAudioWindow()
         }
         if (events.contains(Player.EVENT_TIMELINE_CHANGED)) refreshUpcomingStreamVariants()
         if (events.contains(Player.EVENT_TIMELINE_CHANGED) ||
@@ -289,11 +304,26 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
         if (playbackState == Player.STATE_ENDED) scrobbler.playbackEnded()
     }
 
-    private fun maintainFourTrackWindow() {
+    private fun cacheRemainingQueue() {
+        if (!player.timelineBelongsToCurrentAccount() || player.mediaItemCount == 0) return
+        if (cacheWholeQueue) return
+        cacheWholeQueue = true
+        persistLocalSnapshot(rebuildQueue = true)
+        maintainAudioWindow()
+    }
+
+    private fun resetExpandedCache() {
+        cacheWholeQueue = false
+        persistLocalSnapshot()
+        maintainAudioWindow()
+    }
+
+    private fun maintainAudioWindow() {
         if (!::player.isInitialized) return
         val window = audioCacheWindowIndices(
             itemCount = player.mediaItemCount,
             currentIndex = player.currentMediaItemIndex,
+            cacheWholeQueue = cacheWholeQueue,
         ).mapNotNull { index ->
             player.getMediaItemAt(index).localConfiguration
         }
@@ -301,6 +331,7 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
         val targets = window.map { local -> local.uri to local.customCacheKey }
 
         val generation = ++audioCacheGeneration
+        mutableCacheWholeQueue.value = cacheWholeQueue
         activeCacheWriter?.cancel()
         prefetchJob?.cancel()
         prefetchJob = scope.launch {
@@ -336,6 +367,7 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
             val start = (player.currentMediaItemIndex + 1).coerceAtLeast(0)
             val variant = if (mobile) "opus" else "raw"
             val originals = (start until player.mediaItemCount).map(player::getMediaItemAt)
+            val capturedWholeQueue = cacheWholeQueue
             val generation = ++variantRefreshGeneration
             variantRefreshJob?.cancel()
             variantRefreshJob = scope.launch {
@@ -343,7 +375,8 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
                 val replacements = originals.map { item ->
                     val namespace = item.mediaMetadata.extras?.getString("cacheNamespace")
                     val currentKey = item.localConfiguration?.customCacheKey
-                    val shouldReplace = namespace == account.cacheNamespace &&
+                    val shouldReplace = !capturedWholeQueue &&
+                        namespace == account.cacheNamespace &&
                         currentKey != streamCacheKey(namespace, item.mediaId, variant) &&
                         !(mobile && currentKey == streamCacheKey(namespace, item.mediaId, "raw") &&
                             isFullyCached(currentKey))
@@ -354,9 +387,17 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
                         .setCustomCacheKey(streamCacheKey(requireNotNull(namespace), item.mediaId, variant))
                         .build()
                 }
-                if (!changed) return@launch
+                if (!changed) {
+                    withContext(Dispatchers.Main.immediate) {
+                        if (generation == variantRefreshGeneration && AppGraph.isCurrent(account)) {
+                            maintainAudioWindow()
+                        }
+                    }
+                    return@launch
+                }
                 withContext(Dispatchers.Main.immediate) {
-                    if (generation != variantRefreshGeneration || !AppGraph.isCurrent(account) ||
+                    if (generation != variantRefreshGeneration || capturedWholeQueue != cacheWholeQueue ||
+                        !AppGraph.isCurrent(account) ||
                         player.mediaItemCount < start + originals.size ||
                         originals.indices.any { player.getMediaItemAt(start + it).mediaId != originals[it].mediaId }
                     ) {
@@ -425,8 +466,13 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
             activeInstance?.clearTransientAudioCaches(namespaces)
         }
 
+        private val mutableCacheWholeQueue = MutableStateFlow(false)
+        val cacheWholeQueueState = mutableCacheWholeQueue.asStateFlow()
+
         fun invalidateAccountState() {
+            mutableCacheWholeQueue.value = false
             activeInstance?.run {
+                cacheWholeQueue = false
                 restorationJob?.cancel()
                 libraryCallback.invalidatePlaybackRestoration()
                 queueSync.invalidate()
@@ -440,10 +486,12 @@ internal fun audioCacheWindowIndices(
     itemCount: Int,
     currentIndex: Int,
     maximumSize: Int = 4,
+    cacheWholeQueue: Boolean = false,
 ): List<Int> {
     if (itemCount <= 0 || maximumSize <= 0) return emptyList()
     val first = currentIndex.coerceIn(0, itemCount - 1)
-    val lastExclusive = (first + maximumSize).coerceAtMost(itemCount)
+    val lastExclusive = if (cacheWholeQueue) itemCount else
+        (first.toLong() + maximumSize).coerceAtMost(itemCount.toLong()).toInt()
     return (first until lastExclusive).toList()
 }
 

@@ -273,6 +273,15 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
         refreshState()
     }
 
+    internal val cacheWholeQueue: StateFlow<Boolean> = PlaybackService.cacheWholeQueueState
+
+    fun cacheRemainingQueue() {
+        controller?.sendCustomCommand(
+            androidx.media3.session.SessionCommand(CACHE_REMAINING_QUEUE, android.os.Bundle.EMPTY),
+            android.os.Bundle.EMPTY,
+        )
+    }
+
     fun next() = controller?.seekToNextMediaItem() ?: Unit
 
     fun previous() = controller?.seekToPreviousMediaItem() ?: Unit

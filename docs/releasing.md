@@ -128,3 +128,8 @@ starting an empty queue. Neither action writes a bookmark.
 Check a new external queue while paused Now Playing is open: Home's Continue card must be ready
 before dismissal, including after scrolling Home and opening an intermediate album. Repeated offers,
 ordinary browsing, interaction during the read, and resumed playback must not cause navigation.
+
+Queue cache prototype: enable the queue download icon and confirm its highlight stays stable
+across background downloads, track advance, append, removal, and process recreation. Confirm queue
+replacement (including the same album), clear, and disconnect reset it. Verify offline playback
+past the normal four-track window separately; the icon is not a download-completion guarantee.

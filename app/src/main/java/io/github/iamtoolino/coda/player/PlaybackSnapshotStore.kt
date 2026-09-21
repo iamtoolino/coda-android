@@ -7,6 +7,9 @@ import io.github.iamtoolino.coda.NavidromeSession
 import io.github.iamtoolino.coda.data.Song
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.intOrNull
 
 @Serializable
 internal data class PlaybackSnapshot(
@@ -14,6 +17,8 @@ internal data class PlaybackSnapshot(
     val songs: List<Song>,
     val currentIndex: Int,
     val positionMs: Long,
+    val cacheWholeQueue: Boolean = false,
+    val cacheVariants: List<String> = emptyList(),
 )
 
 internal object PlaybackSnapshotCodec {
@@ -25,7 +30,13 @@ internal object PlaybackSnapshotCodec {
     fun encode(snapshot: PlaybackSnapshot): String = json.encodeToString(snapshot)
 
     fun decode(value: String): PlaybackSnapshot? =
-        runCatching { json.decodeFromString<PlaybackSnapshot>(value) }.getOrNull()
+        runCatching {
+            val snapshot = json.decodeFromString<PlaybackSnapshot>(value)
+            // Preserve opt-in when upgrading the earlier bounded-window prototype.
+            val legacyThrough = json.parseToJsonElement(value).jsonObject["cacheThrough"]
+                ?.jsonPrimitive?.intOrNull ?: 0
+            if (legacyThrough > 0) snapshot.copy(cacheWholeQueue = true) else snapshot
+        }.getOrNull()
 }
 
 internal class PlaybackSnapshotStore(context: Context) {

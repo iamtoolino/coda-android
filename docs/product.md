@@ -87,7 +87,7 @@ band. Artist hero text and album playback/rating controls remain outside the ima
 - Playback begins progressively; it must not wait for a full-file download.
 - Wi-Fi/Ethernet streams the original file. Cellular requests Opus and leaves bitrate selection to the server.
 - A rolling transient cache begins filling when a queue exists, with the current track followed by
-  the next three. It survives process/service recreation, follows queue/current-item changes, and is
+  the next three by default (the queue cache prototype can expand this). It survives process/service recreation, follows queue/current-item changes, and is
   cleared when the queue is emptied or the account disconnects.
 - Coda reports a track as played only when it genuinely finishes. Automatic advance, completion of
   the final queue item, and completion before a repeat count; seeking near the end, manually
@@ -151,3 +151,14 @@ expose the new shelf as a browse root.
 ## Connection diagnostics
 
 The Home profile button opens Connection with app/build information and a compact Connection status row from a one-shot server check. Check connection retries on demand; the last result is not a continuous connectivity guarantee. Missing server metadata is shown as not reported. Artwork refresh and Disconnect remain available.
+
+### Queue cache prototype
+
+The queue download icon enables whole-queue caching. It stays highlighted while the mode is on;
+it indicates policy, not download completion. There are no counters, progress states, or retry
+controls. Repeated taps are a no-op. The normal sequential downloader handles the remaining queue,
+including later additions, and playback still removes audio behind the current item. Pause,
+connectivity changes, track removal/reordering, and process recreation retain the mode. Replacing
+or clearing the queue, or disconnecting the account, resets the normal current-plus-three window.
+Stream variants are retained across restoration. This is temporary audio caching, not an offline
+library or a dedicated background download service; cached bytes remain subject to OS eviction.

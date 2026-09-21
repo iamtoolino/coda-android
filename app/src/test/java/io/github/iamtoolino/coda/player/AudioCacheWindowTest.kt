@@ -4,6 +4,13 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class AudioCacheWindowTest {
+    @Test fun `whole queue mode follows playback and includes appended tracks`() {
+        assertEquals((40 until 100).toList(), audioCacheWindowIndices(100, 40, cacheWholeQueue = true))
+        assertEquals((40 until 110).toList(), audioCacheWindowIndices(110, 40, cacheWholeQueue = true))
+        assertEquals(listOf(40, 41, 42, 43), audioCacheWindowIndices(110, 40))
+        assertEquals(emptyList<Int>(), audioCacheWindowIndices(0, 0, cacheWholeQueue = true))
+    }
+
     @Test
     fun `empty queue produces an empty cache window`() {
         assertEquals(emptyList<Int>(), audioCacheWindowIndices(itemCount = 0, currentIndex = 0))

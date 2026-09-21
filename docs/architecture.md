@@ -160,7 +160,8 @@ lock screen, restored session, and Android Auto do not independently choose diff
 
 The player uses a Media3 `SimpleCache` as a transient audio cache with explicit resource eviction
 rather than a byte-based eviction policy. The queue defines its contents: whenever a queue exists, a
-single cancellable worker fills the current track and next three sequentially and removes keys
+single cancellable worker fills the current track and next three by default (or the explicitly
+expanded queue window) sequentially and removes keys
 outside that window. Replacing, advancing, or clearing the queue recomputes the window immediately.
 The cache survives service/process recreation and is reused by the restored queue; disconnecting the
 account clears its entries. Phone artwork uses Coil's separate cache described above and Android
@@ -258,3 +259,13 @@ The lower controls distribute spare vertical room before progress, before transp
 the utility row, which retains a fixed bottom inset.
 
 Connection diagnostics use the existing keyed remote-resource coordinator and AppGraph.withCurrentSession for a bounded ping. Optional response envelope metadata supplies server/API versions and OpenSubsonic support; unknown fields remain unknown. BuildConfig embeds Git revision, exact tag when available, and source state at build time. No credentials or server details are embedded in the build. The Client row identifies the ordinary API client, not the device-specific queue writer. Missing Git executables yield unavailable build metadata instead of blocking configuration.
+
+### Whole-queue audio caching (prototype)
+
+The phone sends an own-app-only MediaSession command to PlaybackService. The service owns a
+persisted boolean policy exposed through PlaybackConnection; the UI observes only that policy.
+The existing CacheWriter loop and pruner use either current-plus-three or all remaining tracks.
+Append/removal/reorder retain the mode; MediaSession replacement resets it even for identical song
+IDs, and an empty queue or account disconnect clears it. Snapshot metadata retains stream variants
+while enabled. The previous prototype's positive cacheThrough migrates to the boolean opt-in.
+Connectivity and player events continue driving the normal cache worker without UI retry controls.

@@ -15,6 +15,8 @@ import androidx.media3.session.LibraryResult
 import androidx.media3.session.MediaLibraryService
 import androidx.media3.session.MediaLibraryService.MediaLibrarySession
 import androidx.media3.session.MediaSession
+import androidx.media3.session.SessionCommand
+import androidx.media3.session.SessionResult
 import androidx.media3.session.SessionError
 import com.google.common.collect.ImmutableList
 import com.google.common.util.concurrent.Futures
@@ -149,6 +151,8 @@ private fun restrictedPlayerCommands(allowMediaItemSelection: Boolean): Player.C
 internal class CodaMediaLibraryCallback(
     private val context: Context,
     private val scope: CoroutineScope,
+    private val cacheRemaining: () -> Unit = {},
+    private val resetCacheWindow: () -> Unit = {},
 ) : MediaLibrarySession.Callback {
     private val searchCache = BoundedSearchCache(MAX_CACHED_SEARCHES)
     private val restorationMutex = Mutex()
@@ -182,7 +186,11 @@ internal class CodaMediaLibraryCallback(
         )
         return when (access) {
             ControllerAccess.FULL_LIBRARY ->
-                MediaSession.ConnectionResult.AcceptedResultBuilder(session).build()
+                MediaSession.ConnectionResult.AcceptedResultBuilder(session)
+                    .setAvailableSessionCommands(
+                        MediaSession.ConnectionResult.DEFAULT_SESSION_AND_LIBRARY_COMMANDS.buildUpon()
+                            .add(SessionCommand(CACHE_REMAINING_QUEUE, Bundle.EMPTY)).build(),
+                    ).build()
             ControllerAccess.LIBRARY_TRANSPORT -> MediaSession.ConnectionResult.accept(
                 MediaSession.ConnectionResult.DEFAULT_SESSION_AND_LIBRARY_COMMANDS,
                 restrictedPlayerCommands(allowMediaItemSelection = true),
@@ -193,6 +201,32 @@ internal class CodaMediaLibraryCallback(
             )
             ControllerAccess.REJECTED -> MediaSession.ConnectionResult.reject()
         }
+    }
+
+    override fun onCustomCommand(
+        session: MediaSession,
+        controller: MediaSession.ControllerInfo,
+        customCommand: SessionCommand,
+        args: Bundle,
+    ): ListenableFuture<SessionResult> {
+        if (customCommand.customAction == CACHE_REMAINING_QUEUE &&
+            controller.uid == context.applicationInfo.uid && controller.packageName == context.packageName
+        ) {
+            cacheRemaining()
+            return Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
+        }
+        return Futures.immediateFuture(SessionResult(SessionError.ERROR_NOT_SUPPORTED))
+    }
+
+    override fun onSetMediaItems(
+        mediaSession: MediaSession,
+        controller: MediaSession.ControllerInfo,
+        mediaItems: List<MediaItem>,
+        startIndex: Int,
+        startPositionMs: Long,
+    ): ListenableFuture<MediaSession.MediaItemsWithStartPosition> {
+        resetCacheWindow()
+        return super.onSetMediaItems(mediaSession, controller, mediaItems, startIndex, startPositionMs)
     }
 
     override fun onGetLibraryRoot(
@@ -783,3 +817,5 @@ internal class CodaMediaLibraryCallback(
         }
     }
 }
+
+internal const val CACHE_REMAINING_QUEUE = "io.github.iamtoolino.coda.CACHE_REMAINING_QUEUE"

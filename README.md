@@ -20,6 +20,7 @@ Coda is an independent community project and is not affiliated with or endorsed 
   across Coda for Android and macOS. New handoffs from paused Now Playing reveal the Home offer
   without interrupting ordinary browsing.
 - Album Resume Play keeps the whole album queued at the saved track; Append adds the remainder.
+- Queue cache prototype: prepare the remaining queue with one tap, using the existing audio cache.
 - Original-format streaming on Wi-Fi, server-configured Opus on cellular, and scrobbling.
 - Android Auto, notification and Bluetooth controls, and a dedicated immersive Now Playing view.
 
