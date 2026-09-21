@@ -162,3 +162,6 @@ connectivity changes, track removal/reordering, and process recreation retain th
 or clearing the queue, or disconnecting the account, resets the normal current-plus-three window.
 Stream variants are retained across restoration. This is temporary audio caching, not an offline
 library or a dedicated background download service; cached bytes remain subject to OS eviction.
+
+Clearing the queue or removing its final track dismisses Queue and Now Playing together, returning
+to the preceding browsing screen (Home when opened from Home). Back must not reopen an empty player.

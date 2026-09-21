@@ -133,3 +133,6 @@ Queue cache prototype: enable the queue download icon and confirm its highlight 
 across background downloads, track advance, append, removal, and process recreation. Confirm queue
 replacement (including the same album), clear, and disconnect reset it. Verify offline playback
 past the normal four-track window separately; the icon is not a download-completion guarantee.
+
+Clearing the queue or removing its final track dismisses Queue and Now Playing together, returning
+to the preceding browsing screen (Home when opened from Home). Back must not reopen an empty player.

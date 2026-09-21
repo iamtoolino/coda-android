@@ -540,7 +540,7 @@ fun CodaApp() {
                             NowPlayingScreen(navController, playback, playbackState)
                         }
                         composable("queue") {
-                            QueueScreen(playback, playbackState)
+                            QueueScreen(playback, playbackState, onQueueEmptied = { navController.dismissPlaybackScreens() })
                         }
                         }
                     }
@@ -3003,6 +3003,7 @@ private fun AlbumRatingStars(
 private fun QueueScreen(
     playback: PlaybackConnection,
     state: PlaybackUiState,
+    onQueueEmptied: () -> Unit,
 ) {
     val cacheWholeQueue by playback.cacheWholeQueue.collectAsStateWithLifecycle()
     val openingIndex = queueOpeningFirstVisibleItemIndex(
@@ -3037,7 +3038,10 @@ private fun QueueScreen(
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     QueueCacheAction(cacheWholeQueue, state.queue.isNotEmpty(), playback::cacheRemainingQueue)
-                    IconButton(onClick = playback::clearQueue) {
+                    IconButton(onClick = {
+                        onQueueEmptied()
+                        playback.clearQueue()
+                    }) {
                         Icon(Icons.Default.ClearAll, "Clear queue")
                     }
                 }
@@ -3048,7 +3052,10 @@ private fun QueueScreen(
                 item = item,
                 isPlaying = index == state.currentIndex,
                 onClick = { playback.skipTo(index) },
-                onRemove = { playback.removeAt(index) },
+                onRemove = {
+                    if (state.queue.size == 1) onQueueEmptied()
+                    playback.removeAt(index)
+                },
             )
         }
     }

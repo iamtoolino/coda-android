@@ -269,3 +269,6 @@ Append/removal/reorder retain the mode; MediaSession replacement resets it even 
 IDs, and an empty queue or account disconnect clears it. Snapshot metadata retains stream variants
 while enabled. The previous prototype's positive cacheThrough migrates to the boolean opt-in.
 Connectivity and player events continue driving the normal cache worker without UI retry controls.
+
+Clearing the queue or removing its final track dismisses Queue and Now Playing together, returning
+to the preceding browsing screen (Home when opened from Home). Back must not reopen an empty player.
