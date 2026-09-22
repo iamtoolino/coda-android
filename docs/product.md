@@ -154,7 +154,8 @@ The Home profile button opens Connection with app/build information and a compac
 
 ### Queue cache prototype
 
-The queue download icon enables whole-queue caching. It stays highlighted while the mode is on;
+The queue download icon enables whole-queue caching and briefly shows “Caching remaining queue
+in the background”. It stays highlighted while the mode is on;
 it indicates policy, not download completion. There are no counters, progress states, or retry
 controls. Repeated taps are a no-op. The normal sequential downloader handles the remaining queue,
 including later additions, and playback still removes audio behind the current item. Pause,

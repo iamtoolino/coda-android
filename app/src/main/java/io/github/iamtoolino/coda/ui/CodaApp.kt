@@ -3008,6 +3008,7 @@ private fun QueueScreen(
     state: PlaybackUiState,
     onQueueEmptied: () -> Unit,
 ) {
+    val context = LocalContext.current
     val cacheWholeQueue by playback.cacheWholeQueue.collectAsStateWithLifecycle()
     val openingIndex = queueOpeningFirstVisibleItemIndex(
         currentIndex = state.currentIndex,
@@ -3040,7 +3041,14 @@ private fun QueueScreen(
                 contentAlignment = Alignment.CenterEnd,
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    QueueCacheAction(cacheWholeQueue, state.queue.isNotEmpty(), playback::cacheRemainingQueue)
+                    QueueCacheAction(cacheWholeQueue, state.queue.isNotEmpty()) {
+                        playback.cacheRemainingQueue()
+                        Toast.makeText(
+                            context,
+                            "Caching remaining queue in the background",
+                            Toast.LENGTH_SHORT,
+                        ).show()
+                    }
                     IconButton(onClick = {
                         onQueueEmptied()
                         playback.clearQueue()
