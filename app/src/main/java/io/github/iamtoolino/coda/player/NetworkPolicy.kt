@@ -58,3 +58,7 @@ private fun NetworkCapabilities.toNetworkSnapshot() = NetworkSnapshot(
     validatedInternet = hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
         hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED),
 )
+
+/** The playing item is deliberately excluded: changing it would interrupt playback. */
+internal fun upcomingStreamVariant(mobile: Boolean, originalFullyCached: Boolean): String =
+    if (mobile && !originalFullyCached) "opus" else "raw"

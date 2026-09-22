@@ -1,5 +1,6 @@
 package io.github.iamtoolino.coda.player
 
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -64,4 +65,14 @@ class NetworkPolicyTest {
             ),
         )
     }
+    @Test fun `cellular preserves completed originals but replaces partial and missing originals`() {
+        assertEquals("raw", upcomingStreamVariant(mobile = true, originalFullyCached = true))
+        assertEquals("opus", upcomingStreamVariant(mobile = true, originalFullyCached = false))
+    }
+
+    @Test fun `wifi requests originals regardless of cache completion`() {
+        assertEquals("raw", upcomingStreamVariant(mobile = false, originalFullyCached = true))
+        assertEquals("raw", upcomingStreamVariant(mobile = false, originalFullyCached = false))
+    }
+
 }

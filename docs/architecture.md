@@ -267,8 +267,18 @@ persisted boolean policy exposed through PlaybackConnection; the UI observes onl
 The existing CacheWriter loop and pruner use either current-plus-three or all remaining tracks.
 Append/removal/reorder retain the mode; MediaSession replacement resets it even for identical song
 IDs, and an empty queue or account disconnect clears it. Snapshot metadata retains stream variants
-while enabled. The previous prototype's positive cacheThrough migrates to the boolean opt-in.
+in both modes so the current track keeps its format across restoration. The previous prototype's
+positive cacheThrough migrates to the boolean opt-in.
 Connectivity and player events continue driving the normal cache worker without UI retry controls.
 
 Clearing the queue or removing its final track dismisses Queue and Now Playing together, returning
 to the preceding browsing screen (Home when opened from Home). Back must not reopen an empty player.
+
+In both rolling and whole-queue caching, cellular keeps fully cached originals and uses Opus
+for upcoming incomplete or uncached tracks. The current track keeps its format to avoid interrupting
+playback. On restoration, upcoming tracks follow the same network policy. Storage failures remain
+best effort: normal cache maintenance prunes obsolete tracks and retries; there is no download UI
+or dedicated storage retry loop.
+
+An empty Now Playing or Queue entry reached later through Back is dismissed after the playback
+controller connects, preserving intervening album/artist browsing history.

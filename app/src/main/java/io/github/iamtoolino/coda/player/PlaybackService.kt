@@ -204,10 +204,16 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
         val mobile = isMobileNetwork(this)
         player.setMediaItems(
             snapshot.songs.mapIndexed { index, song ->
-                val cachedMobile = if (cacheWholeQueue) {
-                    snapshot.cacheVariants.getOrNull(index)?.let { it == "opus" } ?: mobile
-                } else mobile
-                song.toPlayableMediaItem(this, cachedMobile, account)
+                val savedVariant = snapshot.cacheVariants.getOrNull(index)
+                val variant = if (index == snapshot.currentIndex && savedVariant != null) {
+                    savedVariant
+                } else {
+                    upcomingStreamVariant(
+                        mobile = mobile,
+                        originalFullyCached = isFullyCached(streamCacheKey(account.cacheNamespace, song.id, "raw")),
+                    )
+                }
+                song.toPlayableMediaItem(this, variant == "opus", account)
             },
             snapshot.currentIndex.coerceIn(snapshot.songs.indices),
             snapshot.positionMs.coerceAtLeast(0),
@@ -226,9 +232,9 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
         }
         if (rebuildQueue || snapshotTemplate?.cacheNamespace != account.cacheNamespace) {
             snapshotTemplate = player.playbackSnapshot(account)?.copy(
-                cacheVariants = if (cacheWholeQueue) (0 until player.mediaItemCount).map {
+                cacheVariants = (0 until player.mediaItemCount).map {
                     player.getMediaItemAt(it).localConfiguration?.customCacheKey?.substringAfterLast(':') ?: "raw"
-                } else emptyList(),
+                },
             )
         }
         val template = snapshotTemplate ?: return
@@ -275,7 +281,9 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
         ) {
             maintainAudioWindow()
         }
-        if (events.contains(Player.EVENT_TIMELINE_CHANGED)) refreshUpcomingStreamVariants()
+        if (events.contains(Player.EVENT_TIMELINE_CHANGED) ||
+            events.contains(Player.EVENT_MEDIA_ITEM_TRANSITION)
+        ) refreshUpcomingStreamVariants()
         if (events.contains(Player.EVENT_TIMELINE_CHANGED) ||
             events.contains(Player.EVENT_MEDIA_ITEM_TRANSITION) ||
             events.contains(Player.EVENT_POSITION_DISCONTINUITY) ||
@@ -329,6 +337,7 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
         }
         val keepKeys = window.mapNotNull { it.customCacheKey }.toSet()
         val targets = window.map { local -> local.uri to local.customCacheKey }
+        val currentKey = player.currentMediaItem?.localConfiguration?.customCacheKey
 
         val generation = ++audioCacheGeneration
         mutableCacheWholeQueue.value = cacheWholeQueue
@@ -343,6 +352,11 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
             for ((uri, cacheKey) in targets) {
                 currentCoroutineContext().ensureActive()
                 if (generation != audioCacheGeneration) return@launch
+                // A connectivity refresh may still be resolving the upcoming timeline. Never
+                // start its stale original downloads on cellular; the playing item is exempt.
+                if (cacheKey != currentKey && cacheKey?.endsWith(":raw") == true &&
+                    isMobileNetwork(this@PlaybackService) && !isFullyCached(cacheKey)
+                ) continue
                 val dataSpec = DataSpec.Builder()
                     .setUri(uri)
                     .setKey(cacheKey)
@@ -364,8 +378,11 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
             val account = AppGraph.sessionSnapshot() ?: return@post
             val mobile = isMobileNetwork(this)
             if (!::player.isInitialized || player.mediaItemCount == 0) return@post
-            val start = (player.currentMediaItemIndex + 1).coerceAtLeast(0)
-            val variant = if (mobile) "opus" else "raw"
+            val currentIndex = player.currentMediaItemIndex
+            val start = (currentIndex + 1).coerceAtLeast(0)
+            ++audioCacheGeneration
+            activeCacheWriter?.cancel()
+            prefetchJob?.cancel()
             val originals = (start until player.mediaItemCount).map(player::getMediaItemAt)
             val capturedWholeQueue = cacheWholeQueue
             val generation = ++variantRefreshGeneration
@@ -375,15 +392,16 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
                 val replacements = originals.map { item ->
                     val namespace = item.mediaMetadata.extras?.getString("cacheNamespace")
                     val currentKey = item.localConfiguration?.customCacheKey
-                    val shouldReplace = !capturedWholeQueue &&
-                        namespace == account.cacheNamespace &&
-                        currentKey != streamCacheKey(namespace, item.mediaId, variant) &&
-                        !(mobile && currentKey == streamCacheKey(namespace, item.mediaId, "raw") &&
-                            isFullyCached(currentKey))
+                    if (namespace != account.cacheNamespace) return@map item
+                    val variant = upcomingStreamVariant(
+                        mobile = mobile,
+                        originalFullyCached = isFullyCached(streamCacheKey(namespace, item.mediaId, "raw")),
+                    )
+                    val shouldReplace = currentKey != streamCacheKey(namespace, item.mediaId, variant)
                     if (!shouldReplace) return@map item
                     changed = true
                     item.buildUpon()
-                        .setUri(account.client.streamUrl(item.mediaId, mobile))
+                        .setUri(account.client.streamUrl(item.mediaId, variant == "opus"))
                         .setCustomCacheKey(streamCacheKey(requireNotNull(namespace), item.mediaId, variant))
                         .build()
                 }
@@ -397,8 +415,8 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
                 }
                 withContext(Dispatchers.Main.immediate) {
                     if (generation != variantRefreshGeneration || capturedWholeQueue != cacheWholeQueue ||
-                        !AppGraph.isCurrent(account) ||
-                        player.mediaItemCount < start + originals.size ||
+                        !AppGraph.isCurrent(account) || player.currentMediaItemIndex != currentIndex ||
+                        player.mediaItemCount != start + originals.size ||
                         originals.indices.any { player.getMediaItemAt(start + it).mediaId != originals[it].mediaId }
                     ) {
                         return@withContext

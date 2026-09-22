@@ -11,3 +11,10 @@ internal fun NavHostController.dismissPlaybackScreens() {
         launchSingleTop = true
     }
 }
+
+/** Also handles older player entries below intervening album/artist browsing screens. */
+internal fun NavHostController.dismissEmptyPlaybackDestination(connected: Boolean, queueEmpty: Boolean) {
+    if (connected && queueEmpty && currentDestination?.route in setOf("now-playing", "queue")) {
+        dismissPlaybackScreens()
+    }
+}

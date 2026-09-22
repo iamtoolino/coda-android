@@ -330,6 +330,9 @@ fun CodaApp() {
     val entry by navController.currentBackStackEntryAsState()
     val visibleEntries by navController.visibleEntries.collectAsStateWithLifecycle()
     val route = entry?.destination?.route.orEmpty()
+    LaunchedEffect(entry?.id, playbackState.connected, playbackState.queue.isEmpty()) {
+        navController.dismissEmptyPlaybackDestination(playbackState.connected, playbackState.queue.isEmpty())
+    }
     val lifecycleOwner = LocalLifecycleOwner.current
     val homeListState = rememberLazyListState()
     val handoffQueue by playback.handoffQueue.collectAsStateWithLifecycle()

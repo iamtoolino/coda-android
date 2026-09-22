@@ -136,3 +136,12 @@ past the normal four-track window separately; the icon is not a download-complet
 
 Clearing the queue or removing its final track dismisses Queue and Now Playing together, returning
 to the preceding browsing screen (Home when opened from Home). Back must not reopen an empty player.
+
+Check Wi-Fi → cellular in both rolling and whole-queue caching: completed originals remain usable,
+incomplete upcoming originals switch to Opus, and the current track keeps its format and position
+without restarting. Repeat after paused-process restoration. Storage behavior remains best effort,
+with no dedicated retry loop.
+
+Verify Home → Now Playing → Album → Now Playing → Queue → Clear returns to Album, then Back
+ends at Home. An empty controller state during connection must not dismiss a restored player before
+its queue arrives.
