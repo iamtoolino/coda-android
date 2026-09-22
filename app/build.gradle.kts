@@ -46,8 +46,8 @@ android {
         applicationId = "io.github.iamtoolino.coda"
         minSdk = 28
         targetSdk = 36
-        versionCode = 2
-        versionName = "1.0.0"
+        versionCode = 3
+        versionName = "1.1.0"
         buildConfigField("String", "GIT_COMMIT", "\"$sourceCommit\"")
         buildConfigField("String", "GIT_TAG", "\"$sourceTag\"")
         buildConfigField("String", "SOURCE_STATE", "\"$sourceState\"")
