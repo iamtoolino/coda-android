@@ -145,3 +145,13 @@ with no dedicated retry loop.
 Verify Home → Now Playing → Album → Now Playing → Queue → Clear returns to Album, then Back
 ends at Home. An empty controller state during connection must not dismiss a restored player before
 its queue arrives.
+
+## Playlist normalization checks
+
+When the candidate changes playlist stream policy, verify a playlist with
+`[coda:replaygain=track]` in its comment against a server configured with the
+`coda-normalized-v1` transcoder. Confirm Opus playback and the normalization
+indicator on Wi-Fi and cellular, separate cache identity from ordinary streams,
+and preservation through paused process death and system Play. Check Android Auto
+playlist playback and individual playlist track selection; ordinary album playback
+should retain its usual stream policy. Keep live server reports outside the repository.

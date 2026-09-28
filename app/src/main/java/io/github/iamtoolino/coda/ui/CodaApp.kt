@@ -2704,6 +2704,7 @@ private fun NowPlayingScreen(
                 PlaybackDetailsSheet(
                     sourceQuality = sourceQualityLabel(state),
                     streamQuality = streamQuality,
+                    isVolumeNormalized = state.isVolumeNormalized,
                     onDismiss = { showPlaybackDetails = false },
                 )
             }
@@ -2832,6 +2833,7 @@ private fun QuietUtilityAction(
 private fun PlaybackDetailsSheet(
     sourceQuality: String?,
     streamQuality: String?,
+    isVolumeNormalized: Boolean,
     onDismiss: () -> Unit,
 ) {
     ModalBottomSheet(onDismissRequest = onDismiss) {
@@ -2857,6 +2859,10 @@ private fun PlaybackDetailsSheet(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.bodyMedium,
             )
+            if (isVolumeNormalized) {
+                Spacer(Modifier.height(8.dp))
+                Text("Volume normalized · Track gain", color = MaterialTheme.colorScheme.primary)
+            }
             sourceQuality?.let {
                 Spacer(Modifier.height(16.dp))
                 Text("Source", style = MaterialTheme.typography.titleMedium)

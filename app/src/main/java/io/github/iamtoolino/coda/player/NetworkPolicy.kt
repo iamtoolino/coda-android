@@ -3,6 +3,7 @@ package io.github.iamtoolino.coda.player
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import io.github.iamtoolino.coda.data.NORMALIZED_STREAM_FORMAT
 
 internal fun isMobileNetwork(context: Context): Boolean {
     val connectivity = context.getSystemService(ConnectivityManager::class.java)
@@ -60,5 +61,12 @@ private fun NetworkCapabilities.toNetworkSnapshot() = NetworkSnapshot(
 )
 
 /** The playing item is deliberately excluded: changing it would interrupt playback. */
-internal fun upcomingStreamVariant(mobile: Boolean, originalFullyCached: Boolean): String =
-    if (mobile && !originalFullyCached) "opus" else "raw"
+internal fun upcomingStreamVariant(
+    mobile: Boolean,
+    originalFullyCached: Boolean,
+    normalized: Boolean = false,
+): String = when {
+    normalized -> NORMALIZED_STREAM_FORMAT
+    mobile && !originalFullyCached -> "opus"
+    else -> "raw"
+}

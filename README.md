@@ -55,13 +55,22 @@ Run the automated checks with:
 ./scripts/verify.sh
 ```
 
+## Playlist volume normalization
+
+Put `[coda:replaygain=track]` in a playlist comment to request the server’s
+`coda-normalized-v1` Opus transcoder on every network. This requires that custom
+Navidrome profile and normalization wrapper; ordinary Opus transcoding does not
+normalize volume. Playback Details shows “Volume normalized · Track gain” for
+this selected stream mode, alongside the actual decoded format. Original files
+and tags are untouched. Unmarked playlists and albums retain ordinary playback.
+
 ## Privacy
 
 Coda contains no analytics, advertising, or tracking SDK. Server credentials are encrypted
 using Android Keystore.
 
 Artwork and a rolling audio window are cached on the device; the queue download icon expands
-that window to the remaining queue. On cellular, upcoming tracks use Opus unless their originals
+that window to the remaining queue. On cellular, unmarked upcoming tracks use Opus unless their originals
 are fully cached. The current track keeps its format for uninterrupted playback. Disconnecting
 clears the account's credentials and caches.
 

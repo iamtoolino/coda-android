@@ -74,6 +74,8 @@ data class Song(
     val mediaType: String? = null,
     // Album-page metadata, kept separate from a song’s potentially embedded coverArt.
     val canonicalAlbumCoverArt: String? = null,
+    // Local queue occurrence policy; never written to the library or source file.
+    val normalizedStream: Boolean = false,
 ) {
     val artistName: String
         get() = displayAlbumArtist?.takeIf { it.isNotBlank() } ?: artist
@@ -94,6 +96,7 @@ data class Playlist(
     val changed: String? = null,
     val coverArt: String? = null,
     val owner: String? = null,
+    val comment: String? = null,
     val entry: List<Song> = emptyList(),
 )
 
