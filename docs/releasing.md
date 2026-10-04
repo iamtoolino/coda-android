@@ -155,3 +155,10 @@ indicator on Wi-Fi and cellular, separate cache identity from ordinary streams,
 and preservation through paused process death and system Play. Check Android Auto
 playlist playback and individual playlist track selection; ordinary album playback
 should retain its usual stream policy. Keep live server reports outside the repository.
+
+For network-recovery verification, `PlaybackOutageTest` uses generated audio and a loopback HTTP
+server with the actual playback service, and runs only on an emulator. It checks cache replenishment
+without timeline/network events, whole-queue replenishment, queue-clear cancellation, cached-track
+playback during an outage, automatic source-error recovery, explicit Pause, and permanent HTTP
+errors. No real Navidrome account or radio connectivity toggle is required. Physical mobile/VPN
+handover and process-death behavior remain separate checks.

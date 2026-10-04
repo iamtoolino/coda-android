@@ -192,3 +192,15 @@ controller connects, preserving intervening album/artist browsing history.
   subsequent playlist loads, not an existing queue.
 - Shared Subsonic queue handoff carries song IDs only, so an external queue cannot
   preserve playlist normalization context. Albums and unmarked playlists play normally.
+
+### Temporary playback connectivity failures
+
+The existing current-plus-three and whole-queue windows retry temporary network/server failures
+without waiting for another track transition or Android network callback. Cache retries start after
+10 seconds and back off to at most one pass per minute during a continuing outage; completed bytes
+are reused. Permanent HTTP errors and storage failures do not start this retry loop.
+
+A network-related playback source error retries the same track, position, and format while playback
+is still requested. Recovery starts after 5 seconds, with delays capped at one minute. Explicit Pause
+(including headset/system controls), a user seek, track replacement, or disconnect cancels pending
+recovery. Audio focus remains under Media3's control. Process restoration stays paused.

@@ -430,7 +430,7 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
     }
 
     override fun onEvents(player: Player, events: Player.Events) {
-        if (events.contains(Player.EVENT_MEDIA_ITEM_TRANSITION)) playbackError = null
+        if (events.contains(Player.EVENT_MEDIA_ITEM_TRANSITION) || player.playerError == null) playbackError = null
         val rebuildQueue = events.contains(Player.EVENT_TIMELINE_CHANGED) ||
             events.contains(Player.EVENT_MEDIA_METADATA_CHANGED)
         refreshState(rebuildQueue = rebuildQueue)

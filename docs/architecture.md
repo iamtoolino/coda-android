@@ -299,3 +299,16 @@ and song identity so resolving a bare browse ID retains playlist policy. Shared
 server queue IDs contain no such context; importing that queue uses normal policy.
 The server profile must be provisioned separately; Coda does not analyze audio or
 apply a second gain through player volume.
+
+### Network recovery beside the player
+
+`PlaybackService` owns cache retries and playback source-error recovery. The current cache worker
+retries its earliest missing target after temporary HTTP/network failures, with 10-second initial
+delay and exponential backoff capped at 60 seconds. Existing generation/account guards and writer
+cancellation invalidate obsolete work; storage errors retain the previous best-effort behavior.
+
+Playback recovery prepares the existing item after a 5-second initial delay, with backoff capped at
+60 seconds, without issuing a new Play command. It validates account, item, index, generation, and
+playWhenReady. Explicit Pause, user seeks, track changes, successful playback, service destruction,
+and account invalidation cancel/reset it. Media3's INTERNAL discontinuity on source error must not
+cancel recovery. `PlaybackConnection` clears the displayed error when the controller's error clears.

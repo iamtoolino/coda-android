@@ -8,6 +8,7 @@ import android.os.Handler
 import android.os.Looper
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
+import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.database.StandaloneDatabaseProvider
@@ -56,6 +57,9 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
     private val scrobbleScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private var cacheWholeQueue = false
     private var prefetchJob: Job? = null
+    private var playbackRecoveryJob: Job? = null
+    private var playbackRecoveryAttempt = 0
+    private var playbackRecoveryGeneration = 0L
     private var cleanupJob: Job? = null
     private var snapshotJob: Job? = null
     private lateinit var snapshotWriteWorker: Job
@@ -262,6 +266,7 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
 
     override fun onEvents(player: Player, events: Player.Events) {
         if (!player.timelineBelongsToCurrentAccount()) {
+            cancelPlaybackRecovery()
             queueSync.invalidate()
             scrobbler.invalidate()
             snapshotTemplate = null
@@ -270,6 +275,9 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
             player.clearMediaItems()
             return
         }
+        if (!player.playWhenReady || player.isPlaying ||
+            events.contains(Player.EVENT_MEDIA_ITEM_TRANSITION)
+        ) cancelPlaybackRecovery()
         if (player.mediaItemCount == 0) cacheWholeQueue = false
         queueSync.onPlayerEvents(
             hasPlaybackIntent = player.hasLocalPlaybackIntent(),
@@ -313,6 +321,45 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
         if (playbackState == Player.STATE_ENDED) scrobbler.playbackEnded()
     }
 
+    override fun onPositionDiscontinuity(
+        oldPosition: Player.PositionInfo,
+        newPosition: Player.PositionInfo,
+        reason: Int,
+    ) {
+        // A source failure itself causes an INTERNAL discontinuity. Only user seeks cancel retry.
+        if (reason == Player.DISCONTINUITY_REASON_SEEK || reason == Player.DISCONTINUITY_REASON_SEEK_ADJUSTMENT) {
+            cancelPlaybackRecovery()
+        }
+    }
+
+    override fun onPlayerError(error: PlaybackException) {
+        if (!player.playWhenReady || !isRetryableNetworkFailure(error)) {
+            cancelPlaybackRecovery()
+            return
+        }
+        val account = AppGraph.sessionSnapshot() ?: return
+        val item = player.currentMediaItem ?: return
+        val index = player.currentMediaItemIndex
+        val generation = ++playbackRecoveryGeneration
+        playbackRecoveryJob?.cancel()
+        playbackRecoveryJob = scrobbleScope.launch {
+            delay(networkRetryDelayMs(playbackRecoveryAttempt++))
+            if (generation != playbackRecoveryGeneration || !AppGraph.isCurrent(account) ||
+                !player.playWhenReady || player.currentMediaItemIndex != index ||
+                player.currentMediaItem != item || player.playerError == null
+            ) return@launch
+            // Retain playWhenReady, position, and stream format. Never manufacture a Play command.
+            player.prepare()
+        }
+    }
+
+    private fun cancelPlaybackRecovery() {
+        ++playbackRecoveryGeneration
+        playbackRecoveryJob?.cancel()
+        playbackRecoveryJob = null
+        playbackRecoveryAttempt = 0
+    }
+
     private fun cacheRemainingQueue() {
         if (!player.timelineBelongsToCurrentAccount() || player.mediaItemCount == 0) return
         if (cacheWholeQueue) return
@@ -344,32 +391,43 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
         mutableCacheWholeQueue.value = cacheWholeQueue
         activeCacheWriter?.cancel()
         prefetchJob?.cancel()
+        val account = AppGraph.sessionSnapshot()
         prefetchJob = scope.launch {
-            for (cacheKey in cache.keys.toList()) {
+            var retryAttempt = 0
+            while (true) {
                 currentCoroutineContext().ensureActive()
-                if (generation != audioCacheGeneration) return@launch
-                if (cacheKey !in keepKeys) runCatching { cache.removeResource(cacheKey) }
-            }
-            for ((uri, cacheKey) in targets) {
-                currentCoroutineContext().ensureActive()
-                if (generation != audioCacheGeneration) return@launch
-                // A connectivity refresh may still be resolving the upcoming timeline. Never
-                // start its stale original downloads on cellular; the playing item is exempt.
-                if (cacheKey != currentKey && cacheKey?.endsWith(":raw") == true &&
-                    isMobileNetwork(this@PlaybackService) && !isFullyCached(cacheKey)
-                ) continue
-                val dataSpec = DataSpec.Builder()
-                    .setUri(uri)
-                    .setKey(cacheKey)
-                    .build()
-                val writer = CacheWriter(cacheFactory.createDataSource(), dataSpec, null, null)
-                activeCacheWriter = writer
-                try {
+                if (generation != audioCacheGeneration || account == null || !AppGraph.isCurrent(account)) return@launch
+                for (cacheKey in cache.keys.toList()) {
                     currentCoroutineContext().ensureActive()
-                    runCatching { writer.cache() }
-                } finally {
-                    if (activeCacheWriter === writer) activeCacheWriter = null
+                    if (generation != audioCacheGeneration) return@launch
+                    if (cacheKey !in keepKeys) runCatching { cache.removeResource(cacheKey) }
                 }
+                var retryNetworkFailure = false
+                for ((uri, cacheKey) in targets) {
+                    currentCoroutineContext().ensureActive()
+                    if (generation != audioCacheGeneration || !AppGraph.isCurrent(account)) return@launch
+                    if (cacheKey != null && isFullyCached(cacheKey)) continue
+                    // Wait for connectivity refresh to replace upcoming stale originals on cellular.
+                    if (cacheKey != currentKey && cacheKey?.endsWith(":raw") == true &&
+                        isMobileNetwork(this@PlaybackService)
+                    ) continue
+                    val dataSpec = DataSpec.Builder().setUri(uri).setKey(cacheKey).build()
+                    val writer = CacheWriter(cacheFactory.createDataSource(), dataSpec, null, null)
+                    activeCacheWriter = writer
+                    val failure = try {
+                        currentCoroutineContext().ensureActive()
+                        runCatching { writer.cache() }.exceptionOrNull()
+                    } finally {
+                        if (activeCacheWriter === writer) activeCacheWriter = null
+                    }
+                    currentCoroutineContext().ensureActive()
+                    if (failure != null && isRetryableNetworkFailure(failure)) {
+                        retryNetworkFailure = true
+                        break // Retry the earliest missing audio instead of hammering the entire queue.
+                    }
+                }
+                if (!retryNetworkFailure) return@launch
+                delay(networkRetryDelayMs(retryAttempt++, initialDelayMs = 10_000))
             }
         }
     }
@@ -459,6 +517,7 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
 
     override fun onDestroy() {
         if (activeInstance === this) activeInstance = null
+        cancelPlaybackRecovery()
         activeCacheWriter?.cancel()
         prefetchJob?.cancel()
         cleanupJob?.cancel()
@@ -492,6 +551,7 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
         fun invalidateAccountState() {
             mutableCacheWholeQueue.value = false
             activeInstance?.run {
+                cancelPlaybackRecovery()
                 cacheWholeQueue = false
                 restorationJob?.cancel()
                 libraryCallback.invalidatePlaybackRestoration()
