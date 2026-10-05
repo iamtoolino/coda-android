@@ -177,22 +177,6 @@ or dedicated storage retry loop.
 An empty Now Playing or Queue entry reached later through Back is dismissed after the playback
 controller connects, preserving intervening album/artist browsing history.
 
-## Playlist normalization
-
-- The exact comment directive `[coda:replaygain=track]` opts playlist tracks into
-  server volume normalization when played or appended, on Wi-Fi and cellular alike.
-- This uses the configured `coda-normalized-v1` Opus transcoder, including when an
-  original stream is already cached. No source files or ReplayGain tags change.
-- Playback Details identifies the selected normalized stream with
-  “Volume normalized · Track gain”; decoded stream quality remains independently
-  reported. The indicator describes the requested server profile, not an audio
-  loudness measurement performed by Coda.
-- The mode belongs to each queue occurrence, survives local playback restoration,
-  and works through Android Auto playlist browsing. Editing a comment affects
-  subsequent playlist loads, not an existing queue.
-- Shared Subsonic queue handoff carries song IDs only, so an external queue cannot
-  preserve playlist normalization context. Albums and unmarked playlists play normally.
-
 ### Temporary playback connectivity failures
 
 The existing current-plus-three and whole-queue windows retry temporary network/server failures

@@ -283,23 +283,6 @@ or dedicated storage retry loop.
 An empty Now Playing or Queue entry reached later through Back is dismissed after the playback
 controller connects, preserving intervening album/artist browsing history.
 
-## Normalized playlist streams
-
-`NavidromeClient.playlist` resolves the exact `[coda:replaygain=track]` comment
-directive into `Song.normalizedStream` on each returned playlist occurrence. The
-shared MediaItem factory and network policy select `coda-normalized-v1`, ahead of
-network quality and original-cache reuse. Its cache key is separate from raw and
-ordinary Opus; Media3 receives an explicit Ogg MIME type because a custom format
-alias can produce an empty first-response Content-Type.
-
-Media metadata carries the selected normalized mode to PlaybackConnection and
-Playback Details. The service snapshot persists it per occurrence; upcoming
-network refreshes preserve it. Android Auto playlist child IDs encode playlist
-and song identity so resolving a bare browse ID retains playlist policy. Shared
-server queue IDs contain no such context; importing that queue uses normal policy.
-The server profile must be provisioned separately; Coda does not analyze audio or
-apply a second gain through player volume.
-
 ### Network recovery beside the player
 
 `PlaybackService` owns cache retries and playback source-error recovery. The current cache worker
