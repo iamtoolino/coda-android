@@ -49,6 +49,14 @@ internal object CodaMediaIds {
     fun artist(id: String) = "coda:artist:$id"
     fun playlist(id: String) = "coda:playlist:$id"
     fun song(id: String) = "coda:song:$id"
+    fun playlistSong(playlistId: String, songId: String) =
+        "coda:playlist-song:${Uri.encode(playlistId)}:${Uri.encode(songId)}"
+
+    fun playlistSongIds(mediaId: String): Pair<String, String>? {
+        val parts = mediaId.removePrefixOrNull("coda:playlist-song:")?.split(':') ?: return null
+        if (parts.size != 2 || parts.any(String::isBlank)) return null
+        return Uri.decode(parts[0]) to Uri.decode(parts[1])
+    }
     fun artistBucket(label: String) = "coda:artist-bucket:$label"
 
     fun albumId(mediaId: String) = mediaId.removePrefixOrNull("coda:album:")
@@ -414,7 +422,11 @@ internal class CodaMediaLibraryCallback(
                     .second.map { albumItem(account, it) }
                 CodaMediaIds.playlistId(parentId) != null -> account.client
                     .playlist(requireNotNull(CodaMediaIds.playlistId(parentId)))
-                    .entry.map { songItem(account, it) }
+                    .entry.map {
+                        songItem(account, it, CodaMediaIds.playlistSong(
+                            requireNotNull(CodaMediaIds.playlistId(parentId)), it.id,
+                        ))
+                    }
                 else -> emptyList()
             }
         }
@@ -460,6 +472,11 @@ internal class CodaMediaLibraryCallback(
                 .playlist(requireNotNull(CodaMediaIds.playlistId(mediaId))).let {
                     playlistItem(account, it)
                 }
+            CodaMediaIds.playlistSongIds(mediaId) != null -> {
+                val (playlistId, songId) = requireNotNull(CodaMediaIds.playlistSongIds(mediaId))
+                account.client.playlist(playlistId).entry.firstOrNull { it.id == songId }
+                    ?.let { songItem(account, it, mediaId) }
+            }
             CodaMediaIds.songId(mediaId) != null -> account.client
                 .song(requireNotNull(CodaMediaIds.songId(mediaId))).let { songItem(account, it) }
             else -> null
@@ -479,6 +496,10 @@ internal class CodaMediaLibraryCallback(
             }.orEmpty()
         }
         val mobile = isMobileNetwork(context)
+        CodaMediaIds.playlistSongIds(requested.mediaId)?.let { (playlistId, songId) ->
+            return listOfNotNull(account.client.playlist(playlistId).entry.firstOrNull { it.id == songId })
+                .map { it.toPlayableMediaItem(context, mobile, account) }
+        }
         CodaMediaIds.songId(requested.mediaId)?.let { id ->
             return listOf(account.client.song(id).toPlayableMediaItem(context, mobile, account))
         }
@@ -702,8 +723,12 @@ internal class CodaMediaLibraryCallback(
         )
         .build()
 
-    private fun songItem(account: NavidromeSession, song: Song): MediaItem = MediaItem.Builder()
-        .setMediaId(CodaMediaIds.song(song.id))
+    private fun songItem(
+        account: NavidromeSession,
+        song: Song,
+        browseId: String = CodaMediaIds.song(song.id),
+    ): MediaItem = MediaItem.Builder()
+        .setMediaId(browseId)
         .setMediaMetadata(
             MediaMetadata.Builder()
                 .setTitle(song.title)

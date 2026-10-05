@@ -111,6 +111,7 @@ data class PlaybackUiState(
     val bitRate: Int? = null,
     val channelCount: Int? = null,
     val sourceCodec: String? = null,
+    val isVolumeNormalized: Boolean = false,
     val sourceBitDepth: Int? = null,
     val sourceSamplingRate: Int? = null,
     val sourceBitRate: Int? = null,
@@ -473,6 +474,7 @@ class PlaybackConnection(private val context: Context) : Player.Listener {
             bitRate = format?.averageBitrate?.takeIf { it >= 1_000 }?.div(1_000),
             channelCount = format?.channelCount?.takeIf { it > 0 },
             sourceCodec = extras?.getString("sourceCodec"),
+            isVolumeNormalized = extras?.getBoolean("normalizedStream") == true,
             sourceBitDepth = extras?.takeIf { it.containsKey("sourceBitDepth") }
                 ?.getInt("sourceBitDepth"),
             sourceSamplingRate = extras?.takeIf { it.containsKey("sourceSamplingRate") }

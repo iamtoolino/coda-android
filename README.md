@@ -61,7 +61,7 @@ Coda contains no analytics, advertising, or tracking SDK. Server credentials are
 using Android Keystore.
 
 Artwork and a rolling audio window are cached on the device; the queue download icon expands
-that window to the remaining queue. On cellular, upcoming tracks use Opus unless their originals
+that window to the remaining queue. On cellular, unmarked upcoming tracks use Opus unless their originals
 are fully cached. The current track keeps its format for uninterrupted playback. Disconnecting
 clears the account's credentials and caches.
 

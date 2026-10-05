@@ -162,8 +162,8 @@ class NavidromeClient(
         .playlists?.playlist.orEmpty()
         .sortedBy { it.name.lowercase() }
 
-    suspend fun playlist(id: String): Playlist = call("getPlaylist", "id" to id).playlist
-        ?: error("Playlist was not returned by the server")
+    suspend fun playlist(id: String): Playlist = (call("getPlaylist", "id" to id).playlist
+        ?: error("Playlist was not returned by the server")).withPlaybackPolicy()
 
     suspend fun search(query: String): SearchResult {
         if (query.isBlank()) return SearchResult()
@@ -219,9 +219,11 @@ class NavidromeClient(
         endpoint("getCoverArt", listOf("id" to it, "size" to size)).toString()
     }
 
-    fun streamUrl(id: String, mobile: Boolean): String = endpoint(
+    fun streamUrl(id: String, mobile: Boolean): String = streamUrl(id, if (mobile) "opus" else "raw")
+
+    fun streamUrl(id: String, format: String): String = endpoint(
         "stream",
-        listOf("id" to id, "format" to if (mobile) "opus" else "raw"),
+        listOf("id" to id, "format" to format),
     ).toString()
 
     private suspend fun call(

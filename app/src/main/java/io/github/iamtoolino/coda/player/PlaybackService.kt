@@ -211,6 +211,7 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
                     upcomingStreamVariant(
                         mobile = mobile,
                         originalFullyCached = isFullyCached(streamCacheKey(account.cacheNamespace, song.id, "raw")),
+                        normalized = song.normalizedStream,
                     )
                 }
                 song.toPlayableMediaItem(this, variant == "opus", account)
@@ -396,12 +397,13 @@ class PlaybackService : MediaLibraryService(), Player.Listener {
                     val variant = upcomingStreamVariant(
                         mobile = mobile,
                         originalFullyCached = isFullyCached(streamCacheKey(namespace, item.mediaId, "raw")),
+                        normalized = item.mediaMetadata.extras?.getBoolean("normalizedStream") == true,
                     )
                     val shouldReplace = currentKey != streamCacheKey(namespace, item.mediaId, variant)
                     if (!shouldReplace) return@map item
                     changed = true
                     item.buildUpon()
-                        .setUri(account.client.streamUrl(item.mediaId, variant == "opus"))
+                        .setUri(account.client.streamUrl(item.mediaId, variant))
                         .setCustomCacheKey(streamCacheKey(requireNotNull(namespace), item.mediaId, variant))
                         .build()
                 }

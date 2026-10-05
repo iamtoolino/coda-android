@@ -4,10 +4,12 @@ import android.content.Context
 import android.os.Bundle
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
+import androidx.media3.common.MimeTypes
 import androidx.media3.common.util.UnstableApi
 import io.github.iamtoolino.coda.AppGraph
 import io.github.iamtoolino.coda.NavidromeSession
 import io.github.iamtoolino.coda.artwork.ArtworkSizes
+import io.github.iamtoolino.coda.data.NORMALIZED_STREAM_FORMAT
 import io.github.iamtoolino.coda.data.Song
 
 internal fun Song.toPlayableMediaItem(context: Context): MediaItem =
@@ -28,6 +30,7 @@ internal fun Song.toPlayableMediaItem(
     mobile: Boolean,
     session: NavidromeSession,
 ): MediaItem {
+    val variant = upcomingStreamVariant(mobile, false, normalizedStream)
     val coverUri = CarArtwork.cover(
         context,
         albumArtworkId,
@@ -44,6 +47,7 @@ internal fun Song.toPlayableMediaItem(
         putLong("durationMs", duration.coerceAtLeast(0) * 1_000L)
         track?.let { putInt("trackNumber", it) }
         discNumber?.let { putInt("discNumber", it) }
+        putBoolean("normalizedStream", variant == NORMALIZED_STREAM_FORMAT)
         putString("sourceCodec", suffix)
         bitDepth?.let { putInt("sourceBitDepth", it) }
         samplingRate?.let { putInt("sourceSamplingRate", it) }
@@ -57,10 +61,10 @@ internal fun Song.toPlayableMediaItem(
         .setArtworkUri(coverUri)
         .setExtras(extras)
         .build()
-    val variant = if (mobile) "opus" else "raw"
     return MediaItem.Builder()
         .setMediaId(id)
-        .setUri(session.client.streamUrl(id, mobile))
+        .setUri(session.client.streamUrl(id, variant))
+        .setMimeType(if (variant == NORMALIZED_STREAM_FORMAT) MimeTypes.AUDIO_OGG else null)
         .setCustomCacheKey(streamCacheKey(session.cacheNamespace, id, variant))
         .setMediaMetadata(metadata)
         .build()
