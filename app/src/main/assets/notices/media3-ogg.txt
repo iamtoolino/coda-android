@@ -1,0 +1,8 @@
+AndroidX Media3 1.11.1 Ogg extractor
+Copyright (C) 2016 The Android Open Source Project
+Licensed under the Apache License, Version 2.0 (Apache-2.0.txt).
+
+Coda includes a modified copy under dev.coda.android.playback.ogg.
+The modifications publish final Ogg granule counts before queuing the final
+page's packets, for per-occurrence sample-exact end trimming.
+Original source: https://github.com/androidx/media/tree/1.11.1/libraries/extractor/src/main/java/androidx/media3/extractor/ogg

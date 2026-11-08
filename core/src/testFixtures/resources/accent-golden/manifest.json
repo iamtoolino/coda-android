@@ -1,0 +1,1864 @@
+{
+  "byteLayout" : "RGBA8 premultiplied sRGB, contiguous CGContext memory rows, no row flip",
+  "decisionMargins" : "Signed value minus threshold; empty if no visible area; reporting copy only",
+  "fixtures" : [
+    {
+      "accent" : {
+        "blue" : 0.31974984928223327,
+        "green" : 0.28991282423106751,
+        "hex" : "#C84A52",
+        "kind" : "chromatic",
+        "red" : 0.78252436305962914
+      },
+      "category" : "red",
+      "cg32" : "covers/01-vivid-red.cg32.rgba",
+      "colorSpace" : "sRGB",
+      "decisionMargins" : {
+        "averageChromaMinus0012" : 0.2002858016147622,
+        "chromaticCoverageMinus008" : 0.92000000000000004,
+        "chromaticCoverageMinus012" : 0.88,
+        "familySupportMinus012" : 0.88
+      },
+      "factorCandidates" : [
+        {
+          "factor" : 1,
+          "height" : 472,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 472
+        },
+        {
+          "factor" : 2,
+          "height" : 236,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 236
+        },
+        {
+          "factor" : 4,
+          "height" : 118,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 118
+        },
+        {
+          "factor" : 8,
+          "height" : 59,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 59
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 472,
+      "id" : "01-vivid-red",
+      "productionSelfCheck" : true,
+      "progressive" : false,
+      "reduced" : "covers/01-vivid-red.reduced.png",
+      "reducedHeight" : 59,
+      "reducedModelMatches" : true,
+      "reducedWidth" : 59,
+      "reduceFactor" : 8,
+      "sha256" : "414be24f9459a96a0002c3f874296fb3e6ee3090d144ba773ce8f4c00f35cc9f",
+      "source" : "covers/01-vivid-red.jpg",
+      "sourceBytes" : 4575,
+      "width" : 472
+    },
+    {
+      "accent" : {
+        "blue" : 0.77501835590973767,
+        "green" : 0.39613885699103324,
+        "hex" : "#3565C6",
+        "kind" : "chromatic",
+        "red" : 0.20606874440892015
+      },
+      "category" : "blue",
+      "cg32" : "covers/02-vivid-blue.cg32.rgba",
+      "colorSpace" : "sRGB",
+      "decisionMargins" : {
+        "averageChromaMinus0012" : 0.19775143501416653,
+        "chromaticCoverageMinus008" : 0.92000000000000004,
+        "chromaticCoverageMinus012" : 0.88,
+        "familySupportMinus012" : 0.88
+      },
+      "factorCandidates" : [
+        {
+          "factor" : 1,
+          "height" : 472,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 472
+        },
+        {
+          "factor" : 2,
+          "height" : 236,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 236
+        },
+        {
+          "factor" : 4,
+          "height" : 118,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 118
+        },
+        {
+          "factor" : 8,
+          "height" : 59,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 59
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 472,
+      "id" : "02-vivid-blue",
+      "productionSelfCheck" : true,
+      "progressive" : false,
+      "reduced" : "covers/02-vivid-blue.reduced.png",
+      "reducedHeight" : 59,
+      "reducedModelMatches" : true,
+      "reducedWidth" : 59,
+      "reduceFactor" : 8,
+      "sha256" : "39de6f6728f7898ed125014b24bd35c395d1130517a73aed4cbf6e0b0c382839",
+      "source" : "covers/02-vivid-blue.jpg",
+      "sourceBytes" : 4605,
+      "width" : 472
+    },
+    {
+      "accent" : {
+        "blue" : 0.3018535009012091,
+        "green" : 0.62558790433021316,
+        "hex" : "#23A04D",
+        "kind" : "chromatic",
+        "red" : 0.13782596771113639
+      },
+      "category" : "green",
+      "cg32" : "covers/03-vivid-green.cg32.rgba",
+      "colorSpace" : "sRGB",
+      "decisionMargins" : {
+        "averageChromaMinus0012" : 0.1687771179533864,
+        "chromaticCoverageMinus008" : 0.92000000000000004,
+        "chromaticCoverageMinus012" : 0.88,
+        "familySupportMinus012" : 0.88
+      },
+      "factorCandidates" : [
+        {
+          "factor" : 1,
+          "height" : 472,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 472
+        },
+        {
+          "factor" : 2,
+          "height" : 236,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 236
+        },
+        {
+          "factor" : 4,
+          "height" : 118,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 118
+        },
+        {
+          "factor" : 8,
+          "height" : 59,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 59
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 472,
+      "id" : "03-vivid-green",
+      "productionSelfCheck" : true,
+      "progressive" : false,
+      "reduced" : "covers/03-vivid-green.reduced.png",
+      "reducedHeight" : 59,
+      "reducedModelMatches" : true,
+      "reducedWidth" : 59,
+      "reduceFactor" : 8,
+      "sha256" : "bc02e6645df67aa26fe63e487cac893da2b395116bc4407c9d338437a9f84432",
+      "source" : "covers/03-vivid-green.jpg",
+      "sourceBytes" : 4575,
+      "width" : 472
+    },
+    {
+      "accent" : {
+        "blue" : 0.64015383179098195,
+        "green" : 0.4763782890641694,
+        "hex" : "#9779A3",
+        "kind" : "chromatic",
+        "red" : 0.59043124752621823
+      },
+      "category" : "pastel",
+      "cg32" : "covers/04-pastel.cg32.rgba",
+      "colorSpace" : "sRGB",
+      "decisionMargins" : {
+        "averageChromaMinus0012" : 0.014270255922222135,
+        "chromaticCoverageMinus008" : 0.37530905771232842,
+        "chromaticCoverageMinus012" : 0.33530905771232844,
+        "familySupportMinus012" : 0.35782973542502894
+      },
+      "factorCandidates" : [
+        {
+          "factor" : 1,
+          "height" : 472,
+          "maxByteDiff" : 2,
+          "mismatchedBytes" : 853,
+          "width" : 472
+        },
+        {
+          "factor" : 2,
+          "height" : 236,
+          "maxByteDiff" : 2,
+          "mismatchedBytes" : 826,
+          "width" : 236
+        },
+        {
+          "factor" : 4,
+          "height" : 118,
+          "maxByteDiff" : 2,
+          "mismatchedBytes" : 828,
+          "width" : 118
+        },
+        {
+          "factor" : 8,
+          "height" : 59,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 59
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 472,
+      "id" : "04-pastel",
+      "productionSelfCheck" : true,
+      "progressive" : false,
+      "reduced" : "covers/04-pastel.reduced.png",
+      "reducedHeight" : 59,
+      "reducedModelMatches" : true,
+      "reducedWidth" : 59,
+      "reduceFactor" : 8,
+      "sha256" : "8c8f11afc585ba1d2b86a38be04c53a9c2659e9049b01d3a9e1d783a96e89e26",
+      "source" : "covers/04-pastel.jpg",
+      "sourceBytes" : 9082,
+      "width" : 472
+    },
+    {
+      "accent" : {
+        "blue" : 0.36900222293946694,
+        "green" : 0.36606363806145087,
+        "hex" : "#5E5D5E",
+        "kind" : "neutral",
+        "red" : 0.36671826558247017
+      },
+      "category" : "dark",
+      "cg32" : "covers/05-dark.cg32.rgba",
+      "colorSpace" : "sRGB",
+      "decisionMargins" : {
+        "averageChromaMinus0012" : -0.010799957904165141,
+        "chromaticCoverageMinus008" : -0.080000000000000002,
+        "chromaticCoverageMinus012" : -0.12,
+        "familySupportMinus012" : -0.10972195452715246
+      },
+      "factorCandidates" : [
+        {
+          "factor" : 1,
+          "height" : 472,
+          "maxByteDiff" : 2,
+          "mismatchedBytes" : 320,
+          "width" : 472
+        },
+        {
+          "factor" : 2,
+          "height" : 236,
+          "maxByteDiff" : 2,
+          "mismatchedBytes" : 318,
+          "width" : 236
+        },
+        {
+          "factor" : 4,
+          "height" : 118,
+          "maxByteDiff" : 2,
+          "mismatchedBytes" : 364,
+          "width" : 118
+        },
+        {
+          "factor" : 8,
+          "height" : 59,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 59
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 472,
+      "id" : "05-dark",
+      "productionSelfCheck" : true,
+      "progressive" : false,
+      "reduced" : "covers/05-dark.reduced.png",
+      "reducedHeight" : 59,
+      "reducedModelMatches" : true,
+      "reducedWidth" : 59,
+      "reduceFactor" : 8,
+      "sha256" : "65143c4c4d4c2c3bb4ec5318691bc2a18982573b7ff42bbbeaeba383d0a3f460",
+      "source" : "covers/05-dark.jpg",
+      "sourceBytes" : 5524,
+      "width" : 472
+    },
+    {
+      "accent" : {
+        "blue" : 0.52199391871176171,
+        "green" : 0.52509576034584871,
+        "hex" : "#878685",
+        "kind" : "neutral",
+        "red" : 0.52749668377194758
+      },
+      "category" : "high-key",
+      "cg32" : "covers/06-high-key.cg32.rgba",
+      "colorSpace" : "sRGB",
+      "decisionMargins" : {
+        "averageChromaMinus0012" : -0.010611196780053147,
+        "chromaticCoverageMinus008" : -0.080000000000000002,
+        "chromaticCoverageMinus012" : -0.12,
+        "familySupportMinus012" : -0.12
+      },
+      "factorCandidates" : [
+        {
+          "factor" : 1,
+          "height" : 472,
+          "maxByteDiff" : 2,
+          "mismatchedBytes" : 231,
+          "width" : 472
+        },
+        {
+          "factor" : 2,
+          "height" : 236,
+          "maxByteDiff" : 2,
+          "mismatchedBytes" : 231,
+          "width" : 236
+        },
+        {
+          "factor" : 4,
+          "height" : 118,
+          "maxByteDiff" : 2,
+          "mismatchedBytes" : 280,
+          "width" : 118
+        },
+        {
+          "factor" : 8,
+          "height" : 59,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 59
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 472,
+      "id" : "06-high-key",
+      "productionSelfCheck" : true,
+      "progressive" : false,
+      "reduced" : "covers/06-high-key.reduced.png",
+      "reducedHeight" : 59,
+      "reducedModelMatches" : true,
+      "reducedWidth" : 59,
+      "reduceFactor" : 8,
+      "sha256" : "97ba6626712cf1e6f5e51dd329718fd8765c3d5dbab0330d70f574f6779c73f6",
+      "source" : "covers/06-high-key.jpg",
+      "sourceBytes" : 5519,
+      "width" : 472
+    },
+    {
+      "accent" : {
+        "blue" : 0.47843131426356927,
+        "green" : 0.47843136816749904,
+        "hex" : "#7A7A7A",
+        "kind" : "neutral",
+        "red" : 0.47843138808165092
+      },
+      "category" : "mono",
+      "cg32" : "covers/07-monochrome.cg32.rgba",
+      "colorSpace" : "sRGB",
+      "decisionMargins" : {
+        "averageChromaMinus0012" : -0.011999978314215547,
+        "chromaticCoverageMinus008" : -0.080000000000000002,
+        "chromaticCoverageMinus012" : -0.12,
+        "familySupportMinus012" : -0.12
+      },
+      "factorCandidates" : [
+        {
+          "factor" : 1,
+          "height" : 472,
+          "maxByteDiff" : 1,
+          "mismatchedBytes" : 576,
+          "width" : 472
+        },
+        {
+          "factor" : 2,
+          "height" : 236,
+          "maxByteDiff" : 1,
+          "mismatchedBytes" : 480,
+          "width" : 236
+        },
+        {
+          "factor" : 4,
+          "height" : 118,
+          "maxByteDiff" : 1,
+          "mismatchedBytes" : 1056,
+          "width" : 118
+        },
+        {
+          "factor" : 8,
+          "height" : 59,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 59
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 472,
+      "id" : "07-monochrome",
+      "productionSelfCheck" : true,
+      "progressive" : false,
+      "reduced" : "covers/07-monochrome.reduced.png",
+      "reducedHeight" : 59,
+      "reducedModelMatches" : true,
+      "reducedWidth" : 59,
+      "reduceFactor" : 8,
+      "sha256" : "35e035984f8b485ff2e552a5c710ecd2078d92a92d65bd93ed395255faada908",
+      "source" : "covers/07-monochrome.jpg",
+      "sourceBytes" : 9165,
+      "width" : 472
+    },
+    {
+      "accent" : {
+        "blue" : 0.49019609035770467,
+        "green" : 0.50588236232236261,
+        "hex" : "#86817D",
+        "kind" : "neutral",
+        "red" : 0.52549015161951307
+      },
+      "category" : "warm",
+      "cg32" : "covers/08-warm-neutral.cg32.rgba",
+      "colorSpace" : "sRGB",
+      "decisionMargins" : {
+        "averageChromaMinus0012" : -0.0034730081742218484,
+        "chromaticCoverageMinus008" : -0.080000000000000002,
+        "chromaticCoverageMinus012" : -0.12,
+        "familySupportMinus012" : -0.12
+      },
+      "factorCandidates" : [
+        {
+          "factor" : 1,
+          "height" : 472,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 472
+        },
+        {
+          "factor" : 2,
+          "height" : 236,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 236
+        },
+        {
+          "factor" : 4,
+          "height" : 118,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 118
+        },
+        {
+          "factor" : 8,
+          "height" : 59,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 59
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 472,
+      "id" : "08-warm-neutral",
+      "productionSelfCheck" : true,
+      "progressive" : false,
+      "reduced" : "covers/08-warm-neutral.reduced.png",
+      "reducedHeight" : 59,
+      "reducedModelMatches" : true,
+      "reducedWidth" : 59,
+      "reduceFactor" : 8,
+      "sha256" : "665c04e5fc627c8196d6051520ded36de5949ef9b7a4d5ca4e97134effa21893",
+      "source" : "covers/08-warm-neutral.jpg",
+      "sourceBytes" : 4515,
+      "width" : 472
+    },
+    {
+      "accent" : {
+        "blue" : 0.53725474257125527,
+        "green" : 0.51372547658732026,
+        "hex" : "#7E8389",
+        "kind" : "neutral",
+        "red" : 0.49411772962484529
+      },
+      "category" : "cool",
+      "cg32" : "covers/09-cool-neutral.cg32.rgba",
+      "colorSpace" : "sRGB",
+      "decisionMargins" : {
+        "averageChromaMinus0012" : -0.0011521491366268937,
+        "chromaticCoverageMinus008" : -0.080000000000000002,
+        "chromaticCoverageMinus012" : -0.12,
+        "familySupportMinus012" : -0.12
+      },
+      "factorCandidates" : [
+        {
+          "factor" : 1,
+          "height" : 472,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 472
+        },
+        {
+          "factor" : 2,
+          "height" : 236,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 236
+        },
+        {
+          "factor" : 4,
+          "height" : 118,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 118
+        },
+        {
+          "factor" : 8,
+          "height" : 59,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 59
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 472,
+      "id" : "09-cool-neutral",
+      "productionSelfCheck" : true,
+      "progressive" : false,
+      "reduced" : "covers/09-cool-neutral.reduced.png",
+      "reducedHeight" : 59,
+      "reducedModelMatches" : true,
+      "reducedWidth" : 59,
+      "reduceFactor" : 8,
+      "sha256" : "c5818fa4acbdfba12ac9fcb3906323047eb1b1e5ee41a71b71445f58c68d3154",
+      "source" : "covers/09-cool-neutral.jpg",
+      "sourceBytes" : 4515,
+      "width" : 472
+    },
+    {
+      "accent" : {
+        "blue" : 0.27319716940597655,
+        "green" : 0.59372574189898597,
+        "hex" : "#609746",
+        "kind" : "chromatic",
+        "red" : 0.3765835786545304
+      },
+      "category" : "busy",
+      "cg32" : "covers/10-busy.cg32.rgba",
+      "colorSpace" : "sRGB",
+      "decisionMargins" : {
+        "averageChromaMinus0012" : 0.012375379495676034,
+        "chromaticCoverageMinus008" : 0.81741343253472587,
+        "chromaticCoverageMinus012" : 0.77741343253472583,
+        "familySupportMinus012" : 0.23517014736113412
+      },
+      "factorCandidates" : [
+        {
+          "factor" : 1,
+          "height" : 472,
+          "maxByteDiff" : 26,
+          "mismatchedBytes" : 2416,
+          "width" : 472
+        },
+        {
+          "factor" : 2,
+          "height" : 236,
+          "maxByteDiff" : 26,
+          "mismatchedBytes" : 2399,
+          "width" : 236
+        },
+        {
+          "factor" : 4,
+          "height" : 118,
+          "maxByteDiff" : 25,
+          "mismatchedBytes" : 2354,
+          "width" : 118
+        },
+        {
+          "factor" : 8,
+          "height" : 59,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 59
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 472,
+      "id" : "10-busy",
+      "productionSelfCheck" : true,
+      "progressive" : false,
+      "reduced" : "covers/10-busy.reduced.png",
+      "reducedHeight" : 59,
+      "reducedModelMatches" : true,
+      "reducedWidth" : 59,
+      "reduceFactor" : 8,
+      "sha256" : "0b2821cdd744b9bcd2d97b892a6bf411c5488f6236538200b831f227f5d3655b",
+      "source" : "covers/10-busy.jpg",
+      "sourceBytes" : 44371,
+      "width" : 472
+    },
+    {
+      "accent" : {
+        "blue" : 0.36577286248503399,
+        "green" : 0.36584854791878912,
+        "hex" : "#5E5D5D",
+        "kind" : "neutral",
+        "red" : 0.36845181325989712
+      },
+      "category" : "type",
+      "cg32" : "covers/11-typographic.cg32.rgba",
+      "colorSpace" : "sRGB",
+      "decisionMargins" : {
+        "averageChromaMinus0012" : -0.011152574687910142,
+        "chromaticCoverageMinus008" : -0.052656250000000002,
+        "chromaticCoverageMinus012" : -0.092656249999999996,
+        "familySupportMinus012" : -0.017460937499999996
+      },
+      "factorCandidates" : [
+        {
+          "factor" : 1,
+          "height" : 472,
+          "maxByteDiff" : 27,
+          "mismatchedBytes" : 669,
+          "width" : 472
+        },
+        {
+          "factor" : 2,
+          "height" : 236,
+          "maxByteDiff" : 26,
+          "mismatchedBytes" : 710,
+          "width" : 236
+        },
+        {
+          "factor" : 4,
+          "height" : 118,
+          "maxByteDiff" : 25,
+          "mismatchedBytes" : 760,
+          "width" : 118
+        },
+        {
+          "factor" : 8,
+          "height" : 59,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 59
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 472,
+      "id" : "11-typographic",
+      "productionSelfCheck" : true,
+      "progressive" : false,
+      "reduced" : "covers/11-typographic.reduced.png",
+      "reducedHeight" : 59,
+      "reducedModelMatches" : true,
+      "reducedWidth" : 59,
+      "reduceFactor" : 8,
+      "sha256" : "884b7968ffba3eb0320face4f4cff03cc28c32ba7a09c683cd5776433927ba54",
+      "source" : "covers/11-typographic.jpg",
+      "sourceBytes" : 16674,
+      "width" : 472
+    },
+    {
+      "accent" : {
+        "blue" : 0.48977742141711494,
+        "green" : 0.46929437563308712,
+        "hex" : "#72787D",
+        "kind" : "neutral",
+        "red" : 0.4472878440453209
+      },
+      "category" : "stripes",
+      "cg32" : "covers/12-fine-stripes.cg32.rgba",
+      "colorSpace" : "sRGB",
+      "decisionMargins" : {
+        "averageChromaMinus0012" : -0.0014788461493033724,
+        "chromaticCoverageMinus008" : -0.080000000000000002,
+        "chromaticCoverageMinus012" : -0.12,
+        "familySupportMinus012" : -0.026249999999999996
+      },
+      "factorCandidates" : [
+        {
+          "factor" : 1,
+          "height" : 472,
+          "maxByteDiff" : 16,
+          "mismatchedBytes" : 2720,
+          "width" : 472
+        },
+        {
+          "factor" : 2,
+          "height" : 236,
+          "maxByteDiff" : 16,
+          "mismatchedBytes" : 2912,
+          "width" : 236
+        },
+        {
+          "factor" : 4,
+          "height" : 118,
+          "maxByteDiff" : 13,
+          "mismatchedBytes" : 2816,
+          "width" : 118
+        },
+        {
+          "factor" : 8,
+          "height" : 59,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 59
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 472,
+      "id" : "12-fine-stripes",
+      "productionSelfCheck" : true,
+      "progressive" : false,
+      "reduced" : "covers/12-fine-stripes.reduced.png",
+      "reducedHeight" : 59,
+      "reducedModelMatches" : true,
+      "reducedWidth" : 59,
+      "reduceFactor" : 8,
+      "sha256" : "b3ad244e16d7448001ef0e92a21018e026548b13136c83b862b52affa217791e",
+      "source" : "covers/12-fine-stripes.jpg",
+      "sourceBytes" : 43125,
+      "width" : 472
+    },
+    {
+      "accent" : {
+        "blue" : 0.76098939102032448,
+        "green" : 0.3701677659119722,
+        "hex" : "#3F5EC2",
+        "kind" : "chromatic",
+        "red" : 0.24744930267945098
+      },
+      "category" : "competing",
+      "cg32" : "covers/13-competing-hues.cg32.rgba",
+      "colorSpace" : "sRGB",
+      "decisionMargins" : {
+        "averageChromaMinus0012" : 0.01591830155986082,
+        "chromaticCoverageMinus008" : 0.20124999999999998,
+        "chromaticCoverageMinus012" : 0.16125,
+        "familySupportMinus012" : 0.036250000000000004
+      },
+      "factorCandidates" : [
+        {
+          "factor" : 1,
+          "height" : 472,
+          "maxByteDiff" : 7,
+          "mismatchedBytes" : 320,
+          "width" : 472
+        },
+        {
+          "factor" : 2,
+          "height" : 236,
+          "maxByteDiff" : 8,
+          "mismatchedBytes" : 320,
+          "width" : 236
+        },
+        {
+          "factor" : 4,
+          "height" : 118,
+          "maxByteDiff" : 10,
+          "mismatchedBytes" : 320,
+          "width" : 118
+        },
+        {
+          "factor" : 8,
+          "height" : 59,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 59
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 472,
+      "id" : "13-competing-hues",
+      "productionSelfCheck" : true,
+      "progressive" : false,
+      "reduced" : "covers/13-competing-hues.reduced.png",
+      "reducedHeight" : 59,
+      "reducedModelMatches" : true,
+      "reducedWidth" : 59,
+      "reduceFactor" : 8,
+      "sha256" : "84500e662316c187d0042160385a6c3902bfa2724d15d0baa87c4d30bc38228a",
+      "source" : "covers/13-competing-hues.jpg",
+      "sourceBytes" : 7575,
+      "width" : 472
+    },
+    {
+      "accent" : {
+        "blue" : 0.48535573117782177,
+        "green" : 0.28853487469104061,
+        "hex" : "#C14A7C",
+        "kind" : "chromatic",
+        "red" : 0.75523890323081411
+      },
+      "category" : "wrap",
+      "cg32" : "covers/14-hue-wrap.cg32.rgba",
+      "colorSpace" : "sRGB",
+      "decisionMargins" : {
+        "averageChromaMinus0012" : 0.15915856777627976,
+        "chromaticCoverageMinus008" : 0.92000000000000004,
+        "chromaticCoverageMinus012" : 0.88,
+        "familySupportMinus012" : 0.88
+      },
+      "factorCandidates" : [
+        {
+          "factor" : 1,
+          "height" : 472,
+          "maxByteDiff" : 3,
+          "mismatchedBytes" : 128,
+          "width" : 472
+        },
+        {
+          "factor" : 2,
+          "height" : 236,
+          "maxByteDiff" : 3,
+          "mismatchedBytes" : 160,
+          "width" : 236
+        },
+        {
+          "factor" : 4,
+          "height" : 118,
+          "maxByteDiff" : 2,
+          "mismatchedBytes" : 160,
+          "width" : 118
+        },
+        {
+          "factor" : 8,
+          "height" : 59,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 59
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 472,
+      "id" : "14-hue-wrap",
+      "productionSelfCheck" : true,
+      "progressive" : false,
+      "reduced" : "covers/14-hue-wrap.reduced.png",
+      "reducedHeight" : 59,
+      "reducedModelMatches" : true,
+      "reducedWidth" : 59,
+      "reduceFactor" : 8,
+      "sha256" : "32575b1e7c21235622972ba1b9a357bbbfc71eb957244f159ed06402f3212e8d",
+      "source" : "covers/14-hue-wrap.jpg",
+      "sourceBytes" : 5025,
+      "width" : 472
+    },
+    {
+      "accent" : {
+        "blue" : 0.57156148755754921,
+        "green" : 0.34055011526288143,
+        "hex" : "#CB5792",
+        "kind" : "chromatic",
+        "red" : 0.79440799450132926
+      },
+      "category" : "alpha",
+      "cg32" : "covers/15-transparent-edge.cg32.rgba",
+      "colorSpace" : "sRGB",
+      "decisionMargins" : {
+        "averageChromaMinus0012" : 0.19418474551993944,
+        "chromaticCoverageMinus008" : 0.92000000000000004,
+        "chromaticCoverageMinus012" : 0.88,
+        "familySupportMinus012" : 0.88
+      },
+      "factorCandidates" : [
+        {
+          "factor" : 1,
+          "height" : 472,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 472
+        },
+        {
+          "factor" : 2,
+          "height" : 236,
+          "maxByteDiff" : 1,
+          "mismatchedBytes" : 130,
+          "width" : 236
+        },
+        {
+          "factor" : 4,
+          "height" : 118,
+          "maxByteDiff" : 1,
+          "mismatchedBytes" : 466,
+          "width" : 118
+        },
+        {
+          "factor" : 8,
+          "height" : 59,
+          "maxByteDiff" : 3,
+          "mismatchedBytes" : 1213,
+          "width" : 59
+        }
+      ],
+      "format" : "PNG",
+      "height" : 472,
+      "id" : "15-transparent-edge",
+      "productionSelfCheck" : true,
+      "progressive" : false,
+      "reduced" : "covers/15-transparent-edge.reduced.png",
+      "reducedHeight" : 472,
+      "reducedModelMatches" : true,
+      "reducedWidth" : 472,
+      "reduceFactor" : 1,
+      "sha256" : "e86b5d6a8ef1190c09c61e97a2dd08b9c4ab6dedde34800fcea0b934925242ea",
+      "source" : "covers/15-transparent-edge.png",
+      "sourceBytes" : 6777,
+      "width" : 472
+    },
+    {
+      "accent" : {
+        "blue" : 0.2733938888321355,
+        "green" : 0.59040558316723113,
+        "hex" : "#649746",
+        "kind" : "chromatic",
+        "red" : 0.39101080073343747
+      },
+      "category" : "busy",
+      "cg32" : "covers/16-wide.cg32.rgba",
+      "colorSpace" : "sRGB",
+      "decisionMargins" : {
+        "averageChromaMinus0012" : 0.012411110719471503,
+        "chromaticCoverageMinus008" : 0.81839354068216263,
+        "chromaticCoverageMinus012" : 0.7783935406821626,
+        "familySupportMinus012" : 0.25668345149249705
+      },
+      "factorCandidates" : [
+        {
+          "factor" : 1,
+          "height" : 200,
+          "maxByteDiff" : 68,
+          "mismatchedBytes" : 2765,
+          "width" : 600
+        },
+        {
+          "factor" : 2,
+          "height" : 100,
+          "maxByteDiff" : 69,
+          "mismatchedBytes" : 2765,
+          "width" : 300
+        },
+        {
+          "factor" : 4,
+          "height" : 50,
+          "maxByteDiff" : 61,
+          "mismatchedBytes" : 2723,
+          "width" : 150
+        },
+        {
+          "factor" : 8,
+          "height" : 25,
+          "maxByteDiff" : 21,
+          "mismatchedBytes" : 1698,
+          "width" : 75
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 200,
+      "id" : "16-wide",
+      "productionSelfCheck" : true,
+      "progressive" : false,
+      "reduced" : "covers/16-wide.reduced.png",
+      "reducedHeight" : 25,
+      "reducedModelMatches" : false,
+      "reducedWidth" : 75,
+      "reduceFactor" : 8,
+      "sha256" : "501f1f3ca06e965c4303c5c6b138fcc92965468286b0ec3d43709dbcb2f74b84",
+      "source" : "covers/16-wide.jpg",
+      "sourceBytes" : 30622,
+      "width" : 600
+    },
+    {
+      "accent" : {
+        "blue" : 0.2798486870780002,
+        "green" : 0.58654191139290179,
+        "hex" : "#679647",
+        "kind" : "chromatic",
+        "red" : 0.40551074939848042
+      },
+      "category" : "busy",
+      "cg32" : "covers/17-tall.cg32.rgba",
+      "colorSpace" : "sRGB",
+      "decisionMargins" : {
+        "averageChromaMinus0012" : 0.013134235927472829,
+        "chromaticCoverageMinus008" : 0.81546590886199311,
+        "chromaticCoverageMinus012" : 0.77546590886199307,
+        "familySupportMinus012" : 0.22250987536561972
+      },
+      "factorCandidates" : [
+        {
+          "factor" : 1,
+          "height" : 600,
+          "maxByteDiff" : 78,
+          "mismatchedBytes" : 2879,
+          "width" : 200
+        },
+        {
+          "factor" : 2,
+          "height" : 300,
+          "maxByteDiff" : 81,
+          "mismatchedBytes" : 2814,
+          "width" : 100
+        },
+        {
+          "factor" : 4,
+          "height" : 150,
+          "maxByteDiff" : 76,
+          "mismatchedBytes" : 2766,
+          "width" : 50
+        },
+        {
+          "factor" : 8,
+          "height" : 75,
+          "maxByteDiff" : 25,
+          "mismatchedBytes" : 1768,
+          "width" : 25
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 600,
+      "id" : "17-tall",
+      "productionSelfCheck" : true,
+      "progressive" : false,
+      "reduced" : "covers/17-tall.reduced.png",
+      "reducedHeight" : 75,
+      "reducedModelMatches" : false,
+      "reducedWidth" : 25,
+      "reduceFactor" : 8,
+      "sha256" : "f1adc9173f03a05616b462e5bba83b69b989b9b060caad1c9b5450cf0b0ece83",
+      "source" : "covers/17-tall.jpg",
+      "sourceBytes" : 37856,
+      "width" : 200
+    },
+    {
+      "accent" : {
+        "blue" : 0.32108061744580635,
+        "green" : 0.56413697587378353,
+        "hex" : "#799052",
+        "kind" : "chromatic",
+        "red" : 0.47595215225087489
+      },
+      "category" : "busy",
+      "cg32" : "covers/18-tiny.cg32.rgba",
+      "colorSpace" : "sRGB",
+      "decisionMargins" : {
+        "averageChromaMinus0012" : 0.01467902284622288,
+        "chromaticCoverageMinus008" : 0.72563669450623802,
+        "chromaticCoverageMinus012" : 0.68563669450623799,
+        "familySupportMinus012" : 0.26956248274572259
+      },
+      "factorCandidates" : [
+        {
+          "factor" : 1,
+          "height" : 33,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 33
+        },
+        {
+          "factor" : 2,
+          "height" : 16,
+          "maxByteDiff" : 208,
+          "mismatchedBytes" : 3040,
+          "width" : 16
+        },
+        {
+          "factor" : 4,
+          "height" : 8,
+          "maxByteDiff" : 152,
+          "mismatchedBytes" : 3039,
+          "width" : 8
+        },
+        {
+          "factor" : 8,
+          "height" : 4,
+          "maxByteDiff" : 130,
+          "mismatchedBytes" : 3036,
+          "width" : 4
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 33,
+      "id" : "18-tiny",
+      "productionSelfCheck" : true,
+      "progressive" : false,
+      "reduced" : "covers/18-tiny.reduced.png",
+      "reducedHeight" : 33,
+      "reducedModelMatches" : true,
+      "reducedWidth" : 33,
+      "reduceFactor" : 1,
+      "sha256" : "260b5837df9d9d1d5463d972cea0d140c2e5eeb5c1f8bbf3a07ac4eebfb167be",
+      "source" : "covers/18-tiny.jpg",
+      "sourceBytes" : 2115,
+      "width" : 33
+    },
+    {
+      "accent" : {
+        "blue" : 0.49025076986061716,
+        "green" : 0.46956409047254438,
+        "hex" : "#72787D",
+        "kind" : "neutral",
+        "red" : 0.44551682143562227
+      },
+      "category" : "stripes",
+      "cg32" : "covers/19-odd.cg32.rgba",
+      "colorSpace" : "sRGB",
+      "decisionMargins" : {
+        "averageChromaMinus0012" : -0.0010029210778399675,
+        "chromaticCoverageMinus008" : -0.048750000000000002,
+        "chromaticCoverageMinus012" : -0.088749999999999996,
+        "familySupportMinus012" : 0.067500000000000004
+      },
+      "factorCandidates" : [
+        {
+          "factor" : 1,
+          "height" : 257,
+          "maxByteDiff" : 27,
+          "mismatchedBytes" : 2912,
+          "width" : 255
+        },
+        {
+          "factor" : 2,
+          "height" : 128,
+          "maxByteDiff" : 26,
+          "mismatchedBytes" : 2816,
+          "width" : 127
+        },
+        {
+          "factor" : 4,
+          "height" : 64,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 63
+        },
+        {
+          "factor" : 8,
+          "height" : 32,
+          "maxByteDiff" : 35,
+          "mismatchedBytes" : 2944,
+          "width" : 31
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 257,
+      "id" : "19-odd",
+      "productionSelfCheck" : true,
+      "progressive" : false,
+      "reduced" : "covers/19-odd.reduced.png",
+      "reducedHeight" : 64,
+      "reducedModelMatches" : true,
+      "reducedWidth" : 63,
+      "reduceFactor" : 4,
+      "sha256" : "669a9d49ef97d788e7b1902af5f34f1ba16b20f55621e15a095795c5b5a57b00",
+      "source" : "covers/19-odd.jpg",
+      "sourceBytes" : 13532,
+      "width" : 255
+    },
+    {
+      "accent" : {
+        "blue" : 0.26619474368170049,
+        "green" : 0.59662475933253423,
+        "hex" : "#5D9844",
+        "kind" : "chromatic",
+        "red" : 0.36503662850769097
+      },
+      "category" : "busy",
+      "cg32" : "covers/20-large-progressive.cg32.rgba",
+      "colorSpace" : "sRGB",
+      "decisionMargins" : {
+        "averageChromaMinus0012" : 0.012406317732826334,
+        "chromaticCoverageMinus008" : 0.81838673419087016,
+        "chromaticCoverageMinus012" : 0.77838673419087012,
+        "familySupportMinus012" : 0.2468711899584986
+      },
+      "factorCandidates" : [
+        {
+          "factor" : 1,
+          "height" : 1000,
+          "maxByteDiff" : 14,
+          "mismatchedBytes" : 1445,
+          "width" : 1000
+        },
+        {
+          "factor" : 2,
+          "height" : 500,
+          "maxByteDiff" : 14,
+          "mismatchedBytes" : 1469,
+          "width" : 500
+        },
+        {
+          "factor" : 4,
+          "height" : 250,
+          "maxByteDiff" : 12,
+          "mismatchedBytes" : 1437,
+          "width" : 250
+        },
+        {
+          "factor" : 8,
+          "height" : 125,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 125
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 1000,
+      "id" : "20-large-progressive",
+      "productionSelfCheck" : true,
+      "progressive" : true,
+      "reduced" : "covers/20-large-progressive.reduced.png",
+      "reducedHeight" : 125,
+      "reducedModelMatches" : true,
+      "reducedWidth" : 125,
+      "reduceFactor" : 8,
+      "sha256" : "6133bfa46da91e7df424f758fd285619777335a9a159f9e42c5d8fb2e96124a5",
+      "source" : "covers/20-large-progressive.jpg",
+      "sourceBytes" : 99393,
+      "width" : 1000
+    },
+    {
+      "accent" : {
+        "blue" : 0.76098939102032448,
+        "green" : 0.3701677659119722,
+        "hex" : "#3F5EC2",
+        "kind" : "chromatic",
+        "red" : 0.24744930267945098
+      },
+      "category" : "competing",
+      "cg32" : "covers/21-progressive.cg32.rgba",
+      "colorSpace" : "sRGB",
+      "decisionMargins" : {
+        "averageChromaMinus0012" : 0.01591830155986082,
+        "chromaticCoverageMinus008" : 0.20124999999999998,
+        "chromaticCoverageMinus012" : 0.16125,
+        "familySupportMinus012" : 0.036250000000000004
+      },
+      "factorCandidates" : [
+        {
+          "factor" : 1,
+          "height" : 472,
+          "maxByteDiff" : 7,
+          "mismatchedBytes" : 320,
+          "width" : 472
+        },
+        {
+          "factor" : 2,
+          "height" : 236,
+          "maxByteDiff" : 8,
+          "mismatchedBytes" : 320,
+          "width" : 236
+        },
+        {
+          "factor" : 4,
+          "height" : 118,
+          "maxByteDiff" : 10,
+          "mismatchedBytes" : 320,
+          "width" : 118
+        },
+        {
+          "factor" : 8,
+          "height" : 59,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 59
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 472,
+      "id" : "21-progressive",
+      "productionSelfCheck" : true,
+      "progressive" : true,
+      "reduced" : "covers/21-progressive.reduced.png",
+      "reducedHeight" : 59,
+      "reducedModelMatches" : true,
+      "reducedWidth" : 59,
+      "reduceFactor" : 8,
+      "sha256" : "d2b55b9407185db87cc79950bacd411898e0e44faff877390fb6d638aa44917f",
+      "source" : "covers/21-progressive.jpg",
+      "sourceBytes" : 7450,
+      "width" : 472
+    },
+    {
+      "accent" : {
+        "blue" : 0.62726859874341456,
+        "green" : 0.47211244407002867,
+        "hex" : "#9A78A0",
+        "kind" : "chromatic",
+        "red" : 0.60382382175519389
+      },
+      "category" : "pastel",
+      "cg32" : "covers/22-p3.cg32.rgba",
+      "colorSpace" : "Display P3",
+      "decisionMargins" : {
+        "averageChromaMinus0012" : 0.016276071207321576,
+        "chromaticCoverageMinus008" : 0.47889346464299615,
+        "chromaticCoverageMinus012" : 0.43889346464299617,
+        "familySupportMinus012" : 0.32438133557555643
+      },
+      "factorCandidates" : [
+        {
+          "factor" : 1,
+          "height" : 472,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 472
+        },
+        {
+          "factor" : 2,
+          "height" : 236,
+          "maxByteDiff" : 1,
+          "mismatchedBytes" : 149,
+          "width" : 236
+        },
+        {
+          "factor" : 4,
+          "height" : 118,
+          "maxByteDiff" : 1,
+          "mismatchedBytes" : 216,
+          "width" : 118
+        },
+        {
+          "factor" : 8,
+          "height" : 59,
+          "maxByteDiff" : 2,
+          "mismatchedBytes" : 557,
+          "width" : 59
+        }
+      ],
+      "format" : "PNG",
+      "height" : 472,
+      "id" : "22-p3",
+      "productionSelfCheck" : true,
+      "progressive" : false,
+      "reduced" : "covers/22-p3.reduced.png",
+      "reducedHeight" : 472,
+      "reducedModelMatches" : true,
+      "reducedWidth" : 472,
+      "reduceFactor" : 1,
+      "sha256" : "2b08ecfb64a72ee3ba0bf3994b0771bbb389da9ef4454ab5daf6fa4a7ad2d4b8",
+      "source" : "covers/22-p3.png",
+      "sourceBytes" : 5965,
+      "width" : 472
+    },
+    {
+      "accent" : {
+        "blue" : 0.48445133156781855,
+        "green" : 0.48577008801586813,
+        "hex" : "#8B7C7C",
+        "kind" : "tintedNeutral",
+        "red" : 0.54650034216224763
+      },
+      "category" : "coverage-below",
+      "cg32" : "covers/23-coverage-below.cg32.rgba",
+      "colorSpace" : "sRGB",
+      "decisionMargins" : {
+        "averageChromaMinus0012" : 0.0070992371279517096,
+        "chromaticCoverageMinus008" : 0.013749999999999998,
+        "chromaticCoverageMinus012" : -0.026249999999999996,
+        "familySupportMinus012" : -0.026249999999999996
+      },
+      "factorCandidates" : [
+        {
+          "factor" : 1,
+          "height" : 472,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 472
+        },
+        {
+          "factor" : 2,
+          "height" : 236,
+          "maxByteDiff" : 1,
+          "mismatchedBytes" : 160,
+          "width" : 236
+        },
+        {
+          "factor" : 4,
+          "height" : 118,
+          "maxByteDiff" : 1,
+          "mismatchedBytes" : 192,
+          "width" : 118
+        },
+        {
+          "factor" : 8,
+          "height" : 59,
+          "maxByteDiff" : 6,
+          "mismatchedBytes" : 256,
+          "width" : 59
+        }
+      ],
+      "format" : "PNG",
+      "height" : 472,
+      "id" : "23-coverage-below",
+      "productionSelfCheck" : true,
+      "progressive" : false,
+      "reduced" : "covers/23-coverage-below.reduced.png",
+      "reducedHeight" : 472,
+      "reducedModelMatches" : true,
+      "reducedWidth" : 472,
+      "reduceFactor" : 1,
+      "sha256" : "7787be60371cc80555fda3a3f533006723b0dbb17684351235e0a86e3430556c",
+      "source" : "covers/23-coverage-below.png",
+      "sourceBytes" : 5449,
+      "width" : 472
+    },
+    {
+      "accent" : {
+        "blue" : 0.33538692743128701,
+        "green" : 0.29464055105988657,
+        "hex" : "#C94B56",
+        "kind" : "chromatic",
+        "red" : 0.78817878644611794
+      },
+      "category" : "coverage-above",
+      "cg32" : "covers/24-coverage-above.cg32.rgba",
+      "colorSpace" : "sRGB",
+      "decisionMargins" : {
+        "averageChromaMinus0012" : 0.015431658573480809,
+        "chromaticCoverageMinus008" : 0.076249999999999998,
+        "chromaticCoverageMinus012" : 0.036250000000000004,
+        "familySupportMinus012" : 0.036250000000000004
+      },
+      "factorCandidates" : [
+        {
+          "factor" : 1,
+          "height" : 472,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 472
+        },
+        {
+          "factor" : 2,
+          "height" : 236,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 236
+        },
+        {
+          "factor" : 4,
+          "height" : 118,
+          "maxByteDiff" : 1,
+          "mismatchedBytes" : 192,
+          "width" : 118
+        },
+        {
+          "factor" : 8,
+          "height" : 59,
+          "maxByteDiff" : 2,
+          "mismatchedBytes" : 192,
+          "width" : 59
+        }
+      ],
+      "format" : "PNG",
+      "height" : 472,
+      "id" : "24-coverage-above",
+      "productionSelfCheck" : true,
+      "progressive" : false,
+      "reduced" : "covers/24-coverage-above.reduced.png",
+      "reducedHeight" : 472,
+      "reducedModelMatches" : true,
+      "reducedWidth" : 472,
+      "reduceFactor" : 1,
+      "sha256" : "aaa960eb194846eeec7d2af4b95dbf716c7a86bf01e7709ce45080ec8c2a12ea",
+      "source" : "covers/24-coverage-above.png",
+      "sourceBytes" : 5503,
+      "width" : 472
+    },
+    {
+      "accent" : {
+        "blue" : 0.50980392156862742,
+        "green" : 0.47843137254901963,
+        "hex" : "#2B7A82",
+        "kind" : "brand",
+        "red" : 0.16862745098039217
+      },
+      "cg32" : "raw/transparent.cg32.rgba",
+      "decisionMargins" : {
+
+      },
+      "id" : "raw-transparent",
+      "productionSelfCheck" : true
+    },
+    {
+      "accent" : {
+        "blue" : 0.50980392156862742,
+        "green" : 0.47843137254901963,
+        "hex" : "#2B7A82",
+        "kind" : "brand",
+        "red" : 0.16862745098039217
+      },
+      "cg32" : "raw/black.cg32.rgba",
+      "decisionMargins" : {
+
+      },
+      "id" : "raw-black",
+      "productionSelfCheck" : true
+    },
+    {
+      "accent" : {
+        "blue" : 0.50980392156862742,
+        "green" : 0.47843137254901963,
+        "hex" : "#2B7A82",
+        "kind" : "brand",
+        "red" : 0.16862745098039217
+      },
+      "cg32" : "raw/white.cg32.rgba",
+      "decisionMargins" : {
+
+      },
+      "id" : "raw-white",
+      "productionSelfCheck" : true
+    },
+    {
+      "accent" : {
+        "blue" : 0.32849239743663805,
+        "green" : 0.29528417980676774,
+        "hex" : "#C94B54",
+        "kind" : "chromatic",
+        "red" : 0.78857321609503639
+      },
+      "cg32" : "raw/single-pixel.cg32.rgba",
+      "decisionMargins" : {
+        "averageChromaMinus0012" : 0.19608718283026319,
+        "chromaticCoverageMinus008" : 0.92000000000000004,
+        "chromaticCoverageMinus012" : 0.88,
+        "familySupportMinus012" : 0.88
+      },
+      "id" : "raw-single-pixel",
+      "productionSelfCheck" : true
+    },
+    {
+      "accent" : {
+        "blue" : 0.48659928924302959,
+        "green" : 0.48810795999508366,
+        "hex" : "#8A7C7C",
+        "kind" : "tintedNeutral",
+        "red" : 0.54057276475993177
+      },
+      "cg32" : "raw/coverage-81-of-1024.cg32.rgba",
+      "decisionMargins" : {
+        "averageChromaMinus0012" : 0.0044600282499951509,
+        "chromaticCoverageMinus008" : -0.00089843750000000167,
+        "chromaticCoverageMinus012" : -0.040898437499999996,
+        "familySupportMinus012" : -0.040898437499999996
+      },
+      "id" : "raw-coverage-81-of-1024",
+      "productionSelfCheck" : true
+    },
+    {
+      "accent" : {
+        "blue" : 0.48640882804353563,
+        "green" : 0.48793175237091307,
+        "hex" : "#8A7C7C",
+        "kind" : "tintedNeutral",
+        "red" : 0.54103271214395765
+      },
+      "cg32" : "raw/coverage-82-of-1024.cg32.rgba",
+      "decisionMargins" : {
+        "averageChromaMinus0012" : 0.004663238382105566,
+        "chromaticCoverageMinus008" : 7.8124999999998335e-05,
+        "chromaticCoverageMinus012" : -0.039921874999999996,
+        "familySupportMinus012" : -0.039921874999999996
+      },
+      "id" : "raw-coverage-82-of-1024",
+      "productionSelfCheck" : true
+    },
+    {
+      "accent" : {
+        "blue" : 0.47877309915172411,
+        "green" : 0.4807741355294865,
+        "hex" : "#8F7B7A",
+        "kind" : "tintedNeutral",
+        "red" : 0.55913375292926815
+      },
+      "cg32" : "raw/coverage-122-of-1024.cg32.rgba",
+      "decisionMargins" : {
+        "averageChromaMinus0012" : 0.012791643666524573,
+        "chromaticCoverageMinus008" : 0.039140624999999998,
+        "chromaticCoverageMinus012" : -0.00085937499999999556,
+        "familySupportMinus012" : -0.00085937499999999556
+      },
+      "id" : "raw-coverage-122-of-1024",
+      "productionSelfCheck" : true
+    },
+    {
+      "accent" : {
+        "blue" : 0.32849239743663861,
+        "green" : 0.29528417980676813,
+        "hex" : "#C94B54",
+        "kind" : "chromatic",
+        "red" : 0.78857321609503606
+      },
+      "cg32" : "raw/coverage-123-of-1024.cg32.rgba",
+      "decisionMargins" : {
+        "averageChromaMinus0012" : 0.012994853798635086,
+        "chromaticCoverageMinus008" : 0.040117187499999998,
+        "chromaticCoverageMinus012" : 0.00011718750000000444,
+        "familySupportMinus012" : 0.00011718750000000444
+      },
+      "id" : "raw-coverage-123-of-1024",
+      "productionSelfCheck" : true
+    },
+    {
+      "accent" : {
+        "blue" : 0.50010153493123555,
+        "green" : 0.49844425165787859,
+        "hex" : "#827F80",
+        "kind" : "neutral",
+        "red" : 0.51149950566360514
+      },
+      "cg32" : "raw/opposing-coverage-81-of-1024.cg32.rgba",
+      "decisionMargins" : {
+        "averageChromaMinus0012" : -0.007929941693526555,
+        "chromaticCoverageMinus008" : -0.00089843750000000167,
+        "chromaticCoverageMinus012" : -0.040898437499999996,
+        "familySupportMinus012" : -0.079960937499999996
+      },
+      "id" : "raw-opposing-coverage-81-of-1024",
+      "productionSelfCheck" : true
+    },
+    {
+      "accent" : {
+        "blue" : 0.50024877220577124,
+        "green" : 0.49852832941137432,
+        "hex" : "#827F80",
+        "kind" : "tintedNeutral",
+        "red" : 0.51123808958747152
+      },
+      "cg32" : "raw/opposing-coverage-82-of-1024.cg32.rgba",
+      "decisionMargins" : {
+        "averageChromaMinus0012" : -0.0080322702093913716,
+        "chromaticCoverageMinus008" : 7.8124999999998335e-05,
+        "chromaticCoverageMinus012" : -0.039921874999999996,
+        "familySupportMinus012" : -0.079960937499999996
+      },
+      "id" : "raw-opposing-coverage-82-of-1024",
+      "productionSelfCheck" : true
+    },
+    {
+      "accent" : {
+        "blue" : 0.4936175391977104,
+        "green" : 0.48970631922172442,
+        "hex" : "#887D7E",
+        "kind" : "tintedNeutral",
+        "red" : 0.53461855969121397
+      },
+      "cg32" : "raw/split-family-122-of-1024.cg32.rgba",
+      "decisionMargins" : {
+        "averageChromaMinus0012" : 0.0020828286516621844,
+        "chromaticCoverageMinus008" : 0.13679687499999998,
+        "chromaticCoverageMinus012" : 0.096796875000000004,
+        "familySupportMinus012" : -0.00085937499999999556
+      },
+      "id" : "raw-split-family-122-of-1024",
+      "productionSelfCheck" : true
+    },
+    {
+      "accent" : {
+        "blue" : 0.32849239743663861,
+        "green" : 0.29528417980676813,
+        "hex" : "#C94B54",
+        "kind" : "chromatic",
+        "red" : 0.78857321609503606
+      },
+      "cg32" : "raw/split-family-123-of-1024.cg32.rgba",
+      "decisionMargins" : {
+        "averageChromaMinus0012" : 0.0022840384594945279,
+        "chromaticCoverageMinus008" : 0.13777343749999998,
+        "chromaticCoverageMinus012" : 0.097773437500000004,
+        "familySupportMinus012" : 0.00011718750000000444
+      },
+      "id" : "raw-split-family-123-of-1024",
+      "productionSelfCheck" : true
+    },
+    {
+      "accent" : {
+        "blue" : 0.50196073859047741,
+        "green" : 0.50196079521600623,
+        "hex" : "#848080",
+        "kind" : "neutral",
+        "red" : 0.51764703050735683
+      },
+      "cg32" : "raw/chroma-132-128-128.cg32.rgba",
+      "decisionMargins" : {
+        "averageChromaMinus0012" : -0.0071591900008047913,
+        "chromaticCoverageMinus008" : -0.080000000000000002,
+        "chromaticCoverageMinus012" : -0.12,
+        "familySupportMinus012" : -0.12
+      },
+      "id" : "raw-chroma-132-128-128",
+      "productionSelfCheck" : true
+    },
+    {
+      "accent" : {
+        "blue" : 0.50196074238670418,
+        "green" : 0.50196079919257119,
+        "hex" : "#858080",
+        "kind" : "neutral",
+        "red" : 0.52156858823955554
+      },
+      "cg32" : "raw/chroma-133-128-128.cg32.rgba",
+      "decisionMargins" : {
+        "averageChromaMinus0012" : -0.0059419709215968461,
+        "chromaticCoverageMinus008" : -0.080000000000000002,
+        "chromaticCoverageMinus012" : -0.12,
+        "familySupportMinus012" : -0.12
+      },
+      "id" : "raw-chroma-133-128-128",
+      "productionSelfCheck" : true
+    },
+    {
+      "accent" : {
+        "blue" : 0.50196074621009601,
+        "green" : 0.50196080321243641,
+        "hex" : "#868080",
+        "kind" : "neutral",
+        "red" : 0.52549014605460531
+      },
+      "cg32" : "raw/chroma-134-128-128.cg32.rgba",
+      "decisionMargins" : {
+        "averageChromaMinus0012" : -0.0047221423545393939,
+        "chromaticCoverageMinus008" : -0.080000000000000002,
+        "chromaticCoverageMinus012" : -0.12,
+        "familySupportMinus012" : -0.12
+      },
+      "id" : "raw-chroma-134-128-128",
+      "productionSelfCheck" : true
+    },
+    {
+      "accent" : {
+        "blue" : 0.50196075006059404,
+        "green" : 0.50196080727578507,
+        "hex" : "#878080",
+        "kind" : "neutral",
+        "red" : 0.52941170395047843
+      },
+      "cg32" : "raw/chroma-135-128-128.cg32.rgba",
+      "decisionMargins" : {
+        "averageChromaMinus0012" : -0.0034998011915247807,
+        "chromaticCoverageMinus008" : -0.080000000000000002,
+        "chromaticCoverageMinus012" : -0.12,
+        "familySupportMinus012" : -0.12
+      },
+      "id" : "raw-chroma-135-128-128",
+      "productionSelfCheck" : true
+    },
+    {
+      "accent" : {
+        "blue" : 0.50196075393813999,
+        "green" : 0.5019608113827988,
+        "hex" : "#888080",
+        "kind" : "neutral",
+        "red" : 0.53333326192520791
+      },
+      "cg32" : "raw/chroma-136-128-128.cg32.rgba",
+      "decisionMargins" : {
+        "averageChromaMinus0012" : -0.0022750431566380177,
+        "chromaticCoverageMinus008" : -0.080000000000000002,
+        "chromaticCoverageMinus012" : -0.12,
+        "familySupportMinus012" : -0.12
+      },
+      "id" : "raw-chroma-136-128-128",
+      "productionSelfCheck" : true
+    },
+    {
+      "accent" : {
+        "blue" : 0.50196075784267669,
+        "green" : 0.5019608155336559,
+        "hex" : "#898080",
+        "kind" : "neutral",
+        "red" : 0.53725481997689251
+      },
+      "cg32" : "raw/chroma-137-128-128.cg32.rgba",
+      "decisionMargins" : {
+        "averageChromaMinus0012" : -0.0010479627963862568,
+        "chromaticCoverageMinus008" : -0.080000000000000002,
+        "chromaticCoverageMinus012" : -0.12,
+        "familySupportMinus012" : -0.12
+      },
+      "id" : "raw-chroma-137-128-128",
+      "productionSelfCheck" : true
+    },
+    {
+      "accent" : {
+        "blue" : 0.50196076177414561,
+        "green" : 0.50196081972853812,
+        "hex" : "#8A8080",
+        "kind" : "tintedNeutral",
+        "red" : 0.54117637810368169
+      },
+      "cg32" : "raw/chroma-138-128-128.cg32.rgba",
+      "decisionMargins" : {
+        "averageChromaMinus0012" : 0.00018134652911989783,
+        "chromaticCoverageMinus008" : -0.080000000000000002,
+        "chromaticCoverageMinus012" : -0.12,
+        "familySupportMinus012" : -0.12
+      },
+      "id" : "raw-chroma-138-128-128",
+      "productionSelfCheck" : true
+    },
+    {
+      "accent" : {
+        "blue" : 0.48257323032184091,
+        "green" : 0.28443078536143557,
+        "hex" : "#BF497B",
+        "kind" : "chromatic",
+        "red" : 0.75032097564967037
+      },
+      "cg32" : "raw/hue-wrap.cg32.rgba",
+      "decisionMargins" : {
+        "averageChromaMinus0012" : 0.15868218308061077,
+        "chromaticCoverageMinus008" : 0.92000000000000004,
+        "chromaticCoverageMinus012" : 0.88,
+        "familySupportMinus012" : 0.88
+      },
+      "id" : "raw-hue-wrap",
+      "productionSelfCheck" : true
+    }
+  ],
+  "production" : {
+    "colorDeclarationSha256" : "d44a3b18b2ba7544f9a9154ec1842740398fa60d863fad8f3cc6bd2eae9e7522",
+    "extractionDeclarationSha256" : "1149f08f8d5de25ae4c8a2395f8e5e894e626e6870d157cc6756e853ec3a2fe6",
+    "productionFilesSha256" : {
+      "ArtworkAccentSelector.swift" : "14149a6b17572ffe6d6ea8a0ba01c4e934102d13a0f08bbe23f511e53f0666b8",
+      "ArtworkCache.swift" : "a11a32f58af740cd7f8c89955e1313eb7efb95c7a70771c1186837b5b4b86011",
+      "ArtworkTreatment.swift" : "75c2e1441248a4ac186e9c2f0ef9a63501709b84df5ce55810f7d495814acc8a"
+    },
+    "revision" : "b292fdf",
+    "sha256" : {
+      "ArtworkAccentExtraction.swift" : "a54372a2beaf24f248cff2736c55fe940271bea93305f509a45a2c2c88e8d55c",
+      "ArtworkAccentSelector.swift" : "14149a6b17572ffe6d6ea8a0ba01c4e934102d13a0f08bbe23f511e53f0666b8",
+      "ArtworkColor.swift" : "9f69f60b28a9e40730c49509659767129b3eaca74e7dd51249135ba85ff030b0"
+    }
+  },
+  "reducedPNGLayout" : "Decode to sRGB premultiplied RGBA8 in native pixel order; do not resize",
+  "sampleHeight" : 32,
+  "sampleWidth" : 32,
+  "schemaVersion" : 1
+}

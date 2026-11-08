@@ -1,0 +1,25 @@
+FFmpeg 6.0 · LGPL-2.1-or-later
+Copyright (c) 2000–2023 the FFmpeg developers
+
+Coda includes an unmodified FFmpeg 6.0 built with only the mp3 and mp3float
+decoders, libavcodec, libavutil and libswresample. GPL, nonfree, version3 and
+autodetection are explicitly disabled. FFmpeg is dynamically linked to the
+Media3 JNI wrapper in separate shared libraries. FFmpeg is free software;
+you may modify and redistribute it under the GNU Lesser General Public
+License, version 2.1 or (at your option) any later version. It is provided
+WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+or FITNESS FOR A PARTICULAR PURPOSE. The complete LGPL text follows.
+
+Corresponding source: https://ffmpeg.org/releases/ffmpeg-6.0.tar.xz
+SHA-256: 57be87c22d9b49c112b6d24bc67d42508660e6b718b3db89c44e47e289137082
+Build and replacement instructions: tools/ffmpeg-ext/README.md in Coda's source.
+Coda permits reverse engineering for debugging modifications to these LGPL
+libraries. Rebuild the AAR with replacement FFmpeg libraries, rebuild Coda,
+and install the APK signed with your own key. No original signing key is needed.
+
+Media3 decoder_ffmpeg 1.11.1
+Copyright (C) 2016 The Android Open Source Project
+Licensed under Apache License 2.0 (bundled separately).
+Source: https://github.com/androidx/media/tree/1.11.1/libraries/decoder_ffmpeg
+Coda modification: FfmpegAudioRenderer accepts audio/mpeg only.
+No community FFmpeg AAR is used.

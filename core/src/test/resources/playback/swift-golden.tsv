@@ -1,0 +1,229 @@
+# Generated from coda-macos b292fdf2c2092a1dabc27f337af42ac359c9f3a9; synthetic inputs only.
+normalize	0	0
+normalize	8	8
+normalize	9	-
+normalize	10	-
+normalize	11	-
+normalize	12	-
+normalize	13	-
+normalize	28	28
+normalize	29	29
+normalize	30	30
+normalize	31	31
+normalize	32	-
+normalize	133	-
+normalize	160	-
+normalize	5760	-
+normalize	6158	6158
+normalize	8192	-
+normalize	8193	-
+normalize	8194	-
+normalize	8195	-
+normalize	8196	-
+normalize	8197	-
+normalize	8198	-
+normalize	8199	-
+normalize	8200	-
+normalize	8201	-
+normalize	8202	-
+normalize	8203	-
+normalize	8232	-
+normalize	8233	-
+normalize	8239	-
+normalize	8287	-
+normalize	12288	-
+normalize	65279	65279
+normalize	128512	128512
+context	A	-1	-	false	false	false
+context	A	0	A	false	false	true
+context	A	1	-	false	false	false
+groups	A	0:1:A
+context	A,A,A	-1	-	false	false	false
+context	A,A,A	0	A	false	true	true
+context	A,A,A	1	A	true	true	true
+context	A,A,A	2	A	true	false	true
+context	A,A,A	3	-	false	false	false
+groups	A,A,A	0:3:A
+context	A,B,C	-1	-	false	false	false
+context	A,B,C	0	A	false	false	true
+context	A,B,C	1	B	false	false	true
+context	A,B,C	2	C	false	false	true
+context	A,B,C	3	-	false	false	false
+groups	A,B,C	0:1:A,1:1:B,2:1:C
+context	A,A,B,C,C,D	-1	-	false	false	false
+context	A,A,B,C,C,D	0	A	false	true	true
+context	A,A,B,C,C,D	1	A	true	false	true
+context	A,A,B,C,C,D	2	B	false	false	true
+context	A,A,B,C,C,D	3	C	false	true	true
+context	A,A,B,C,C,D	4	C	true	false	true
+context	A,A,B,C,C,D	5	D	false	false	true
+context	A,A,B,C,C,D	6	-	false	false	false
+groups	A,A,B,C,C,D	0:2:A,2:1:B,3:2:C,5:1:D
+context	A,A	-1	-	false	false	false
+context	A,A	0	A	false	true	true
+context	A,A	1	A	true	false	true
+context	A,A	2	-	false	false	false
+groups	A,A	0:2:A
+context	-,-	-1	-	false	false	false
+context	-,-	0	-	false	false	true
+context	-,-	1	-	false	false	true
+context	-,-	2	-	false	false	false
+groups	-,-	0:1:-,1:1:-
+context	_,~,-	-1	-	false	false	false
+context	_,~,-	0	-	false	false	true
+context	_,~,-	1	-	false	false	true
+context	_,~,-	2	-	false	false	true
+context	_,~,-	3	-	false	false	false
+groups	_,~,-	0:1:-,1:1:-,2:1:-
+context	A,B,A	-1	-	false	false	false
+context	A,B,A	0	A	false	false	true
+context	A,B,A	1	B	false	false	true
+context	A,B,A	2	A	false	false	true
+context	A,B,A	3	-	false	false	false
+groups	A,B,A	0:1:A,1:1:B,2:1:A
+context	 A ,A	-1	-	false	false	false
+context	 A ,A	0	A	false	true	true
+context	 A ,A	1	A	true	false	true
+context	 A ,A	2	-	false	false	false
+groups	 A ,A	0:2:A
+context		-1	-	false	false	false
+context		0	-	false	false	false
+groups		-
+continuation	A	false	true
+continuation	B	false	false
+continuation	-	false	false
+continuation	_	false	false
+continuation	~	false	false
+reorder		-1	-
+reorder		0	-
+reorder		1	-
+reorder		2	-
+reorder		3	-
+reorder		4	-
+reorder	0	-1	1,2,3,0
+reorder	0	0	-
+reorder	0	1	-
+reorder	0	2	1,0,2,3
+reorder	0	3	1,2,0,3
+reorder	0	4	-
+reorder	1	-1	0,2,3,1
+reorder	1	0	1,0,2,3
+reorder	1	1	-
+reorder	1	2	-
+reorder	1	3	0,2,1,3
+reorder	1	4	-
+reorder	3,1	-1	0,2,1,3
+reorder	3,1	0	1,3,0,2
+reorder	3,1	1	-
+reorder	3,1	2	0,1,3,2
+reorder	3,1	3	-
+reorder	3,1	4	-
+reorder	0,1,2,3	-1	-
+reorder	0,1,2,3	0	-
+reorder	0,1,2,3	1	-
+reorder	0,1,2,3	2	-
+reorder	0,1,2,3	3	-
+reorder	0,1,2,3	4	-
+reorder	1,1	-1	-
+reorder	1,1	0	-
+reorder	1,1	1	-
+reorder	1,1	2	-
+reorder	1,1	3	-
+reorder	1,1	4	-
+reorder	4	-1	-
+reorder	4	0	-
+reorder	4	1	-
+reorder	4	2	-
+reorder	4	3	-
+reorder	4	4	-
+gain	false	false	-10	-7	1	1	OFF	0.0	false
+gain	false	false	0	-	-	-	OFF	0.0	false
+gain	false	false	-	-4	-	-	OFF	0.0	false
+gain	false	false	-	-	-	-	OFF	0.0	false
+gain	false	false	-3	nan	-	-	OFF	0.0	false
+gain	false	false	5	-	0.8	-	OFF	0.0	false
+gain	false	false	-10	-	1	-	OFF	0.0	false
+gain	false	false	5	-	0	-	OFF	0.0	false
+gain	false	false	5	-	inf	-	OFF	0.0	false
+gain	false	false	5	-	2	-	OFF	0.0	false
+gain	false	false	inf	-	-	-	OFF	0.0	false
+gain	false	false	200	-	-	-	OFF	0.0	false
+gain	false	false	-200	-	-	-	OFF	0.0	false
+gain	false	false	5	7	0.8	2	OFF	0.0	false
+gain	false	false	5	-	-1	-	OFF	0.0	false
+gain	false	false	nan	0	1	1	OFF	0.0	false
+gain	false	false	5	-	nan	-	OFF	0.0	false
+gain	false	false	5	-	1e-200	-	OFF	0.0	false
+gain	false	true	-10	-7	1	1	OFF	0.0	false
+gain	false	true	0	-	-	-	OFF	0.0	false
+gain	false	true	-	-4	-	-	OFF	0.0	false
+gain	false	true	-	-	-	-	OFF	0.0	false
+gain	false	true	-3	nan	-	-	OFF	0.0	false
+gain	false	true	5	-	0.8	-	OFF	0.0	false
+gain	false	true	-10	-	1	-	OFF	0.0	false
+gain	false	true	5	-	0	-	OFF	0.0	false
+gain	false	true	5	-	inf	-	OFF	0.0	false
+gain	false	true	5	-	2	-	OFF	0.0	false
+gain	false	true	inf	-	-	-	OFF	0.0	false
+gain	false	true	200	-	-	-	OFF	0.0	false
+gain	false	true	-200	-	-	-	OFF	0.0	false
+gain	false	true	5	7	0.8	2	OFF	0.0	false
+gain	false	true	5	-	-1	-	OFF	0.0	false
+gain	false	true	nan	0	1	1	OFF	0.0	false
+gain	false	true	5	-	nan	-	OFF	0.0	false
+gain	false	true	5	-	1e-200	-	OFF	0.0	false
+gain	true	false	-10	-7	1	1	TRACK	-10.0	false
+gain	true	false	0	-	-	-	TRACK	0.0	false
+gain	true	false	-	-4	-	-	FALLBACK	-9.0	false
+gain	true	false	-	-	-	-	FALLBACK	-9.0	false
+gain	true	false	-3	nan	-	-	TRACK	-3.0	false
+gain	true	false	5	-	0.8	-	TRACK	1.938200260161128	true
+gain	true	false	-10	-	1	-	TRACK	-10.0	false
+gain	true	false	5	-	0	-	TRACK	5.0	false
+gain	true	false	5	-	inf	-	TRACK	5.0	false
+gain	true	false	5	-	2	-	TRACK	-6.020599913279624	true
+gain	true	false	inf	-	-	-	FALLBACK	-9.0	false
+gain	true	false	200	-	-	-	TRACK	150.0	false
+gain	true	false	-200	-	-	-	TRACK	-150.0	false
+gain	true	false	5	7	0.8	2	TRACK	1.938200260161128	true
+gain	true	false	5	-	-1	-	TRACK	5.0	false
+gain	true	false	nan	0	1	1	FALLBACK	-9.0	false
+gain	true	false	5	-	nan	-	TRACK	5.0	false
+gain	true	false	5	-	1e-200	-	TRACK	5.0	false
+gain	true	true	-10	-7	1	1	ALBUM	-7.0	false
+gain	true	true	0	-	-	-	TRACK	0.0	false
+gain	true	true	-	-4	-	-	ALBUM	-4.0	false
+gain	true	true	-	-	-	-	FALLBACK	-9.0	false
+gain	true	true	-3	nan	-	-	TRACK	-3.0	false
+gain	true	true	5	-	0.8	-	TRACK	1.938200260161128	true
+gain	true	true	-10	-	1	-	TRACK	-10.0	false
+gain	true	true	5	-	0	-	TRACK	5.0	false
+gain	true	true	5	-	inf	-	TRACK	5.0	false
+gain	true	true	5	-	2	-	TRACK	-6.020599913279624	true
+gain	true	true	inf	-	-	-	FALLBACK	-9.0	false
+gain	true	true	200	-	-	-	TRACK	150.0	false
+gain	true	true	-200	-	-	-	TRACK	-150.0	false
+gain	true	true	5	7	0.8	2	ALBUM	-6.020599913279624	true
+gain	true	true	5	-	-1	-	TRACK	5.0	false
+gain	true	true	nan	0	1	1	ALBUM	0.0	false
+gain	true	true	5	-	nan	-	TRACK	5.0	false
+gain	true	true	5	-	1e-200	-	TRACK	5.0	false
+controller	load	a	0	true	Playing	-3.0	false	-	false	1	0
+controller	append	a	0	true	Playing	-3.0	false	-	false	1	1
+controller	advance	b	1	true	Playing	-8.0	true	a	false	1	2
+controller	remove-next	b	1	true	Playing	-8.0	true	a	false	1	3
+controller	pause-seek	b	1	false	Paused	-8.0	true	a	false	1	3
+controller	finish	-	-1	false	Finished	0.0	false	b	true	1	3
+controller	restore	a	0	false	Ready	-3.0	false	b	true	2	3
+controller	edit-before-play	a	0	false	Ready	-8.0	true	b	true	2	4
+controller	edit-after-play	a	0	false	Paused	-8.0	true	b	true	2	5
+controller	replace-with-successor	d	1	false	Ready	-9.0	false	b	true	4	5
+controller	replace-with-predecessor	a	0	false	Ready	-3.0	false	b	true	5	5
+controller	insert-before-current	a	2	false	Ready	-3.0	false	b	true	5	6
+controller	move-selection	a	1	false	Ready	-3.0	false	b	true	5	7
+controller	off	a	1	false	Ready	0.0	false	b	true	5	8
+controller	manual-play	a	1	true	Playing	0.0	false	b	true	6	8
+controller	previous-at-3	c	0	true	Playing	0.0	false	b	true	7	8
+controller	previous-after-3	a	1	true	Playing	0.0	false	b	true	8	8
+controller	fail	a	1	false	Playback failed	0.0	false	b	true	8	8
+controller	clear	-	-1	false	Nothing queued	0.0	false	b	true	8	8

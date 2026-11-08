@@ -1,0 +1,7 @@
+# Raw pixel and audio fixtures must never receive text conversion or text diffs.
+*.rgba binary
+*.bgra binary
+*.argb binary
+*.rgb binary
+*.raw binary
+*.pcm binary

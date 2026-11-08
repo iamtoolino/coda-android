@@ -1,0 +1,92 @@
+{
+  "albums": [
+    {
+      "id": "unknown-z",
+      "name": "Zulu"
+    },
+    {
+      "id": "later",
+      "name": "Later",
+      "originalReleaseDate": {
+        "year": 2024,
+        "month": 11,
+        "day": 2
+      }
+    },
+    {
+      "id": "earlier",
+      "name": "Earlier",
+      "originalReleaseDate": {
+        "year": 2024,
+        "month": 2,
+        "day": 12
+      }
+    },
+    {
+      "id": "old",
+      "name": "Old",
+      "year": 1999
+    },
+    {
+      "id": "unknown-a",
+      "name": "Alpha"
+    },
+    {
+      "id": "tie-z",
+      "name": "zulu",
+      "releaseDate": {
+        "year": 2024,
+        "month": 2,
+        "day": 12
+      }
+    },
+    {
+      "id": "tie-a",
+      "name": "alpha",
+      "releaseDate": {
+        "year": 2024,
+        "month": 2,
+        "day": 12
+      }
+    },
+    {
+      "id": "partial",
+      "name": "Partial",
+      "year": 2024
+    },
+    {
+      "id": "fallback",
+      "name": "Fallback",
+      "year": 2030,
+      "originalReleaseDate": {
+        "year": 2020
+      },
+      "releaseDate": {
+        "year": 2023,
+        "month": 4,
+        "day": 5
+      }
+    },
+    {
+      "id": "day",
+      "name": "Day",
+      "year": 2024,
+      "releaseDate": {
+        "month": 2,
+        "day": 1
+      }
+    }
+  ],
+  "oldest": [
+    "old",
+    "fallback",
+    "day",
+    "tie-a",
+    "earlier",
+    "tie-z",
+    "later",
+    "partial",
+    "unknown-a",
+    "unknown-z"
+  ]
+}

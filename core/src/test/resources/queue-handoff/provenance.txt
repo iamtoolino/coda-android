@@ -1,0 +1,3 @@
+Reference: coda-macos b292fdf; unmodified policy and RemotePlayQueue body.
+QueueHandoffCoordinator.swift: sha256 5b19fac3c6a786c48167fbb0c7657872c757822f13180e101047ef7d73d867a0
+PlaybackModels.swift: sha256 aeb70e5511e5207a26c69df123c35853e0a304e0805956f70b60db55ae50b432

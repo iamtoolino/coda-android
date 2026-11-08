@@ -1,0 +1,7058 @@
+{
+  "method" : "Best of ImageIO factors 1,2,4,8 by mismatched bytes, then max diff, then largest factor; H/V box model. All factors measured for JPEG and PNG; cover PNG fixtures retain factor 1. modelMatches requires max diff <=1 and at least 4092/4096 exact bytes. Failed models are measurements, not inferred factors.",
+  "probes" : [
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 33,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 33
+        },
+        {
+          "factor" : 2,
+          "height" : 16,
+          "maxByteDiff" : 208,
+          "mismatchedBytes" : 3040,
+          "width" : 16
+        },
+        {
+          "factor" : 4,
+          "height" : 8,
+          "maxByteDiff" : 152,
+          "mismatchedBytes" : 3039,
+          "width" : 8
+        },
+        {
+          "factor" : 8,
+          "height" : 4,
+          "maxByteDiff" : 130,
+          "mismatchedBytes" : 3036,
+          "width" : 4
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 33,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "square",
+      "width" : 33
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 33,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 33
+        },
+        {
+          "factor" : 2,
+          "height" : 16,
+          "maxByteDiff" : 209,
+          "mismatchedBytes" : 2754,
+          "width" : 16
+        },
+        {
+          "factor" : 4,
+          "height" : 8,
+          "maxByteDiff" : 138,
+          "mismatchedBytes" : 2917,
+          "width" : 8
+        },
+        {
+          "factor" : 8,
+          "height" : 4,
+          "maxByteDiff" : 135,
+          "mismatchedBytes" : 2984,
+          "width" : 4
+        }
+      ],
+      "format" : "PNG",
+      "height" : 33,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "square",
+      "width" : 33
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 33,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 33
+        },
+        {
+          "factor" : 2,
+          "height" : 16,
+          "maxByteDiff" : 208,
+          "mismatchedBytes" : 3040,
+          "width" : 16
+        },
+        {
+          "factor" : 4,
+          "height" : 8,
+          "maxByteDiff" : 152,
+          "mismatchedBytes" : 3039,
+          "width" : 8
+        },
+        {
+          "factor" : 8,
+          "height" : 4,
+          "maxByteDiff" : 130,
+          "mismatchedBytes" : 3036,
+          "width" : 4
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 33,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "wide",
+      "width" : 33
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 33,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 33
+        },
+        {
+          "factor" : 2,
+          "height" : 16,
+          "maxByteDiff" : 209,
+          "mismatchedBytes" : 2754,
+          "width" : 16
+        },
+        {
+          "factor" : 4,
+          "height" : 8,
+          "maxByteDiff" : 138,
+          "mismatchedBytes" : 2917,
+          "width" : 8
+        },
+        {
+          "factor" : 8,
+          "height" : 4,
+          "maxByteDiff" : 135,
+          "mismatchedBytes" : 2984,
+          "width" : 4
+        }
+      ],
+      "format" : "PNG",
+      "height" : 33,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "wide",
+      "width" : 33
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 33,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 33
+        },
+        {
+          "factor" : 2,
+          "height" : 16,
+          "maxByteDiff" : 208,
+          "mismatchedBytes" : 3040,
+          "width" : 16
+        },
+        {
+          "factor" : 4,
+          "height" : 8,
+          "maxByteDiff" : 152,
+          "mismatchedBytes" : 3039,
+          "width" : 8
+        },
+        {
+          "factor" : 8,
+          "height" : 4,
+          "maxByteDiff" : 130,
+          "mismatchedBytes" : 3036,
+          "width" : 4
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 33,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "tall",
+      "width" : 33
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 33,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 33
+        },
+        {
+          "factor" : 2,
+          "height" : 16,
+          "maxByteDiff" : 209,
+          "mismatchedBytes" : 2754,
+          "width" : 16
+        },
+        {
+          "factor" : 4,
+          "height" : 8,
+          "maxByteDiff" : 138,
+          "mismatchedBytes" : 2917,
+          "width" : 8
+        },
+        {
+          "factor" : 8,
+          "height" : 4,
+          "maxByteDiff" : 135,
+          "mismatchedBytes" : 2984,
+          "width" : 4
+        }
+      ],
+      "format" : "PNG",
+      "height" : 33,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "tall",
+      "width" : 33
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 40,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 40
+        },
+        {
+          "factor" : 2,
+          "height" : 20,
+          "maxByteDiff" : 85,
+          "mismatchedBytes" : 3009,
+          "width" : 20
+        },
+        {
+          "factor" : 4,
+          "height" : 10,
+          "maxByteDiff" : 134,
+          "mismatchedBytes" : 3037,
+          "width" : 10
+        },
+        {
+          "factor" : 8,
+          "height" : 5,
+          "maxByteDiff" : 118,
+          "mismatchedBytes" : 3047,
+          "width" : 5
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 40,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "square",
+      "width" : 40
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 40,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 40
+        },
+        {
+          "factor" : 2,
+          "height" : 20,
+          "maxByteDiff" : 119,
+          "mismatchedBytes" : 2315,
+          "width" : 20
+        },
+        {
+          "factor" : 4,
+          "height" : 10,
+          "maxByteDiff" : 151,
+          "mismatchedBytes" : 2829,
+          "width" : 10
+        },
+        {
+          "factor" : 8,
+          "height" : 5,
+          "maxByteDiff" : 127,
+          "mismatchedBytes" : 2946,
+          "width" : 5
+        }
+      ],
+      "format" : "PNG",
+      "height" : 40,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "square",
+      "width" : 40
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 33,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 40
+        },
+        {
+          "factor" : 2,
+          "height" : 16,
+          "maxByteDiff" : 207,
+          "mismatchedBytes" : 3036,
+          "width" : 20
+        },
+        {
+          "factor" : 4,
+          "height" : 8,
+          "maxByteDiff" : 169,
+          "mismatchedBytes" : 3038,
+          "width" : 10
+        },
+        {
+          "factor" : 8,
+          "height" : 4,
+          "maxByteDiff" : 117,
+          "mismatchedBytes" : 3037,
+          "width" : 5
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 33,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "wide",
+      "width" : 40
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 33,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 40
+        },
+        {
+          "factor" : 2,
+          "height" : 16,
+          "maxByteDiff" : 213,
+          "mismatchedBytes" : 2394,
+          "width" : 20
+        },
+        {
+          "factor" : 4,
+          "height" : 8,
+          "maxByteDiff" : 158,
+          "mismatchedBytes" : 2818,
+          "width" : 10
+        },
+        {
+          "factor" : 8,
+          "height" : 4,
+          "maxByteDiff" : 130,
+          "mismatchedBytes" : 2947,
+          "width" : 5
+        }
+      ],
+      "format" : "PNG",
+      "height" : 33,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "wide",
+      "width" : 40
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 40,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 33
+        },
+        {
+          "factor" : 2,
+          "height" : 20,
+          "maxByteDiff" : 210,
+          "mismatchedBytes" : 3036,
+          "width" : 16
+        },
+        {
+          "factor" : 4,
+          "height" : 10,
+          "maxByteDiff" : 136,
+          "mismatchedBytes" : 3036,
+          "width" : 8
+        },
+        {
+          "factor" : 8,
+          "height" : 5,
+          "maxByteDiff" : 116,
+          "mismatchedBytes" : 3034,
+          "width" : 4
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 40,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "tall",
+      "width" : 33
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 40,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 33
+        },
+        {
+          "factor" : 2,
+          "height" : 20,
+          "maxByteDiff" : 124,
+          "mismatchedBytes" : 2765,
+          "width" : 16
+        },
+        {
+          "factor" : 4,
+          "height" : 10,
+          "maxByteDiff" : 154,
+          "mismatchedBytes" : 2906,
+          "width" : 8
+        },
+        {
+          "factor" : 8,
+          "height" : 5,
+          "maxByteDiff" : 129,
+          "mismatchedBytes" : 2991,
+          "width" : 4
+        }
+      ],
+      "format" : "PNG",
+      "height" : 40,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "tall",
+      "width" : 33
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 48,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 48
+        },
+        {
+          "factor" : 2,
+          "height" : 24,
+          "maxByteDiff" : 78,
+          "mismatchedBytes" : 3008,
+          "width" : 24
+        },
+        {
+          "factor" : 4,
+          "height" : 12,
+          "maxByteDiff" : 129,
+          "mismatchedBytes" : 3040,
+          "width" : 12
+        },
+        {
+          "factor" : 8,
+          "height" : 6,
+          "maxByteDiff" : 128,
+          "mismatchedBytes" : 3040,
+          "width" : 6
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 48,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "square",
+      "width" : 48
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 48,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 48
+        },
+        {
+          "factor" : 2,
+          "height" : 24,
+          "maxByteDiff" : 106,
+          "mismatchedBytes" : 2397,
+          "width" : 24
+        },
+        {
+          "factor" : 4,
+          "height" : 12,
+          "maxByteDiff" : 157,
+          "mismatchedBytes" : 2782,
+          "width" : 12
+        },
+        {
+          "factor" : 8,
+          "height" : 6,
+          "maxByteDiff" : 133,
+          "mismatchedBytes" : 2942,
+          "width" : 6
+        }
+      ],
+      "format" : "PNG",
+      "height" : 48,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "square",
+      "width" : 48
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 33,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 48
+        },
+        {
+          "factor" : 2,
+          "height" : 16,
+          "maxByteDiff" : 206,
+          "mismatchedBytes" : 3018,
+          "width" : 24
+        },
+        {
+          "factor" : 4,
+          "height" : 8,
+          "maxByteDiff" : 170,
+          "mismatchedBytes" : 3043,
+          "width" : 12
+        },
+        {
+          "factor" : 8,
+          "height" : 4,
+          "maxByteDiff" : 116,
+          "mismatchedBytes" : 3036,
+          "width" : 6
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 33,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "wide",
+      "width" : 48
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 33,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 48
+        },
+        {
+          "factor" : 2,
+          "height" : 16,
+          "maxByteDiff" : 216,
+          "mismatchedBytes" : 2475,
+          "width" : 24
+        },
+        {
+          "factor" : 4,
+          "height" : 8,
+          "maxByteDiff" : 156,
+          "mismatchedBytes" : 2792,
+          "width" : 12
+        },
+        {
+          "factor" : 8,
+          "height" : 4,
+          "maxByteDiff" : 132,
+          "mismatchedBytes" : 2925,
+          "width" : 6
+        }
+      ],
+      "format" : "PNG",
+      "height" : 33,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "wide",
+      "width" : 48
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 48,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 33
+        },
+        {
+          "factor" : 2,
+          "height" : 24,
+          "maxByteDiff" : 206,
+          "mismatchedBytes" : 3024,
+          "width" : 16
+        },
+        {
+          "factor" : 4,
+          "height" : 12,
+          "maxByteDiff" : 141,
+          "mismatchedBytes" : 3040,
+          "width" : 8
+        },
+        {
+          "factor" : 8,
+          "height" : 6,
+          "maxByteDiff" : 126,
+          "mismatchedBytes" : 3043,
+          "width" : 4
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 48,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "tall",
+      "width" : 33
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 48,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 33
+        },
+        {
+          "factor" : 2,
+          "height" : 24,
+          "maxByteDiff" : 124,
+          "mismatchedBytes" : 2764,
+          "width" : 16
+        },
+        {
+          "factor" : 4,
+          "height" : 12,
+          "maxByteDiff" : 159,
+          "mismatchedBytes" : 2896,
+          "width" : 8
+        },
+        {
+          "factor" : 8,
+          "height" : 6,
+          "maxByteDiff" : 138,
+          "mismatchedBytes" : 2984,
+          "width" : 4
+        }
+      ],
+      "format" : "PNG",
+      "height" : 48,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "tall",
+      "width" : 33
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 63,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 63
+        },
+        {
+          "factor" : 2,
+          "height" : 31,
+          "maxByteDiff" : 109,
+          "mismatchedBytes" : 2998,
+          "width" : 31
+        },
+        {
+          "factor" : 4,
+          "height" : 15,
+          "maxByteDiff" : 213,
+          "mismatchedBytes" : 3032,
+          "width" : 15
+        },
+        {
+          "factor" : 8,
+          "height" : 7,
+          "maxByteDiff" : 146,
+          "mismatchedBytes" : 3034,
+          "width" : 7
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 63,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "square",
+      "width" : 63
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 63,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 63
+        },
+        {
+          "factor" : 2,
+          "height" : 31,
+          "maxByteDiff" : 102,
+          "mismatchedBytes" : 2453,
+          "width" : 31
+        },
+        {
+          "factor" : 4,
+          "height" : 15,
+          "maxByteDiff" : 218,
+          "mismatchedBytes" : 2699,
+          "width" : 15
+        },
+        {
+          "factor" : 8,
+          "height" : 7,
+          "maxByteDiff" : 142,
+          "mismatchedBytes" : 2895,
+          "width" : 7
+        }
+      ],
+      "format" : "PNG",
+      "height" : 63,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "square",
+      "width" : 63
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 33,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 63
+        },
+        {
+          "factor" : 2,
+          "height" : 16,
+          "maxByteDiff" : 211,
+          "mismatchedBytes" : 3016,
+          "width" : 31
+        },
+        {
+          "factor" : 4,
+          "height" : 8,
+          "maxByteDiff" : 194,
+          "mismatchedBytes" : 3026,
+          "width" : 15
+        },
+        {
+          "factor" : 8,
+          "height" : 4,
+          "maxByteDiff" : 117,
+          "mismatchedBytes" : 3033,
+          "width" : 7
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 33,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "wide",
+      "width" : 63
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 33,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 63
+        },
+        {
+          "factor" : 2,
+          "height" : 16,
+          "maxByteDiff" : 214,
+          "mismatchedBytes" : 2464,
+          "width" : 31
+        },
+        {
+          "factor" : 4,
+          "height" : 8,
+          "maxByteDiff" : 178,
+          "mismatchedBytes" : 2734,
+          "width" : 15
+        },
+        {
+          "factor" : 8,
+          "height" : 4,
+          "maxByteDiff" : 126,
+          "mismatchedBytes" : 2890,
+          "width" : 7
+        }
+      ],
+      "format" : "PNG",
+      "height" : 33,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "wide",
+      "width" : 63
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 63,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 33
+        },
+        {
+          "factor" : 2,
+          "height" : 31,
+          "maxByteDiff" : 185,
+          "mismatchedBytes" : 3026,
+          "width" : 16
+        },
+        {
+          "factor" : 4,
+          "height" : 15,
+          "maxByteDiff" : 164,
+          "mismatchedBytes" : 3045,
+          "width" : 8
+        },
+        {
+          "factor" : 8,
+          "height" : 7,
+          "maxByteDiff" : 128,
+          "mismatchedBytes" : 3033,
+          "width" : 4
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 63,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "tall",
+      "width" : 33
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 63,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 33
+        },
+        {
+          "factor" : 2,
+          "height" : 31,
+          "maxByteDiff" : 126,
+          "mismatchedBytes" : 2756,
+          "width" : 16
+        },
+        {
+          "factor" : 4,
+          "height" : 15,
+          "maxByteDiff" : 189,
+          "mismatchedBytes" : 2927,
+          "width" : 8
+        },
+        {
+          "factor" : 8,
+          "height" : 7,
+          "maxByteDiff" : 133,
+          "mismatchedBytes" : 2997,
+          "width" : 4
+        }
+      ],
+      "format" : "PNG",
+      "height" : 63,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "tall",
+      "width" : 33
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 64,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 64
+        },
+        {
+          "factor" : 2,
+          "height" : 32,
+          "maxByteDiff" : 50,
+          "mismatchedBytes" : 2989,
+          "width" : 32
+        },
+        {
+          "factor" : 4,
+          "height" : 16,
+          "maxByteDiff" : 131,
+          "mismatchedBytes" : 3027,
+          "width" : 16
+        },
+        {
+          "factor" : 8,
+          "height" : 8,
+          "maxByteDiff" : 139,
+          "mismatchedBytes" : 3033,
+          "width" : 8
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 64,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "square",
+      "width" : 64
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 64,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 64
+        },
+        {
+          "factor" : 2,
+          "height" : 32,
+          "maxByteDiff" : 36,
+          "mismatchedBytes" : 2273,
+          "width" : 32
+        },
+        {
+          "factor" : 4,
+          "height" : 16,
+          "maxByteDiff" : 141,
+          "mismatchedBytes" : 2767,
+          "width" : 16
+        },
+        {
+          "factor" : 8,
+          "height" : 8,
+          "maxByteDiff" : 138,
+          "mismatchedBytes" : 2907,
+          "width" : 8
+        }
+      ],
+      "format" : "PNG",
+      "height" : 64,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "square",
+      "width" : 64
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 33,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 64
+        },
+        {
+          "factor" : 2,
+          "height" : 16,
+          "maxByteDiff" : 213,
+          "mismatchedBytes" : 3008,
+          "width" : 32
+        },
+        {
+          "factor" : 4,
+          "height" : 8,
+          "maxByteDiff" : 191,
+          "mismatchedBytes" : 3035,
+          "width" : 16
+        },
+        {
+          "factor" : 8,
+          "height" : 4,
+          "maxByteDiff" : 119,
+          "mismatchedBytes" : 3036,
+          "width" : 8
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 33,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "wide",
+      "width" : 64
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 33,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 64
+        },
+        {
+          "factor" : 2,
+          "height" : 16,
+          "maxByteDiff" : 218,
+          "mismatchedBytes" : 2396,
+          "width" : 32
+        },
+        {
+          "factor" : 4,
+          "height" : 8,
+          "maxByteDiff" : 184,
+          "mismatchedBytes" : 2782,
+          "width" : 16
+        },
+        {
+          "factor" : 8,
+          "height" : 4,
+          "maxByteDiff" : 137,
+          "mismatchedBytes" : 2900,
+          "width" : 8
+        }
+      ],
+      "format" : "PNG",
+      "height" : 33,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "wide",
+      "width" : 64
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 64,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 33
+        },
+        {
+          "factor" : 2,
+          "height" : 32,
+          "maxByteDiff" : 203,
+          "mismatchedBytes" : 3035,
+          "width" : 16
+        },
+        {
+          "factor" : 4,
+          "height" : 16,
+          "maxByteDiff" : 160,
+          "mismatchedBytes" : 3037,
+          "width" : 8
+        },
+        {
+          "factor" : 8,
+          "height" : 8,
+          "maxByteDiff" : 134,
+          "mismatchedBytes" : 3043,
+          "width" : 4
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 64,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "tall",
+      "width" : 33
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 64,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 33
+        },
+        {
+          "factor" : 2,
+          "height" : 32,
+          "maxByteDiff" : 115,
+          "mismatchedBytes" : 2770,
+          "width" : 16
+        },
+        {
+          "factor" : 4,
+          "height" : 16,
+          "maxByteDiff" : 176,
+          "mismatchedBytes" : 2895,
+          "width" : 8
+        },
+        {
+          "factor" : 8,
+          "height" : 8,
+          "maxByteDiff" : 130,
+          "mismatchedBytes" : 2984,
+          "width" : 4
+        }
+      ],
+      "format" : "PNG",
+      "height" : 64,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "tall",
+      "width" : 33
+    },
+    {
+      "bestFactor" : 2,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 65,
+          "maxByteDiff" : 117,
+          "mismatchedBytes" : 3000,
+          "width" : 65
+        },
+        {
+          "factor" : 2,
+          "height" : 32,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 32
+        },
+        {
+          "factor" : 4,
+          "height" : 16,
+          "maxByteDiff" : 149,
+          "mismatchedBytes" : 3032,
+          "width" : 16
+        },
+        {
+          "factor" : 8,
+          "height" : 8,
+          "maxByteDiff" : 166,
+          "mismatchedBytes" : 3016,
+          "width" : 8
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 65,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "square",
+      "width" : 65
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 65,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 65
+        },
+        {
+          "factor" : 2,
+          "height" : 32,
+          "maxByteDiff" : 115,
+          "mismatchedBytes" : 2230,
+          "width" : 32
+        },
+        {
+          "factor" : 4,
+          "height" : 16,
+          "maxByteDiff" : 147,
+          "mismatchedBytes" : 2819,
+          "width" : 16
+        },
+        {
+          "factor" : 8,
+          "height" : 8,
+          "maxByteDiff" : 141,
+          "mismatchedBytes" : 2929,
+          "width" : 8
+        }
+      ],
+      "format" : "PNG",
+      "height" : 65,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "square",
+      "width" : 65
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 33,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 65
+        },
+        {
+          "factor" : 2,
+          "height" : 16,
+          "maxByteDiff" : 217,
+          "mismatchedBytes" : 3009,
+          "width" : 32
+        },
+        {
+          "factor" : 4,
+          "height" : 8,
+          "maxByteDiff" : 194,
+          "mismatchedBytes" : 3025,
+          "width" : 16
+        },
+        {
+          "factor" : 8,
+          "height" : 4,
+          "maxByteDiff" : 118,
+          "mismatchedBytes" : 3034,
+          "width" : 8
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 33,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "wide",
+      "width" : 65
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 33,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 65
+        },
+        {
+          "factor" : 2,
+          "height" : 16,
+          "maxByteDiff" : 234,
+          "mismatchedBytes" : 2332,
+          "width" : 32
+        },
+        {
+          "factor" : 4,
+          "height" : 8,
+          "maxByteDiff" : 183,
+          "mismatchedBytes" : 2795,
+          "width" : 16
+        },
+        {
+          "factor" : 8,
+          "height" : 4,
+          "maxByteDiff" : 137,
+          "mismatchedBytes" : 2929,
+          "width" : 8
+        }
+      ],
+      "format" : "PNG",
+      "height" : 33,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "wide",
+      "width" : 65
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 65,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 33
+        },
+        {
+          "factor" : 2,
+          "height" : 32,
+          "maxByteDiff" : 202,
+          "mismatchedBytes" : 3024,
+          "width" : 16
+        },
+        {
+          "factor" : 4,
+          "height" : 16,
+          "maxByteDiff" : 167,
+          "mismatchedBytes" : 3044,
+          "width" : 8
+        },
+        {
+          "factor" : 8,
+          "height" : 8,
+          "maxByteDiff" : 132,
+          "mismatchedBytes" : 3034,
+          "width" : 4
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 65,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "tall",
+      "width" : 33
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 65,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 33
+        },
+        {
+          "factor" : 2,
+          "height" : 32,
+          "maxByteDiff" : 114,
+          "mismatchedBytes" : 2756,
+          "width" : 16
+        },
+        {
+          "factor" : 4,
+          "height" : 16,
+          "maxByteDiff" : 167,
+          "mismatchedBytes" : 2914,
+          "width" : 8
+        },
+        {
+          "factor" : 8,
+          "height" : 8,
+          "maxByteDiff" : 130,
+          "mismatchedBytes" : 2983,
+          "width" : 4
+        }
+      ],
+      "format" : "PNG",
+      "height" : 65,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "tall",
+      "width" : 33
+    },
+    {
+      "bestFactor" : 2,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 95,
+          "maxByteDiff" : 69,
+          "mismatchedBytes" : 2958,
+          "width" : 95
+        },
+        {
+          "factor" : 2,
+          "height" : 47,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 47
+        },
+        {
+          "factor" : 4,
+          "height" : 23,
+          "maxByteDiff" : 126,
+          "mismatchedBytes" : 2963,
+          "width" : 23
+        },
+        {
+          "factor" : 8,
+          "height" : 11,
+          "maxByteDiff" : 171,
+          "mismatchedBytes" : 3010,
+          "width" : 11
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 95,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "square",
+      "width" : 95
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 95,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 95
+        },
+        {
+          "factor" : 2,
+          "height" : 47,
+          "maxByteDiff" : 70,
+          "mismatchedBytes" : 2284,
+          "width" : 47
+        },
+        {
+          "factor" : 4,
+          "height" : 23,
+          "maxByteDiff" : 144,
+          "mismatchedBytes" : 2617,
+          "width" : 23
+        },
+        {
+          "factor" : 8,
+          "height" : 11,
+          "maxByteDiff" : 178,
+          "mismatchedBytes" : 2788,
+          "width" : 11
+        }
+      ],
+      "format" : "PNG",
+      "height" : 95,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "square",
+      "width" : 95
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 33,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 95
+        },
+        {
+          "factor" : 2,
+          "height" : 16,
+          "maxByteDiff" : 211,
+          "mismatchedBytes" : 3010,
+          "width" : 47
+        },
+        {
+          "factor" : 4,
+          "height" : 8,
+          "maxByteDiff" : 198,
+          "mismatchedBytes" : 3028,
+          "width" : 23
+        },
+        {
+          "factor" : 8,
+          "height" : 4,
+          "maxByteDiff" : 133,
+          "mismatchedBytes" : 3028,
+          "width" : 11
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 33,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "wide",
+      "width" : 95
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 33,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 95
+        },
+        {
+          "factor" : 2,
+          "height" : 16,
+          "maxByteDiff" : 214,
+          "mismatchedBytes" : 2355,
+          "width" : 47
+        },
+        {
+          "factor" : 4,
+          "height" : 8,
+          "maxByteDiff" : 193,
+          "mismatchedBytes" : 2701,
+          "width" : 23
+        },
+        {
+          "factor" : 8,
+          "height" : 4,
+          "maxByteDiff" : 131,
+          "mismatchedBytes" : 2826,
+          "width" : 11
+        }
+      ],
+      "format" : "PNG",
+      "height" : 33,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "wide",
+      "width" : 95
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 95,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 33
+        },
+        {
+          "factor" : 2,
+          "height" : 47,
+          "maxByteDiff" : 207,
+          "mismatchedBytes" : 3035,
+          "width" : 16
+        },
+        {
+          "factor" : 4,
+          "height" : 23,
+          "maxByteDiff" : 196,
+          "mismatchedBytes" : 3039,
+          "width" : 8
+        },
+        {
+          "factor" : 8,
+          "height" : 11,
+          "maxByteDiff" : 139,
+          "mismatchedBytes" : 3050,
+          "width" : 4
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 95,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "tall",
+      "width" : 33
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 95,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 33
+        },
+        {
+          "factor" : 2,
+          "height" : 47,
+          "maxByteDiff" : 117,
+          "mismatchedBytes" : 2761,
+          "width" : 16
+        },
+        {
+          "factor" : 4,
+          "height" : 23,
+          "maxByteDiff" : 160,
+          "mismatchedBytes" : 2916,
+          "width" : 8
+        },
+        {
+          "factor" : 8,
+          "height" : 11,
+          "maxByteDiff" : 149,
+          "mismatchedBytes" : 3001,
+          "width" : 4
+        }
+      ],
+      "format" : "PNG",
+      "height" : 95,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "tall",
+      "width" : 33
+    },
+    {
+      "bestFactor" : 2,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 96,
+          "maxByteDiff" : 32,
+          "mismatchedBytes" : 2833,
+          "width" : 96
+        },
+        {
+          "factor" : 2,
+          "height" : 48,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 48
+        },
+        {
+          "factor" : 4,
+          "height" : 24,
+          "maxByteDiff" : 87,
+          "mismatchedBytes" : 2952,
+          "width" : 24
+        },
+        {
+          "factor" : 8,
+          "height" : 12,
+          "maxByteDiff" : 137,
+          "mismatchedBytes" : 3016,
+          "width" : 12
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 96,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "square",
+      "width" : 96
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 96,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 96
+        },
+        {
+          "factor" : 2,
+          "height" : 48,
+          "maxByteDiff" : 56,
+          "mismatchedBytes" : 2066,
+          "width" : 48
+        },
+        {
+          "factor" : 4,
+          "height" : 24,
+          "maxByteDiff" : 96,
+          "mismatchedBytes" : 2424,
+          "width" : 24
+        },
+        {
+          "factor" : 8,
+          "height" : 12,
+          "maxByteDiff" : 166,
+          "mismatchedBytes" : 2726,
+          "width" : 12
+        }
+      ],
+      "format" : "PNG",
+      "height" : 96,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "square",
+      "width" : 96
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 33,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 96
+        },
+        {
+          "factor" : 2,
+          "height" : 16,
+          "maxByteDiff" : 215,
+          "mismatchedBytes" : 3011,
+          "width" : 48
+        },
+        {
+          "factor" : 4,
+          "height" : 8,
+          "maxByteDiff" : 202,
+          "mismatchedBytes" : 3025,
+          "width" : 24
+        },
+        {
+          "factor" : 8,
+          "height" : 4,
+          "maxByteDiff" : 129,
+          "mismatchedBytes" : 3027,
+          "width" : 12
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 33,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "wide",
+      "width" : 96
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 33,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 96
+        },
+        {
+          "factor" : 2,
+          "height" : 16,
+          "maxByteDiff" : 216,
+          "mismatchedBytes" : 2324,
+          "width" : 48
+        },
+        {
+          "factor" : 4,
+          "height" : 8,
+          "maxByteDiff" : 199,
+          "mismatchedBytes" : 2677,
+          "width" : 24
+        },
+        {
+          "factor" : 8,
+          "height" : 4,
+          "maxByteDiff" : 135,
+          "mismatchedBytes" : 2823,
+          "width" : 12
+        }
+      ],
+      "format" : "PNG",
+      "height" : 33,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "wide",
+      "width" : 96
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 96,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 33
+        },
+        {
+          "factor" : 2,
+          "height" : 48,
+          "maxByteDiff" : 209,
+          "mismatchedBytes" : 3022,
+          "width" : 16
+        },
+        {
+          "factor" : 4,
+          "height" : 24,
+          "maxByteDiff" : 205,
+          "mismatchedBytes" : 3029,
+          "width" : 8
+        },
+        {
+          "factor" : 8,
+          "height" : 12,
+          "maxByteDiff" : 148,
+          "mismatchedBytes" : 3045,
+          "width" : 4
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 96,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "tall",
+      "width" : 33
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 96,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 33
+        },
+        {
+          "factor" : 2,
+          "height" : 48,
+          "maxByteDiff" : 109,
+          "mismatchedBytes" : 2757,
+          "width" : 16
+        },
+        {
+          "factor" : 4,
+          "height" : 24,
+          "maxByteDiff" : 159,
+          "mismatchedBytes" : 2893,
+          "width" : 8
+        },
+        {
+          "factor" : 8,
+          "height" : 12,
+          "maxByteDiff" : 138,
+          "mismatchedBytes" : 2973,
+          "width" : 4
+        }
+      ],
+      "format" : "PNG",
+      "height" : 96,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "tall",
+      "width" : 33
+    },
+    {
+      "bestFactor" : 2,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 100,
+          "maxByteDiff" : 26,
+          "mismatchedBytes" : 2658,
+          "width" : 100
+        },
+        {
+          "factor" : 2,
+          "height" : 50,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 50
+        },
+        {
+          "factor" : 4,
+          "height" : 25,
+          "maxByteDiff" : 78,
+          "mismatchedBytes" : 2933,
+          "width" : 25
+        },
+        {
+          "factor" : 8,
+          "height" : 12,
+          "maxByteDiff" : 170,
+          "mismatchedBytes" : 2985,
+          "width" : 12
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 100,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "square",
+      "width" : 100
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 100,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 100
+        },
+        {
+          "factor" : 2,
+          "height" : 50,
+          "maxByteDiff" : 49,
+          "mismatchedBytes" : 1942,
+          "width" : 50
+        },
+        {
+          "factor" : 4,
+          "height" : 25,
+          "maxByteDiff" : 83,
+          "mismatchedBytes" : 2416,
+          "width" : 25
+        },
+        {
+          "factor" : 8,
+          "height" : 12,
+          "maxByteDiff" : 174,
+          "mismatchedBytes" : 2776,
+          "width" : 12
+        }
+      ],
+      "format" : "PNG",
+      "height" : 100,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "square",
+      "width" : 100
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 33,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 100
+        },
+        {
+          "factor" : 2,
+          "height" : 16,
+          "maxByteDiff" : 210,
+          "mismatchedBytes" : 3006,
+          "width" : 50
+        },
+        {
+          "factor" : 4,
+          "height" : 8,
+          "maxByteDiff" : 202,
+          "mismatchedBytes" : 3021,
+          "width" : 25
+        },
+        {
+          "factor" : 8,
+          "height" : 4,
+          "maxByteDiff" : 132,
+          "mismatchedBytes" : 3027,
+          "width" : 12
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 33,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "wide",
+      "width" : 100
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 33,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 100
+        },
+        {
+          "factor" : 2,
+          "height" : 16,
+          "maxByteDiff" : 211,
+          "mismatchedBytes" : 2299,
+          "width" : 50
+        },
+        {
+          "factor" : 4,
+          "height" : 8,
+          "maxByteDiff" : 199,
+          "mismatchedBytes" : 2673,
+          "width" : 25
+        },
+        {
+          "factor" : 8,
+          "height" : 4,
+          "maxByteDiff" : 134,
+          "mismatchedBytes" : 2838,
+          "width" : 12
+        }
+      ],
+      "format" : "PNG",
+      "height" : 33,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "wide",
+      "width" : 100
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 100,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 33
+        },
+        {
+          "factor" : 2,
+          "height" : 50,
+          "maxByteDiff" : 215,
+          "mismatchedBytes" : 3008,
+          "width" : 16
+        },
+        {
+          "factor" : 4,
+          "height" : 25,
+          "maxByteDiff" : 200,
+          "mismatchedBytes" : 3034,
+          "width" : 8
+        },
+        {
+          "factor" : 8,
+          "height" : 12,
+          "maxByteDiff" : 139,
+          "mismatchedBytes" : 3031,
+          "width" : 4
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 100,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "tall",
+      "width" : 33
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 100,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 33
+        },
+        {
+          "factor" : 2,
+          "height" : 50,
+          "maxByteDiff" : 109,
+          "mismatchedBytes" : 2754,
+          "width" : 16
+        },
+        {
+          "factor" : 4,
+          "height" : 25,
+          "maxByteDiff" : 158,
+          "mismatchedBytes" : 2897,
+          "width" : 8
+        },
+        {
+          "factor" : 8,
+          "height" : 12,
+          "maxByteDiff" : 136,
+          "mismatchedBytes" : 2980,
+          "width" : 4
+        }
+      ],
+      "format" : "PNG",
+      "height" : 100,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "tall",
+      "width" : 33
+    },
+    {
+      "bestFactor" : 2,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 127,
+          "maxByteDiff" : 63,
+          "mismatchedBytes" : 2835,
+          "width" : 127
+        },
+        {
+          "factor" : 2,
+          "height" : 63,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 63
+        },
+        {
+          "factor" : 4,
+          "height" : 31,
+          "maxByteDiff" : 117,
+          "mismatchedBytes" : 2964,
+          "width" : 31
+        },
+        {
+          "factor" : 8,
+          "height" : 15,
+          "maxByteDiff" : 199,
+          "mismatchedBytes" : 2997,
+          "width" : 15
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 127,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "square",
+      "width" : 127
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 127,
+          "maxByteDiff" : 1,
+          "mismatchedBytes" : 13,
+          "width" : 127
+        },
+        {
+          "factor" : 2,
+          "height" : 63,
+          "maxByteDiff" : 55,
+          "mismatchedBytes" : 1975,
+          "width" : 63
+        },
+        {
+          "factor" : 4,
+          "height" : 31,
+          "maxByteDiff" : 158,
+          "mismatchedBytes" : 2433,
+          "width" : 31
+        },
+        {
+          "factor" : 8,
+          "height" : 15,
+          "maxByteDiff" : 201,
+          "mismatchedBytes" : 2670,
+          "width" : 15
+        }
+      ],
+      "format" : "PNG",
+      "height" : 127,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : false,
+      "shape" : "square",
+      "width" : 127
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 42,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 127
+        },
+        {
+          "factor" : 2,
+          "height" : 21,
+          "maxByteDiff" : 64,
+          "mismatchedBytes" : 2961,
+          "width" : 63
+        },
+        {
+          "factor" : 4,
+          "height" : 10,
+          "maxByteDiff" : 207,
+          "mismatchedBytes" : 3018,
+          "width" : 31
+        },
+        {
+          "factor" : 8,
+          "height" : 5,
+          "maxByteDiff" : 148,
+          "mismatchedBytes" : 3022,
+          "width" : 15
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 42,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "wide",
+      "width" : 127
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 42,
+          "maxByteDiff" : 1,
+          "mismatchedBytes" : 13,
+          "width" : 127
+        },
+        {
+          "factor" : 2,
+          "height" : 21,
+          "maxByteDiff" : 77,
+          "mismatchedBytes" : 2160,
+          "width" : 63
+        },
+        {
+          "factor" : 4,
+          "height" : 10,
+          "maxByteDiff" : 211,
+          "mismatchedBytes" : 2622,
+          "width" : 31
+        },
+        {
+          "factor" : 8,
+          "height" : 5,
+          "maxByteDiff" : 149,
+          "mismatchedBytes" : 2747,
+          "width" : 15
+        }
+      ],
+      "format" : "PNG",
+      "height" : 42,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : false,
+      "shape" : "wide",
+      "width" : 127
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 127,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 42
+        },
+        {
+          "factor" : 2,
+          "height" : 63,
+          "maxByteDiff" : 80,
+          "mismatchedBytes" : 2992,
+          "width" : 21
+        },
+        {
+          "factor" : 4,
+          "height" : 31,
+          "maxByteDiff" : 196,
+          "mismatchedBytes" : 3044,
+          "width" : 10
+        },
+        {
+          "factor" : 8,
+          "height" : 15,
+          "maxByteDiff" : 157,
+          "mismatchedBytes" : 3045,
+          "width" : 5
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 127,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "tall",
+      "width" : 42
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 127,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 42
+        },
+        {
+          "factor" : 2,
+          "height" : 63,
+          "maxByteDiff" : 86,
+          "mismatchedBytes" : 2306,
+          "width" : 21
+        },
+        {
+          "factor" : 4,
+          "height" : 31,
+          "maxByteDiff" : 144,
+          "mismatchedBytes" : 2871,
+          "width" : 10
+        },
+        {
+          "factor" : 8,
+          "height" : 15,
+          "maxByteDiff" : 138,
+          "mismatchedBytes" : 2946,
+          "width" : 5
+        }
+      ],
+      "format" : "PNG",
+      "height" : 127,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "tall",
+      "width" : 42
+    },
+    {
+      "bestFactor" : 4,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 128,
+          "maxByteDiff" : 42,
+          "mismatchedBytes" : 2938,
+          "width" : 128
+        },
+        {
+          "factor" : 2,
+          "height" : 64,
+          "maxByteDiff" : 44,
+          "mismatchedBytes" : 2902,
+          "width" : 64
+        },
+        {
+          "factor" : 4,
+          "height" : 32,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 32
+        },
+        {
+          "factor" : 8,
+          "height" : 16,
+          "maxByteDiff" : 126,
+          "mismatchedBytes" : 3022,
+          "width" : 16
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 128,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "square",
+      "width" : 128
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 128,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 128
+        },
+        {
+          "factor" : 2,
+          "height" : 64,
+          "maxByteDiff" : 14,
+          "mismatchedBytes" : 1977,
+          "width" : 64
+        },
+        {
+          "factor" : 4,
+          "height" : 32,
+          "maxByteDiff" : 36,
+          "mismatchedBytes" : 2271,
+          "width" : 32
+        },
+        {
+          "factor" : 8,
+          "height" : 16,
+          "maxByteDiff" : 139,
+          "mismatchedBytes" : 2798,
+          "width" : 16
+        }
+      ],
+      "format" : "PNG",
+      "height" : 128,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "square",
+      "width" : 128
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 42,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 128
+        },
+        {
+          "factor" : 2,
+          "height" : 21,
+          "maxByteDiff" : 67,
+          "mismatchedBytes" : 2926,
+          "width" : 64
+        },
+        {
+          "factor" : 4,
+          "height" : 10,
+          "maxByteDiff" : 207,
+          "mismatchedBytes" : 3007,
+          "width" : 32
+        },
+        {
+          "factor" : 8,
+          "height" : 5,
+          "maxByteDiff" : 148,
+          "mismatchedBytes" : 3038,
+          "width" : 16
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 42,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "wide",
+      "width" : 128
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 42,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 128
+        },
+        {
+          "factor" : 2,
+          "height" : 21,
+          "maxByteDiff" : 79,
+          "mismatchedBytes" : 2189,
+          "width" : 64
+        },
+        {
+          "factor" : 4,
+          "height" : 10,
+          "maxByteDiff" : 221,
+          "mismatchedBytes" : 2594,
+          "width" : 32
+        },
+        {
+          "factor" : 8,
+          "height" : 5,
+          "maxByteDiff" : 154,
+          "mismatchedBytes" : 2786,
+          "width" : 16
+        }
+      ],
+      "format" : "PNG",
+      "height" : 42,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "wide",
+      "width" : 128
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 128,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 42
+        },
+        {
+          "factor" : 2,
+          "height" : 64,
+          "maxByteDiff" : 71,
+          "mismatchedBytes" : 2956,
+          "width" : 21
+        },
+        {
+          "factor" : 4,
+          "height" : 32,
+          "maxByteDiff" : 220,
+          "mismatchedBytes" : 3032,
+          "width" : 10
+        },
+        {
+          "factor" : 8,
+          "height" : 16,
+          "maxByteDiff" : 152,
+          "mismatchedBytes" : 3049,
+          "width" : 5
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 128,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "tall",
+      "width" : 42
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 128,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 42
+        },
+        {
+          "factor" : 2,
+          "height" : 64,
+          "maxByteDiff" : 82,
+          "mismatchedBytes" : 2300,
+          "width" : 21
+        },
+        {
+          "factor" : 4,
+          "height" : 32,
+          "maxByteDiff" : 125,
+          "mismatchedBytes" : 2910,
+          "width" : 10
+        },
+        {
+          "factor" : 8,
+          "height" : 16,
+          "maxByteDiff" : 143,
+          "mismatchedBytes" : 2968,
+          "width" : 5
+        }
+      ],
+      "format" : "PNG",
+      "height" : 128,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "tall",
+      "width" : 42
+    },
+    {
+      "bestFactor" : 4,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 129,
+          "maxByteDiff" : 73,
+          "mismatchedBytes" : 2977,
+          "width" : 129
+        },
+        {
+          "factor" : 2,
+          "height" : 64,
+          "maxByteDiff" : 34,
+          "mismatchedBytes" : 2875,
+          "width" : 64
+        },
+        {
+          "factor" : 4,
+          "height" : 32,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 32
+        },
+        {
+          "factor" : 8,
+          "height" : 16,
+          "maxByteDiff" : 138,
+          "mismatchedBytes" : 3023,
+          "width" : 16
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 129,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "square",
+      "width" : 129
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 129,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 129
+        },
+        {
+          "factor" : 2,
+          "height" : 64,
+          "maxByteDiff" : 56,
+          "mismatchedBytes" : 2196,
+          "width" : 64
+        },
+        {
+          "factor" : 4,
+          "height" : 32,
+          "maxByteDiff" : 54,
+          "mismatchedBytes" : 2204,
+          "width" : 32
+        },
+        {
+          "factor" : 8,
+          "height" : 16,
+          "maxByteDiff" : 140,
+          "mismatchedBytes" : 2798,
+          "width" : 16
+        }
+      ],
+      "format" : "PNG",
+      "height" : 129,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "square",
+      "width" : 129
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 43,
+          "maxByteDiff" : 1,
+          "mismatchedBytes" : 1,
+          "width" : 129
+        },
+        {
+          "factor" : 2,
+          "height" : 21,
+          "maxByteDiff" : 128,
+          "mismatchedBytes" : 2978,
+          "width" : 64
+        },
+        {
+          "factor" : 4,
+          "height" : 10,
+          "maxByteDiff" : 202,
+          "mismatchedBytes" : 3021,
+          "width" : 32
+        },
+        {
+          "factor" : 8,
+          "height" : 5,
+          "maxByteDiff" : 141,
+          "mismatchedBytes" : 3033,
+          "width" : 16
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 43,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "wide",
+      "width" : 129
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 43,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 129
+        },
+        {
+          "factor" : 2,
+          "height" : 21,
+          "maxByteDiff" : 138,
+          "mismatchedBytes" : 2432,
+          "width" : 64
+        },
+        {
+          "factor" : 4,
+          "height" : 10,
+          "maxByteDiff" : 214,
+          "mismatchedBytes" : 2640,
+          "width" : 32
+        },
+        {
+          "factor" : 8,
+          "height" : 5,
+          "maxByteDiff" : 146,
+          "mismatchedBytes" : 2781,
+          "width" : 16
+        }
+      ],
+      "format" : "PNG",
+      "height" : 43,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "wide",
+      "width" : 129
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 129,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 43
+        },
+        {
+          "factor" : 2,
+          "height" : 64,
+          "maxByteDiff" : 135,
+          "mismatchedBytes" : 3027,
+          "width" : 21
+        },
+        {
+          "factor" : 4,
+          "height" : 32,
+          "maxByteDiff" : 218,
+          "mismatchedBytes" : 3032,
+          "width" : 10
+        },
+        {
+          "factor" : 8,
+          "height" : 16,
+          "maxByteDiff" : 181,
+          "mismatchedBytes" : 3034,
+          "width" : 5
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 129,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "tall",
+      "width" : 43
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 129,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 43
+        },
+        {
+          "factor" : 2,
+          "height" : 64,
+          "maxByteDiff" : 69,
+          "mismatchedBytes" : 2509,
+          "width" : 21
+        },
+        {
+          "factor" : 4,
+          "height" : 32,
+          "maxByteDiff" : 141,
+          "mismatchedBytes" : 2892,
+          "width" : 10
+        },
+        {
+          "factor" : 8,
+          "height" : 16,
+          "maxByteDiff" : 136,
+          "mismatchedBytes" : 2981,
+          "width" : 5
+        }
+      ],
+      "format" : "PNG",
+      "height" : 129,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "tall",
+      "width" : 43
+    },
+    {
+      "bestFactor" : 4,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 200,
+          "maxByteDiff" : 45,
+          "mismatchedBytes" : 2681,
+          "width" : 200
+        },
+        {
+          "factor" : 2,
+          "height" : 100,
+          "maxByteDiff" : 48,
+          "mismatchedBytes" : 2665,
+          "width" : 100
+        },
+        {
+          "factor" : 4,
+          "height" : 50,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 50
+        },
+        {
+          "factor" : 8,
+          "height" : 25,
+          "maxByteDiff" : 78,
+          "mismatchedBytes" : 2876,
+          "width" : 25
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 200,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "square",
+      "width" : 200
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 200,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 200
+        },
+        {
+          "factor" : 2,
+          "height" : 100,
+          "maxByteDiff" : 15,
+          "mismatchedBytes" : 1602,
+          "width" : 100
+        },
+        {
+          "factor" : 4,
+          "height" : 50,
+          "maxByteDiff" : 49,
+          "mismatchedBytes" : 2050,
+          "width" : 50
+        },
+        {
+          "factor" : 8,
+          "height" : 25,
+          "maxByteDiff" : 78,
+          "mismatchedBytes" : 2484,
+          "width" : 25
+        }
+      ],
+      "format" : "PNG",
+      "height" : 200,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "square",
+      "width" : 200
+    },
+    {
+      "bestFactor" : 4,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 66,
+          "maxByteDiff" : 157,
+          "mismatchedBytes" : 2941,
+          "width" : 200
+        },
+        {
+          "factor" : 2,
+          "height" : 33,
+          "maxByteDiff" : 155,
+          "mismatchedBytes" : 2921,
+          "width" : 100
+        },
+        {
+          "factor" : 4,
+          "height" : 16,
+          "maxByteDiff" : 28,
+          "mismatchedBytes" : 2422,
+          "width" : 50
+        },
+        {
+          "factor" : 8,
+          "height" : 8,
+          "maxByteDiff" : 110,
+          "mismatchedBytes" : 2986,
+          "width" : 25
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 66,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : false,
+      "shape" : "wide",
+      "width" : 200
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 66,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 200
+        },
+        {
+          "factor" : 2,
+          "height" : 33,
+          "maxByteDiff" : 45,
+          "mismatchedBytes" : 1973,
+          "width" : 100
+        },
+        {
+          "factor" : 4,
+          "height" : 16,
+          "maxByteDiff" : 166,
+          "mismatchedBytes" : 2356,
+          "width" : 50
+        },
+        {
+          "factor" : 8,
+          "height" : 8,
+          "maxByteDiff" : 177,
+          "mismatchedBytes" : 2647,
+          "width" : 25
+        }
+      ],
+      "format" : "PNG",
+      "height" : 66,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "wide",
+      "width" : 200
+    },
+    {
+      "bestFactor" : 4,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 200,
+          "maxByteDiff" : 166,
+          "mismatchedBytes" : 3002,
+          "width" : 66
+        },
+        {
+          "factor" : 2,
+          "height" : 100,
+          "maxByteDiff" : 176,
+          "mismatchedBytes" : 2969,
+          "width" : 33
+        },
+        {
+          "factor" : 4,
+          "height" : 50,
+          "maxByteDiff" : 28,
+          "mismatchedBytes" : 2618,
+          "width" : 16
+        },
+        {
+          "factor" : 8,
+          "height" : 25,
+          "maxByteDiff" : 118,
+          "mismatchedBytes" : 3016,
+          "width" : 8
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 200,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : false,
+      "shape" : "tall",
+      "width" : 66
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 200,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 66
+        },
+        {
+          "factor" : 2,
+          "height" : 100,
+          "maxByteDiff" : 49,
+          "mismatchedBytes" : 2199,
+          "width" : 33
+        },
+        {
+          "factor" : 4,
+          "height" : 50,
+          "maxByteDiff" : 112,
+          "mismatchedBytes" : 2814,
+          "width" : 16
+        },
+        {
+          "factor" : 8,
+          "height" : 25,
+          "maxByteDiff" : 151,
+          "mismatchedBytes" : 2940,
+          "width" : 8
+        }
+      ],
+      "format" : "PNG",
+      "height" : 200,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "tall",
+      "width" : 66
+    },
+    {
+      "bestFactor" : 4,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 254,
+          "maxByteDiff" : 59,
+          "mismatchedBytes" : 2708,
+          "width" : 254
+        },
+        {
+          "factor" : 2,
+          "height" : 127,
+          "maxByteDiff" : 56,
+          "mismatchedBytes" : 2675,
+          "width" : 127
+        },
+        {
+          "factor" : 4,
+          "height" : 63,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 63
+        },
+        {
+          "factor" : 8,
+          "height" : 31,
+          "maxByteDiff" : 109,
+          "mismatchedBytes" : 2901,
+          "width" : 31
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 254,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "square",
+      "width" : 254
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 254,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 254
+        },
+        {
+          "factor" : 2,
+          "height" : 127,
+          "maxByteDiff" : 13,
+          "mismatchedBytes" : 1156,
+          "width" : 127
+        },
+        {
+          "factor" : 4,
+          "height" : 63,
+          "maxByteDiff" : 53,
+          "mismatchedBytes" : 2029,
+          "width" : 63
+        },
+        {
+          "factor" : 8,
+          "height" : 31,
+          "maxByteDiff" : 156,
+          "mismatchedBytes" : 2457,
+          "width" : 31
+        }
+      ],
+      "format" : "PNG",
+      "height" : 254,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "square",
+      "width" : 254
+    },
+    {
+      "bestFactor" : 4,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 84,
+          "maxByteDiff" : 91,
+          "mismatchedBytes" : 2893,
+          "width" : 254
+        },
+        {
+          "factor" : 2,
+          "height" : 42,
+          "maxByteDiff" : 91,
+          "mismatchedBytes" : 2883,
+          "width" : 127
+        },
+        {
+          "factor" : 4,
+          "height" : 21,
+          "maxByteDiff" : 25,
+          "mismatchedBytes" : 1838,
+          "width" : 63
+        },
+        {
+          "factor" : 8,
+          "height" : 10,
+          "maxByteDiff" : 208,
+          "mismatchedBytes" : 2982,
+          "width" : 31
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 84,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : false,
+      "shape" : "wide",
+      "width" : 254
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 84,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 254
+        },
+        {
+          "factor" : 2,
+          "height" : 42,
+          "maxByteDiff" : 32,
+          "mismatchedBytes" : 1818,
+          "width" : 127
+        },
+        {
+          "factor" : 4,
+          "height" : 21,
+          "maxByteDiff" : 76,
+          "mismatchedBytes" : 2266,
+          "width" : 63
+        },
+        {
+          "factor" : 8,
+          "height" : 10,
+          "maxByteDiff" : 216,
+          "mismatchedBytes" : 2590,
+          "width" : 31
+        }
+      ],
+      "format" : "PNG",
+      "height" : 84,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "wide",
+      "width" : 254
+    },
+    {
+      "bestFactor" : 4,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 254,
+          "maxByteDiff" : 90,
+          "mismatchedBytes" : 2929,
+          "width" : 84
+        },
+        {
+          "factor" : 2,
+          "height" : 127,
+          "maxByteDiff" : 90,
+          "mismatchedBytes" : 2871,
+          "width" : 42
+        },
+        {
+          "factor" : 4,
+          "height" : 63,
+          "maxByteDiff" : 20,
+          "mismatchedBytes" : 1862,
+          "width" : 21
+        },
+        {
+          "factor" : 8,
+          "height" : 31,
+          "maxByteDiff" : 194,
+          "mismatchedBytes" : 3012,
+          "width" : 10
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 254,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : false,
+      "shape" : "tall",
+      "width" : 84
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 254,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 84
+        },
+        {
+          "factor" : 2,
+          "height" : 127,
+          "maxByteDiff" : 33,
+          "mismatchedBytes" : 1951,
+          "width" : 42
+        },
+        {
+          "factor" : 4,
+          "height" : 63,
+          "maxByteDiff" : 79,
+          "mismatchedBytes" : 2428,
+          "width" : 21
+        },
+        {
+          "factor" : 8,
+          "height" : 31,
+          "maxByteDiff" : 142,
+          "mismatchedBytes" : 2888,
+          "width" : 10
+        }
+      ],
+      "format" : "PNG",
+      "height" : 254,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "tall",
+      "width" : 84
+    },
+    {
+      "bestFactor" : 4,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 255,
+          "maxByteDiff" : 89,
+          "mismatchedBytes" : 2760,
+          "width" : 255
+        },
+        {
+          "factor" : 2,
+          "height" : 127,
+          "maxByteDiff" : 63,
+          "mismatchedBytes" : 2656,
+          "width" : 127
+        },
+        {
+          "factor" : 4,
+          "height" : 63,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 63
+        },
+        {
+          "factor" : 8,
+          "height" : 31,
+          "maxByteDiff" : 112,
+          "mismatchedBytes" : 2916,
+          "width" : 31
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 255,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "square",
+      "width" : 255
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 255,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 255
+        },
+        {
+          "factor" : 2,
+          "height" : 127,
+          "maxByteDiff" : 28,
+          "mismatchedBytes" : 1623,
+          "width" : 127
+        },
+        {
+          "factor" : 4,
+          "height" : 63,
+          "maxByteDiff" : 79,
+          "mismatchedBytes" : 2021,
+          "width" : 63
+        },
+        {
+          "factor" : 8,
+          "height" : 31,
+          "maxByteDiff" : 182,
+          "mismatchedBytes" : 2414,
+          "width" : 31
+        }
+      ],
+      "format" : "PNG",
+      "height" : 255,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "square",
+      "width" : 255
+    },
+    {
+      "bestFactor" : 4,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 85,
+          "maxByteDiff" : 104,
+          "mismatchedBytes" : 2926,
+          "width" : 255
+        },
+        {
+          "factor" : 2,
+          "height" : 42,
+          "maxByteDiff" : 93,
+          "mismatchedBytes" : 2884,
+          "width" : 127
+        },
+        {
+          "factor" : 4,
+          "height" : 21,
+          "maxByteDiff" : 23,
+          "mismatchedBytes" : 1852,
+          "width" : 63
+        },
+        {
+          "factor" : 8,
+          "height" : 10,
+          "maxByteDiff" : 208,
+          "mismatchedBytes" : 2994,
+          "width" : 31
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 85,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : false,
+      "shape" : "wide",
+      "width" : 255
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 85,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 255
+        },
+        {
+          "factor" : 2,
+          "height" : 42,
+          "maxByteDiff" : 78,
+          "mismatchedBytes" : 2092,
+          "width" : 127
+        },
+        {
+          "factor" : 4,
+          "height" : 21,
+          "maxByteDiff" : 104,
+          "mismatchedBytes" : 2219,
+          "width" : 63
+        },
+        {
+          "factor" : 8,
+          "height" : 10,
+          "maxByteDiff" : 216,
+          "mismatchedBytes" : 2626,
+          "width" : 31
+        }
+      ],
+      "format" : "PNG",
+      "height" : 85,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "wide",
+      "width" : 255
+    },
+    {
+      "bestFactor" : 4,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 255,
+          "maxByteDiff" : 106,
+          "mismatchedBytes" : 2965,
+          "width" : 85
+        },
+        {
+          "factor" : 2,
+          "height" : 127,
+          "maxByteDiff" : 94,
+          "mismatchedBytes" : 2924,
+          "width" : 42
+        },
+        {
+          "factor" : 4,
+          "height" : 63,
+          "maxByteDiff" : 21,
+          "mismatchedBytes" : 1878,
+          "width" : 21
+        },
+        {
+          "factor" : 8,
+          "height" : 31,
+          "maxByteDiff" : 159,
+          "mismatchedBytes" : 3021,
+          "width" : 10
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 255,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : false,
+      "shape" : "tall",
+      "width" : 85
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 255,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 85
+        },
+        {
+          "factor" : 2,
+          "height" : 127,
+          "maxByteDiff" : 39,
+          "mismatchedBytes" : 2157,
+          "width" : 42
+        },
+        {
+          "factor" : 4,
+          "height" : 63,
+          "maxByteDiff" : 86,
+          "mismatchedBytes" : 2387,
+          "width" : 21
+        },
+        {
+          "factor" : 8,
+          "height" : 31,
+          "maxByteDiff" : 163,
+          "mismatchedBytes" : 2818,
+          "width" : 10
+        }
+      ],
+      "format" : "PNG",
+      "height" : 255,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "tall",
+      "width" : 85
+    },
+    {
+      "bestFactor" : 8,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 256,
+          "maxByteDiff" : 16,
+          "mismatchedBytes" : 2840,
+          "width" : 256
+        },
+        {
+          "factor" : 2,
+          "height" : 128,
+          "maxByteDiff" : 17,
+          "mismatchedBytes" : 2794,
+          "width" : 128
+        },
+        {
+          "factor" : 4,
+          "height" : 64,
+          "maxByteDiff" : 17,
+          "mismatchedBytes" : 2753,
+          "width" : 64
+        },
+        {
+          "factor" : 8,
+          "height" : 32,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 32
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 256,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "square",
+      "width" : 256
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 256,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 256
+        },
+        {
+          "factor" : 2,
+          "height" : 128,
+          "maxByteDiff" : 8,
+          "mismatchedBytes" : 1538,
+          "width" : 128
+        },
+        {
+          "factor" : 4,
+          "height" : 64,
+          "maxByteDiff" : 13,
+          "mismatchedBytes" : 2063,
+          "width" : 64
+        },
+        {
+          "factor" : 8,
+          "height" : 32,
+          "maxByteDiff" : 36,
+          "mismatchedBytes" : 2227,
+          "width" : 32
+        }
+      ],
+      "format" : "PNG",
+      "height" : 256,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "square",
+      "width" : 256
+    },
+    {
+      "bestFactor" : 4,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 85,
+          "maxByteDiff" : 104,
+          "mismatchedBytes" : 2887,
+          "width" : 256
+        },
+        {
+          "factor" : 2,
+          "height" : 42,
+          "maxByteDiff" : 93,
+          "mismatchedBytes" : 2881,
+          "width" : 128
+        },
+        {
+          "factor" : 4,
+          "height" : 21,
+          "maxByteDiff" : 27,
+          "mismatchedBytes" : 1868,
+          "width" : 64
+        },
+        {
+          "factor" : 8,
+          "height" : 10,
+          "maxByteDiff" : 211,
+          "mismatchedBytes" : 2987,
+          "width" : 32
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 85,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : false,
+      "shape" : "wide",
+      "width" : 256
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 85,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 256
+        },
+        {
+          "factor" : 2,
+          "height" : 42,
+          "maxByteDiff" : 78,
+          "mismatchedBytes" : 2142,
+          "width" : 128
+        },
+        {
+          "factor" : 4,
+          "height" : 21,
+          "maxByteDiff" : 105,
+          "mismatchedBytes" : 2259,
+          "width" : 64
+        },
+        {
+          "factor" : 8,
+          "height" : 10,
+          "maxByteDiff" : 229,
+          "mismatchedBytes" : 2636,
+          "width" : 32
+        }
+      ],
+      "format" : "PNG",
+      "height" : 85,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "wide",
+      "width" : 256
+    },
+    {
+      "bestFactor" : 4,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 256,
+          "maxByteDiff" : 106,
+          "mismatchedBytes" : 2968,
+          "width" : 85
+        },
+        {
+          "factor" : 2,
+          "height" : 128,
+          "maxByteDiff" : 95,
+          "mismatchedBytes" : 2931,
+          "width" : 42
+        },
+        {
+          "factor" : 4,
+          "height" : 64,
+          "maxByteDiff" : 20,
+          "mismatchedBytes" : 1850,
+          "width" : 21
+        },
+        {
+          "factor" : 8,
+          "height" : 32,
+          "maxByteDiff" : 162,
+          "mismatchedBytes" : 3010,
+          "width" : 10
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 256,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : false,
+      "shape" : "tall",
+      "width" : 85
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 256,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 85
+        },
+        {
+          "factor" : 2,
+          "height" : 128,
+          "maxByteDiff" : 30,
+          "mismatchedBytes" : 2079,
+          "width" : 42
+        },
+        {
+          "factor" : 4,
+          "height" : 64,
+          "maxByteDiff" : 64,
+          "mismatchedBytes" : 2386,
+          "width" : 21
+        },
+        {
+          "factor" : 8,
+          "height" : 32,
+          "maxByteDiff" : 138,
+          "mismatchedBytes" : 2827,
+          "width" : 10
+        }
+      ],
+      "format" : "PNG",
+      "height" : 256,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "tall",
+      "width" : 85
+    },
+    {
+      "bestFactor" : 8,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 257,
+          "maxByteDiff" : 34,
+          "mismatchedBytes" : 2896,
+          "width" : 257
+        },
+        {
+          "factor" : 2,
+          "height" : 128,
+          "maxByteDiff" : 18,
+          "mismatchedBytes" : 2757,
+          "width" : 128
+        },
+        {
+          "factor" : 4,
+          "height" : 64,
+          "maxByteDiff" : 18,
+          "mismatchedBytes" : 2725,
+          "width" : 64
+        },
+        {
+          "factor" : 8,
+          "height" : 32,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 32
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 257,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "square",
+      "width" : 257
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 257,
+          "maxByteDiff" : 1,
+          "mismatchedBytes" : 4,
+          "width" : 257
+        },
+        {
+          "factor" : 2,
+          "height" : 128,
+          "maxByteDiff" : 28,
+          "mismatchedBytes" : 1887,
+          "width" : 128
+        },
+        {
+          "factor" : 4,
+          "height" : 64,
+          "maxByteDiff" : 29,
+          "mismatchedBytes" : 2215,
+          "width" : 64
+        },
+        {
+          "factor" : 8,
+          "height" : 32,
+          "maxByteDiff" : 36,
+          "mismatchedBytes" : 2220,
+          "width" : 32
+        }
+      ],
+      "format" : "PNG",
+      "height" : 257,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "square",
+      "width" : 257
+    },
+    {
+      "bestFactor" : 4,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 85,
+          "maxByteDiff" : 104,
+          "mismatchedBytes" : 2902,
+          "width" : 257
+        },
+        {
+          "factor" : 2,
+          "height" : 42,
+          "maxByteDiff" : 93,
+          "mismatchedBytes" : 2865,
+          "width" : 128
+        },
+        {
+          "factor" : 4,
+          "height" : 21,
+          "maxByteDiff" : 27,
+          "mismatchedBytes" : 1874,
+          "width" : 64
+        },
+        {
+          "factor" : 8,
+          "height" : 10,
+          "maxByteDiff" : 211,
+          "mismatchedBytes" : 2998,
+          "width" : 32
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 85,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : false,
+      "shape" : "wide",
+      "width" : 257
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 85,
+          "maxByteDiff" : 1,
+          "mismatchedBytes" : 4,
+          "width" : 257
+        },
+        {
+          "factor" : 2,
+          "height" : 42,
+          "maxByteDiff" : 78,
+          "mismatchedBytes" : 2171,
+          "width" : 128
+        },
+        {
+          "factor" : 4,
+          "height" : 21,
+          "maxByteDiff" : 105,
+          "mismatchedBytes" : 2338,
+          "width" : 64
+        },
+        {
+          "factor" : 8,
+          "height" : 10,
+          "maxByteDiff" : 225,
+          "mismatchedBytes" : 2632,
+          "width" : 32
+        }
+      ],
+      "format" : "PNG",
+      "height" : 85,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "wide",
+      "width" : 257
+    },
+    {
+      "bestFactor" : 4,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 257,
+          "maxByteDiff" : 105,
+          "mismatchedBytes" : 2964,
+          "width" : 85
+        },
+        {
+          "factor" : 2,
+          "height" : 128,
+          "maxByteDiff" : 93,
+          "mismatchedBytes" : 2908,
+          "width" : 42
+        },
+        {
+          "factor" : 4,
+          "height" : 64,
+          "maxByteDiff" : 20,
+          "mismatchedBytes" : 1861,
+          "width" : 21
+        },
+        {
+          "factor" : 8,
+          "height" : 32,
+          "maxByteDiff" : 164,
+          "mismatchedBytes" : 3022,
+          "width" : 10
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 257,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : false,
+      "shape" : "tall",
+      "width" : 85
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 257,
+          "maxByteDiff" : 1,
+          "mismatchedBytes" : 2,
+          "width" : 85
+        },
+        {
+          "factor" : 2,
+          "height" : 128,
+          "maxByteDiff" : 39,
+          "mismatchedBytes" : 2198,
+          "width" : 42
+        },
+        {
+          "factor" : 4,
+          "height" : 64,
+          "maxByteDiff" : 65,
+          "mismatchedBytes" : 2416,
+          "width" : 21
+        },
+        {
+          "factor" : 8,
+          "height" : 32,
+          "maxByteDiff" : 139,
+          "mismatchedBytes" : 2825,
+          "width" : 10
+        }
+      ],
+      "format" : "PNG",
+      "height" : 257,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "tall",
+      "width" : 85
+    },
+    {
+      "bestFactor" : 8,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 300,
+          "maxByteDiff" : 101,
+          "mismatchedBytes" : 2864,
+          "width" : 300
+        },
+        {
+          "factor" : 2,
+          "height" : 150,
+          "maxByteDiff" : 102,
+          "mismatchedBytes" : 2861,
+          "width" : 150
+        },
+        {
+          "factor" : 4,
+          "height" : 75,
+          "maxByteDiff" : 86,
+          "mismatchedBytes" : 2848,
+          "width" : 75
+        },
+        {
+          "factor" : 8,
+          "height" : 37,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 37
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 300,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "square",
+      "width" : 300
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 300,
+          "maxByteDiff" : 1,
+          "mismatchedBytes" : 1,
+          "width" : 300
+        },
+        {
+          "factor" : 2,
+          "height" : 150,
+          "maxByteDiff" : 10,
+          "mismatchedBytes" : 1085,
+          "width" : 150
+        },
+        {
+          "factor" : 4,
+          "height" : 75,
+          "maxByteDiff" : 23,
+          "mismatchedBytes" : 1791,
+          "width" : 75
+        },
+        {
+          "factor" : 8,
+          "height" : 37,
+          "maxByteDiff" : 79,
+          "mismatchedBytes" : 2357,
+          "width" : 37
+        }
+      ],
+      "format" : "PNG",
+      "height" : 300,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "square",
+      "width" : 300
+    },
+    {
+      "bestFactor" : 8,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 100,
+          "maxByteDiff" : 188,
+          "mismatchedBytes" : 2962,
+          "width" : 300
+        },
+        {
+          "factor" : 2,
+          "height" : 50,
+          "maxByteDiff" : 188,
+          "mismatchedBytes" : 2959,
+          "width" : 150
+        },
+        {
+          "factor" : 4,
+          "height" : 25,
+          "maxByteDiff" : 188,
+          "mismatchedBytes" : 2952,
+          "width" : 75
+        },
+        {
+          "factor" : 8,
+          "height" : 12,
+          "maxByteDiff" : 48,
+          "mismatchedBytes" : 2110,
+          "width" : 37
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 100,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : false,
+      "shape" : "wide",
+      "width" : 300
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 100,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 300
+        },
+        {
+          "factor" : 2,
+          "height" : 50,
+          "maxByteDiff" : 26,
+          "mismatchedBytes" : 1626,
+          "width" : 150
+        },
+        {
+          "factor" : 4,
+          "height" : 25,
+          "maxByteDiff" : 63,
+          "mismatchedBytes" : 2191,
+          "width" : 75
+        },
+        {
+          "factor" : 8,
+          "height" : 12,
+          "maxByteDiff" : 184,
+          "mismatchedBytes" : 2483,
+          "width" : 37
+        }
+      ],
+      "format" : "PNG",
+      "height" : 100,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "wide",
+      "width" : 300
+    },
+    {
+      "bestFactor" : 8,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 300,
+          "maxByteDiff" : 186,
+          "mismatchedBytes" : 3000,
+          "width" : 100
+        },
+        {
+          "factor" : 2,
+          "height" : 150,
+          "maxByteDiff" : 187,
+          "mismatchedBytes" : 2978,
+          "width" : 50
+        },
+        {
+          "factor" : 4,
+          "height" : 75,
+          "maxByteDiff" : 189,
+          "mismatchedBytes" : 2964,
+          "width" : 25
+        },
+        {
+          "factor" : 8,
+          "height" : 37,
+          "maxByteDiff" : 49,
+          "mismatchedBytes" : 2036,
+          "width" : 12
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 300,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : false,
+      "shape" : "tall",
+      "width" : 100
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 300,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 100
+        },
+        {
+          "factor" : 2,
+          "height" : 150,
+          "maxByteDiff" : 35,
+          "mismatchedBytes" : 1789,
+          "width" : 50
+        },
+        {
+          "factor" : 4,
+          "height" : 75,
+          "maxByteDiff" : 67,
+          "mismatchedBytes" : 2334,
+          "width" : 25
+        },
+        {
+          "factor" : 8,
+          "height" : 37,
+          "maxByteDiff" : 139,
+          "mismatchedBytes" : 2754,
+          "width" : 12
+        }
+      ],
+      "format" : "PNG",
+      "height" : 300,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "tall",
+      "width" : 100
+    },
+    {
+      "bestFactor" : 8,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 472,
+          "maxByteDiff" : 26,
+          "mismatchedBytes" : 2416,
+          "width" : 472
+        },
+        {
+          "factor" : 2,
+          "height" : 236,
+          "maxByteDiff" : 26,
+          "mismatchedBytes" : 2399,
+          "width" : 236
+        },
+        {
+          "factor" : 4,
+          "height" : 118,
+          "maxByteDiff" : 25,
+          "mismatchedBytes" : 2354,
+          "width" : 118
+        },
+        {
+          "factor" : 8,
+          "height" : 59,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 59
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 472,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "square",
+      "width" : 472
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 472,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 472
+        },
+        {
+          "factor" : 2,
+          "height" : 236,
+          "maxByteDiff" : 4,
+          "mismatchedBytes" : 538,
+          "width" : 236
+        },
+        {
+          "factor" : 4,
+          "height" : 118,
+          "maxByteDiff" : 14,
+          "mismatchedBytes" : 1337,
+          "width" : 118
+        },
+        {
+          "factor" : 8,
+          "height" : 59,
+          "maxByteDiff" : 27,
+          "mismatchedBytes" : 1896,
+          "width" : 59
+        }
+      ],
+      "format" : "PNG",
+      "height" : 472,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "square",
+      "width" : 472
+    },
+    {
+      "bestFactor" : 8,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 157,
+          "maxByteDiff" : 145,
+          "mismatchedBytes" : 2886,
+          "width" : 472
+        },
+        {
+          "factor" : 2,
+          "height" : 78,
+          "maxByteDiff" : 144,
+          "mismatchedBytes" : 2887,
+          "width" : 236
+        },
+        {
+          "factor" : 4,
+          "height" : 39,
+          "maxByteDiff" : 118,
+          "mismatchedBytes" : 2870,
+          "width" : 118
+        },
+        {
+          "factor" : 8,
+          "height" : 19,
+          "maxByteDiff" : 16,
+          "mismatchedBytes" : 1750,
+          "width" : 59
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 157,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : false,
+      "shape" : "wide",
+      "width" : 472
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 157,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 472
+        },
+        {
+          "factor" : 2,
+          "height" : 78,
+          "maxByteDiff" : 42,
+          "mismatchedBytes" : 1688,
+          "width" : 236
+        },
+        {
+          "factor" : 4,
+          "height" : 39,
+          "maxByteDiff" : 47,
+          "mismatchedBytes" : 1973,
+          "width" : 118
+        },
+        {
+          "factor" : 8,
+          "height" : 19,
+          "maxByteDiff" : 144,
+          "mismatchedBytes" : 2386,
+          "width" : 59
+        }
+      ],
+      "format" : "PNG",
+      "height" : 157,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "wide",
+      "width" : 472
+    },
+    {
+      "bestFactor" : 8,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 472,
+          "maxByteDiff" : 141,
+          "mismatchedBytes" : 2883,
+          "width" : 157
+        },
+        {
+          "factor" : 2,
+          "height" : 236,
+          "maxByteDiff" : 142,
+          "mismatchedBytes" : 2866,
+          "width" : 78
+        },
+        {
+          "factor" : 4,
+          "height" : 118,
+          "maxByteDiff" : 136,
+          "mismatchedBytes" : 2883,
+          "width" : 39
+        },
+        {
+          "factor" : 8,
+          "height" : 59,
+          "maxByteDiff" : 22,
+          "mismatchedBytes" : 1731,
+          "width" : 19
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 472,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : false,
+      "shape" : "tall",
+      "width" : 157
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 472,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 157
+        },
+        {
+          "factor" : 2,
+          "height" : 236,
+          "maxByteDiff" : 21,
+          "mismatchedBytes" : 1428,
+          "width" : 78
+        },
+        {
+          "factor" : 4,
+          "height" : 118,
+          "maxByteDiff" : 39,
+          "mismatchedBytes" : 2089,
+          "width" : 39
+        },
+        {
+          "factor" : 8,
+          "height" : 59,
+          "maxByteDiff" : 43,
+          "mismatchedBytes" : 2174,
+          "width" : 19
+        }
+      ],
+      "format" : "PNG",
+      "height" : 472,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "tall",
+      "width" : 157
+    },
+    {
+      "bestFactor" : 8,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 600,
+          "maxByteDiff" : 20,
+          "mismatchedBytes" : 2130,
+          "width" : 600
+        },
+        {
+          "factor" : 2,
+          "height" : 300,
+          "maxByteDiff" : 20,
+          "mismatchedBytes" : 2157,
+          "width" : 300
+        },
+        {
+          "factor" : 4,
+          "height" : 150,
+          "maxByteDiff" : 17,
+          "mismatchedBytes" : 2082,
+          "width" : 150
+        },
+        {
+          "factor" : 8,
+          "height" : 75,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 75
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 600,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "square",
+      "width" : 600
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 600,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 600
+        },
+        {
+          "factor" : 2,
+          "height" : 300,
+          "maxByteDiff" : 3,
+          "mismatchedBytes" : 414,
+          "width" : 300
+        },
+        {
+          "factor" : 4,
+          "height" : 150,
+          "maxByteDiff" : 12,
+          "mismatchedBytes" : 1230,
+          "width" : 150
+        },
+        {
+          "factor" : 8,
+          "height" : 75,
+          "maxByteDiff" : 23,
+          "mismatchedBytes" : 1805,
+          "width" : 75
+        }
+      ],
+      "format" : "PNG",
+      "height" : 600,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "square",
+      "width" : 600
+    },
+    {
+      "bestFactor" : 8,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 200,
+          "maxByteDiff" : 68,
+          "mismatchedBytes" : 2765,
+          "width" : 600
+        },
+        {
+          "factor" : 2,
+          "height" : 100,
+          "maxByteDiff" : 69,
+          "mismatchedBytes" : 2765,
+          "width" : 300
+        },
+        {
+          "factor" : 4,
+          "height" : 50,
+          "maxByteDiff" : 61,
+          "mismatchedBytes" : 2723,
+          "width" : 150
+        },
+        {
+          "factor" : 8,
+          "height" : 25,
+          "maxByteDiff" : 21,
+          "mismatchedBytes" : 1698,
+          "width" : 75
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 200,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : false,
+      "shape" : "wide",
+      "width" : 600
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 200,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 600
+        },
+        {
+          "factor" : 2,
+          "height" : 100,
+          "maxByteDiff" : 5,
+          "mismatchedBytes" : 1092,
+          "width" : 300
+        },
+        {
+          "factor" : 4,
+          "height" : 50,
+          "maxByteDiff" : 28,
+          "mismatchedBytes" : 1781,
+          "width" : 150
+        },
+        {
+          "factor" : 8,
+          "height" : 25,
+          "maxByteDiff" : 63,
+          "mismatchedBytes" : 2227,
+          "width" : 75
+        }
+      ],
+      "format" : "PNG",
+      "height" : 200,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "wide",
+      "width" : 600
+    },
+    {
+      "bestFactor" : 8,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 600,
+          "maxByteDiff" : 78,
+          "mismatchedBytes" : 2879,
+          "width" : 200
+        },
+        {
+          "factor" : 2,
+          "height" : 300,
+          "maxByteDiff" : 81,
+          "mismatchedBytes" : 2814,
+          "width" : 100
+        },
+        {
+          "factor" : 4,
+          "height" : 150,
+          "maxByteDiff" : 76,
+          "mismatchedBytes" : 2766,
+          "width" : 50
+        },
+        {
+          "factor" : 8,
+          "height" : 75,
+          "maxByteDiff" : 25,
+          "mismatchedBytes" : 1768,
+          "width" : 25
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 600,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : false,
+      "shape" : "tall",
+      "width" : 200
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 600,
+          "maxByteDiff" : 1,
+          "mismatchedBytes" : 2,
+          "width" : 200
+        },
+        {
+          "factor" : 2,
+          "height" : 300,
+          "maxByteDiff" : 13,
+          "mismatchedBytes" : 1283,
+          "width" : 100
+        },
+        {
+          "factor" : 4,
+          "height" : 150,
+          "maxByteDiff" : 35,
+          "mismatchedBytes" : 1884,
+          "width" : 50
+        },
+        {
+          "factor" : 8,
+          "height" : 75,
+          "maxByteDiff" : 58,
+          "mismatchedBytes" : 2377,
+          "width" : 25
+        }
+      ],
+      "format" : "PNG",
+      "height" : 600,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "tall",
+      "width" : 200
+    },
+    {
+      "bestFactor" : 8,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 1000,
+          "maxByteDiff" : 14,
+          "mismatchedBytes" : 1445,
+          "width" : 1000
+        },
+        {
+          "factor" : 2,
+          "height" : 500,
+          "maxByteDiff" : 14,
+          "mismatchedBytes" : 1469,
+          "width" : 500
+        },
+        {
+          "factor" : 4,
+          "height" : 250,
+          "maxByteDiff" : 12,
+          "mismatchedBytes" : 1437,
+          "width" : 250
+        },
+        {
+          "factor" : 8,
+          "height" : 125,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 125
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 1000,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "square",
+      "width" : 1000
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 1000,
+          "maxByteDiff" : 1,
+          "mismatchedBytes" : 54,
+          "width" : 1000
+        },
+        {
+          "factor" : 2,
+          "height" : 500,
+          "maxByteDiff" : 2,
+          "mismatchedBytes" : 253,
+          "width" : 500
+        },
+        {
+          "factor" : 4,
+          "height" : 250,
+          "maxByteDiff" : 5,
+          "mismatchedBytes" : 470,
+          "width" : 250
+        },
+        {
+          "factor" : 8,
+          "height" : 125,
+          "maxByteDiff" : 15,
+          "mismatchedBytes" : 1291,
+          "width" : 125
+        }
+      ],
+      "format" : "PNG",
+      "height" : 1000,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : false,
+      "shape" : "square",
+      "width" : 1000
+    },
+    {
+      "bestFactor" : 8,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 333,
+          "maxByteDiff" : 95,
+          "mismatchedBytes" : 2522,
+          "width" : 1000
+        },
+        {
+          "factor" : 2,
+          "height" : 166,
+          "maxByteDiff" : 76,
+          "mismatchedBytes" : 2497,
+          "width" : 500
+        },
+        {
+          "factor" : 4,
+          "height" : 83,
+          "maxByteDiff" : 81,
+          "mismatchedBytes" : 2522,
+          "width" : 250
+        },
+        {
+          "factor" : 8,
+          "height" : 41,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 125
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 333,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "wide",
+      "width" : 1000
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 333,
+          "maxByteDiff" : 1,
+          "mismatchedBytes" : 56,
+          "width" : 1000
+        },
+        {
+          "factor" : 2,
+          "height" : 166,
+          "maxByteDiff" : 20,
+          "mismatchedBytes" : 1089,
+          "width" : 500
+        },
+        {
+          "factor" : 4,
+          "height" : 83,
+          "maxByteDiff" : 20,
+          "mismatchedBytes" : 1607,
+          "width" : 250
+        },
+        {
+          "factor" : 8,
+          "height" : 41,
+          "maxByteDiff" : 95,
+          "mismatchedBytes" : 2099,
+          "width" : 125
+        }
+      ],
+      "format" : "PNG",
+      "height" : 333,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : false,
+      "shape" : "wide",
+      "width" : 1000
+    },
+    {
+      "bestFactor" : 8,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 1000,
+          "maxByteDiff" : 86,
+          "mismatchedBytes" : 2760,
+          "width" : 333
+        },
+        {
+          "factor" : 2,
+          "height" : 500,
+          "maxByteDiff" : 71,
+          "mismatchedBytes" : 2718,
+          "width" : 166
+        },
+        {
+          "factor" : 4,
+          "height" : 250,
+          "maxByteDiff" : 72,
+          "mismatchedBytes" : 2707,
+          "width" : 83
+        },
+        {
+          "factor" : 8,
+          "height" : 125,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 41
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 1000,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : true,
+      "shape" : "tall",
+      "width" : 333
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 1000,
+          "maxByteDiff" : 1,
+          "mismatchedBytes" : 13,
+          "width" : 333
+        },
+        {
+          "factor" : 2,
+          "height" : 500,
+          "maxByteDiff" : 4,
+          "mismatchedBytes" : 947,
+          "width" : 166
+        },
+        {
+          "factor" : 4,
+          "height" : 250,
+          "maxByteDiff" : 6,
+          "mismatchedBytes" : 1554,
+          "width" : 83
+        },
+        {
+          "factor" : 8,
+          "height" : 125,
+          "maxByteDiff" : 38,
+          "mismatchedBytes" : 2017,
+          "width" : 41
+        }
+      ],
+      "format" : "PNG",
+      "height" : 1000,
+      "largeSourceProbeOnly" : false,
+      "modelMatches" : false,
+      "shape" : "tall",
+      "width" : 333
+    },
+    {
+      "bestFactor" : 8,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 1023,
+          "maxByteDiff" : 49,
+          "mismatchedBytes" : 2208,
+          "width" : 1023
+        },
+        {
+          "factor" : 2,
+          "height" : 511,
+          "maxByteDiff" : 42,
+          "mismatchedBytes" : 2179,
+          "width" : 511
+        },
+        {
+          "factor" : 4,
+          "height" : 255,
+          "maxByteDiff" : 29,
+          "mismatchedBytes" : 2156,
+          "width" : 255
+        },
+        {
+          "factor" : 8,
+          "height" : 127,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 127
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 1023,
+      "largeSourceProbeOnly" : true,
+      "modelMatches" : true,
+      "shape" : "square",
+      "width" : 1023
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 1023,
+          "maxByteDiff" : 1,
+          "mismatchedBytes" : 98,
+          "width" : 1023
+        },
+        {
+          "factor" : 2,
+          "height" : 511,
+          "maxByteDiff" : 7,
+          "mismatchedBytes" : 879,
+          "width" : 511
+        },
+        {
+          "factor" : 4,
+          "height" : 255,
+          "maxByteDiff" : 20,
+          "mismatchedBytes" : 1191,
+          "width" : 255
+        },
+        {
+          "factor" : 8,
+          "height" : 127,
+          "maxByteDiff" : 48,
+          "mismatchedBytes" : 1552,
+          "width" : 127
+        }
+      ],
+      "format" : "PNG",
+      "height" : 1023,
+      "largeSourceProbeOnly" : true,
+      "modelMatches" : false,
+      "shape" : "square",
+      "width" : 1023
+    },
+    {
+      "bestFactor" : 8,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 341,
+          "maxByteDiff" : 93,
+          "mismatchedBytes" : 2586,
+          "width" : 1023
+        },
+        {
+          "factor" : 2,
+          "height" : 170,
+          "maxByteDiff" : 73,
+          "mismatchedBytes" : 2589,
+          "width" : 511
+        },
+        {
+          "factor" : 4,
+          "height" : 85,
+          "maxByteDiff" : 74,
+          "mismatchedBytes" : 2555,
+          "width" : 255
+        },
+        {
+          "factor" : 8,
+          "height" : 42,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 127
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 341,
+      "largeSourceProbeOnly" : true,
+      "modelMatches" : true,
+      "shape" : "wide",
+      "width" : 1023
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 341,
+          "maxByteDiff" : 1,
+          "mismatchedBytes" : 83,
+          "width" : 1023
+        },
+        {
+          "factor" : 2,
+          "height" : 170,
+          "maxByteDiff" : 20,
+          "mismatchedBytes" : 1387,
+          "width" : 511
+        },
+        {
+          "factor" : 4,
+          "height" : 85,
+          "maxByteDiff" : 19,
+          "mismatchedBytes" : 1560,
+          "width" : 255
+        },
+        {
+          "factor" : 8,
+          "height" : 42,
+          "maxByteDiff" : 95,
+          "mismatchedBytes" : 2107,
+          "width" : 127
+        }
+      ],
+      "format" : "PNG",
+      "height" : 341,
+      "largeSourceProbeOnly" : true,
+      "modelMatches" : false,
+      "shape" : "wide",
+      "width" : 1023
+    },
+    {
+      "bestFactor" : 8,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 1023,
+          "maxByteDiff" : 88,
+          "mismatchedBytes" : 2723,
+          "width" : 341
+        },
+        {
+          "factor" : 2,
+          "height" : 511,
+          "maxByteDiff" : 71,
+          "mismatchedBytes" : 2670,
+          "width" : 170
+        },
+        {
+          "factor" : 4,
+          "height" : 255,
+          "maxByteDiff" : 71,
+          "mismatchedBytes" : 2669,
+          "width" : 85
+        },
+        {
+          "factor" : 8,
+          "height" : 127,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 42
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 1023,
+      "largeSourceProbeOnly" : true,
+      "modelMatches" : true,
+      "shape" : "tall",
+      "width" : 341
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 1023,
+          "maxByteDiff" : 1,
+          "mismatchedBytes" : 17,
+          "width" : 341
+        },
+        {
+          "factor" : 2,
+          "height" : 511,
+          "maxByteDiff" : 8,
+          "mismatchedBytes" : 1146,
+          "width" : 170
+        },
+        {
+          "factor" : 4,
+          "height" : 255,
+          "maxByteDiff" : 20,
+          "mismatchedBytes" : 1686,
+          "width" : 85
+        },
+        {
+          "factor" : 8,
+          "height" : 127,
+          "maxByteDiff" : 54,
+          "mismatchedBytes" : 2117,
+          "width" : 42
+        }
+      ],
+      "format" : "PNG",
+      "height" : 1023,
+      "largeSourceProbeOnly" : true,
+      "modelMatches" : false,
+      "shape" : "tall",
+      "width" : 341
+    },
+    {
+      "bestFactor" : 8,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 1024,
+          "maxByteDiff" : 4,
+          "mismatchedBytes" : 559,
+          "width" : 1024
+        },
+        {
+          "factor" : 2,
+          "height" : 512,
+          "maxByteDiff" : 4,
+          "mismatchedBytes" : 502,
+          "width" : 512
+        },
+        {
+          "factor" : 4,
+          "height" : 256,
+          "maxByteDiff" : 4,
+          "mismatchedBytes" : 451,
+          "width" : 256
+        },
+        {
+          "factor" : 8,
+          "height" : 128,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 128
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 1024,
+      "largeSourceProbeOnly" : true,
+      "modelMatches" : true,
+      "shape" : "square",
+      "width" : 1024
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 1024,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 1024
+        },
+        {
+          "factor" : 2,
+          "height" : 512,
+          "maxByteDiff" : 2,
+          "mismatchedBytes" : 277,
+          "width" : 512
+        },
+        {
+          "factor" : 4,
+          "height" : 256,
+          "maxByteDiff" : 4,
+          "mismatchedBytes" : 656,
+          "width" : 256
+        },
+        {
+          "factor" : 8,
+          "height" : 128,
+          "maxByteDiff" : 8,
+          "mismatchedBytes" : 1533,
+          "width" : 128
+        }
+      ],
+      "format" : "PNG",
+      "height" : 1024,
+      "largeSourceProbeOnly" : true,
+      "modelMatches" : true,
+      "shape" : "square",
+      "width" : 1024
+    },
+    {
+      "bestFactor" : 8,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 341,
+          "maxByteDiff" : 93,
+          "mismatchedBytes" : 2341,
+          "width" : 1024
+        },
+        {
+          "factor" : 2,
+          "height" : 170,
+          "maxByteDiff" : 73,
+          "mismatchedBytes" : 2359,
+          "width" : 512
+        },
+        {
+          "factor" : 4,
+          "height" : 85,
+          "maxByteDiff" : 74,
+          "mismatchedBytes" : 2252,
+          "width" : 256
+        },
+        {
+          "factor" : 8,
+          "height" : 42,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 128
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 341,
+      "largeSourceProbeOnly" : true,
+      "modelMatches" : true,
+      "shape" : "wide",
+      "width" : 1024
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 341,
+          "maxByteDiff" : 1,
+          "mismatchedBytes" : 8,
+          "width" : 1024
+        },
+        {
+          "factor" : 2,
+          "height" : 170,
+          "maxByteDiff" : 20,
+          "mismatchedBytes" : 1413,
+          "width" : 512
+        },
+        {
+          "factor" : 4,
+          "height" : 85,
+          "maxByteDiff" : 19,
+          "mismatchedBytes" : 1654,
+          "width" : 256
+        },
+        {
+          "factor" : 8,
+          "height" : 42,
+          "maxByteDiff" : 95,
+          "mismatchedBytes" : 2201,
+          "width" : 128
+        }
+      ],
+      "format" : "PNG",
+      "height" : 341,
+      "largeSourceProbeOnly" : true,
+      "modelMatches" : false,
+      "shape" : "wide",
+      "width" : 1024
+    },
+    {
+      "bestFactor" : 8,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 1024,
+          "maxByteDiff" : 88,
+          "mismatchedBytes" : 2589,
+          "width" : 341
+        },
+        {
+          "factor" : 2,
+          "height" : 512,
+          "maxByteDiff" : 71,
+          "mismatchedBytes" : 2534,
+          "width" : 170
+        },
+        {
+          "factor" : 4,
+          "height" : 256,
+          "maxByteDiff" : 71,
+          "mismatchedBytes" : 2556,
+          "width" : 85
+        },
+        {
+          "factor" : 8,
+          "height" : 128,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 42
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 1024,
+      "largeSourceProbeOnly" : true,
+      "modelMatches" : true,
+      "shape" : "tall",
+      "width" : 341
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 1024,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 341
+        },
+        {
+          "factor" : 2,
+          "height" : 512,
+          "maxByteDiff" : 8,
+          "mismatchedBytes" : 705,
+          "width" : 170
+        },
+        {
+          "factor" : 4,
+          "height" : 256,
+          "maxByteDiff" : 17,
+          "mismatchedBytes" : 1423,
+          "width" : 85
+        },
+        {
+          "factor" : 8,
+          "height" : 128,
+          "maxByteDiff" : 35,
+          "mismatchedBytes" : 2046,
+          "width" : 42
+        }
+      ],
+      "format" : "PNG",
+      "height" : 1024,
+      "largeSourceProbeOnly" : true,
+      "modelMatches" : true,
+      "shape" : "tall",
+      "width" : 341
+    },
+    {
+      "bestFactor" : 8,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 1025,
+          "maxByteDiff" : 8,
+          "mismatchedBytes" : 1448,
+          "width" : 1025
+        },
+        {
+          "factor" : 2,
+          "height" : 512,
+          "maxByteDiff" : 4,
+          "mismatchedBytes" : 502,
+          "width" : 512
+        },
+        {
+          "factor" : 4,
+          "height" : 256,
+          "maxByteDiff" : 4,
+          "mismatchedBytes" : 453,
+          "width" : 256
+        },
+        {
+          "factor" : 8,
+          "height" : 128,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 128
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 1025,
+      "largeSourceProbeOnly" : true,
+      "modelMatches" : true,
+      "shape" : "square",
+      "width" : 1025
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 1025,
+          "maxByteDiff" : 2,
+          "mismatchedBytes" : 101,
+          "width" : 1025
+        },
+        {
+          "factor" : 2,
+          "height" : 512,
+          "maxByteDiff" : 7,
+          "mismatchedBytes" : 935,
+          "width" : 512
+        },
+        {
+          "factor" : 4,
+          "height" : 256,
+          "maxByteDiff" : 7,
+          "mismatchedBytes" : 1157,
+          "width" : 256
+        },
+        {
+          "factor" : 8,
+          "height" : 128,
+          "maxByteDiff" : 10,
+          "mismatchedBytes" : 1666,
+          "width" : 128
+        }
+      ],
+      "format" : "PNG",
+      "height" : 1025,
+      "largeSourceProbeOnly" : true,
+      "modelMatches" : false,
+      "shape" : "square",
+      "width" : 1025
+    },
+    {
+      "bestFactor" : 8,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 341,
+          "maxByteDiff" : 93,
+          "mismatchedBytes" : 2388,
+          "width" : 1025
+        },
+        {
+          "factor" : 2,
+          "height" : 170,
+          "maxByteDiff" : 73,
+          "mismatchedBytes" : 2353,
+          "width" : 512
+        },
+        {
+          "factor" : 4,
+          "height" : 85,
+          "maxByteDiff" : 74,
+          "mismatchedBytes" : 2254,
+          "width" : 256
+        },
+        {
+          "factor" : 8,
+          "height" : 42,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 128
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 341,
+      "largeSourceProbeOnly" : true,
+      "modelMatches" : true,
+      "shape" : "wide",
+      "width" : 1025
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 341,
+          "maxByteDiff" : 1,
+          "mismatchedBytes" : 54,
+          "width" : 1025
+        },
+        {
+          "factor" : 2,
+          "height" : 170,
+          "maxByteDiff" : 20,
+          "mismatchedBytes" : 1415,
+          "width" : 512
+        },
+        {
+          "factor" : 4,
+          "height" : 85,
+          "maxByteDiff" : 19,
+          "mismatchedBytes" : 1624,
+          "width" : 256
+        },
+        {
+          "factor" : 8,
+          "height" : 42,
+          "maxByteDiff" : 95,
+          "mismatchedBytes" : 2157,
+          "width" : 128
+        }
+      ],
+      "format" : "PNG",
+      "height" : 341,
+      "largeSourceProbeOnly" : true,
+      "modelMatches" : false,
+      "shape" : "wide",
+      "width" : 1025
+    },
+    {
+      "bestFactor" : 8,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 1025,
+          "maxByteDiff" : 88,
+          "mismatchedBytes" : 2657,
+          "width" : 341
+        },
+        {
+          "factor" : 2,
+          "height" : 512,
+          "maxByteDiff" : 71,
+          "mismatchedBytes" : 2536,
+          "width" : 170
+        },
+        {
+          "factor" : 4,
+          "height" : 256,
+          "maxByteDiff" : 71,
+          "mismatchedBytes" : 2543,
+          "width" : 85
+        },
+        {
+          "factor" : 8,
+          "height" : 128,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 42
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 1025,
+      "largeSourceProbeOnly" : true,
+      "modelMatches" : true,
+      "shape" : "tall",
+      "width" : 341
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 1025,
+          "maxByteDiff" : 1,
+          "mismatchedBytes" : 58,
+          "width" : 341
+        },
+        {
+          "factor" : 2,
+          "height" : 512,
+          "maxByteDiff" : 8,
+          "mismatchedBytes" : 1191,
+          "width" : 170
+        },
+        {
+          "factor" : 4,
+          "height" : 256,
+          "maxByteDiff" : 17,
+          "mismatchedBytes" : 1619,
+          "width" : 85
+        },
+        {
+          "factor" : 8,
+          "height" : 128,
+          "maxByteDiff" : 35,
+          "mismatchedBytes" : 2103,
+          "width" : 42
+        }
+      ],
+      "format" : "PNG",
+      "height" : 1025,
+      "largeSourceProbeOnly" : true,
+      "modelMatches" : false,
+      "shape" : "tall",
+      "width" : 341
+    },
+    {
+      "bestFactor" : 8,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 1200,
+          "maxByteDiff" : 10,
+          "mismatchedBytes" : 1086,
+          "width" : 1200
+        },
+        {
+          "factor" : 2,
+          "height" : 600,
+          "maxByteDiff" : 10,
+          "mismatchedBytes" : 1086,
+          "width" : 600
+        },
+        {
+          "factor" : 4,
+          "height" : 300,
+          "maxByteDiff" : 10,
+          "mismatchedBytes" : 1062,
+          "width" : 300
+        },
+        {
+          "factor" : 8,
+          "height" : 150,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 150
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 1200,
+      "largeSourceProbeOnly" : true,
+      "modelMatches" : true,
+      "shape" : "square",
+      "width" : 1200
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 1200,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 1200
+        },
+        {
+          "factor" : 2,
+          "height" : 600,
+          "maxByteDiff" : 2,
+          "mismatchedBytes" : 224,
+          "width" : 600
+        },
+        {
+          "factor" : 4,
+          "height" : 300,
+          "maxByteDiff" : 2,
+          "mismatchedBytes" : 430,
+          "width" : 300
+        },
+        {
+          "factor" : 8,
+          "height" : 150,
+          "maxByteDiff" : 12,
+          "mismatchedBytes" : 1249,
+          "width" : 150
+        }
+      ],
+      "format" : "PNG",
+      "height" : 1200,
+      "largeSourceProbeOnly" : true,
+      "modelMatches" : true,
+      "shape" : "square",
+      "width" : 1200
+    },
+    {
+      "bestFactor" : 8,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 400,
+          "maxByteDiff" : 29,
+          "mismatchedBytes" : 1996,
+          "width" : 1200
+        },
+        {
+          "factor" : 2,
+          "height" : 200,
+          "maxByteDiff" : 29,
+          "mismatchedBytes" : 1981,
+          "width" : 600
+        },
+        {
+          "factor" : 4,
+          "height" : 100,
+          "maxByteDiff" : 30,
+          "mismatchedBytes" : 1998,
+          "width" : 300
+        },
+        {
+          "factor" : 8,
+          "height" : 50,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 150
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 400,
+      "largeSourceProbeOnly" : true,
+      "modelMatches" : true,
+      "shape" : "wide",
+      "width" : 1200
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 400,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 1200
+        },
+        {
+          "factor" : 2,
+          "height" : 200,
+          "maxByteDiff" : 4,
+          "mismatchedBytes" : 437,
+          "width" : 600
+        },
+        {
+          "factor" : 4,
+          "height" : 100,
+          "maxByteDiff" : 5,
+          "mismatchedBytes" : 1106,
+          "width" : 300
+        },
+        {
+          "factor" : 8,
+          "height" : 50,
+          "maxByteDiff" : 28,
+          "mismatchedBytes" : 1801,
+          "width" : 150
+        }
+      ],
+      "format" : "PNG",
+      "height" : 400,
+      "largeSourceProbeOnly" : true,
+      "modelMatches" : true,
+      "shape" : "wide",
+      "width" : 1200
+    },
+    {
+      "bestFactor" : 8,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 1200,
+          "maxByteDiff" : 26,
+          "mismatchedBytes" : 2372,
+          "width" : 400
+        },
+        {
+          "factor" : 2,
+          "height" : 600,
+          "maxByteDiff" : 26,
+          "mismatchedBytes" : 2346,
+          "width" : 200
+        },
+        {
+          "factor" : 4,
+          "height" : 300,
+          "maxByteDiff" : 27,
+          "mismatchedBytes" : 2284,
+          "width" : 100
+        },
+        {
+          "factor" : 8,
+          "height" : 150,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 50
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 1200,
+      "largeSourceProbeOnly" : true,
+      "modelMatches" : true,
+      "shape" : "tall",
+      "width" : 400
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 1200,
+          "maxByteDiff" : 1,
+          "mismatchedBytes" : 1,
+          "width" : 400
+        },
+        {
+          "factor" : 2,
+          "height" : 600,
+          "maxByteDiff" : 5,
+          "mismatchedBytes" : 516,
+          "width" : 200
+        },
+        {
+          "factor" : 4,
+          "height" : 300,
+          "maxByteDiff" : 11,
+          "mismatchedBytes" : 1193,
+          "width" : 100
+        },
+        {
+          "factor" : 8,
+          "height" : 150,
+          "maxByteDiff" : 27,
+          "mismatchedBytes" : 1958,
+          "width" : 50
+        }
+      ],
+      "format" : "PNG",
+      "height" : 1200,
+      "largeSourceProbeOnly" : true,
+      "modelMatches" : true,
+      "shape" : "tall",
+      "width" : 400
+    },
+    {
+      "bestFactor" : 8,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 1439,
+          "maxByteDiff" : 36,
+          "mismatchedBytes" : 1987,
+          "width" : 1439
+        },
+        {
+          "factor" : 2,
+          "height" : 719,
+          "maxByteDiff" : 32,
+          "mismatchedBytes" : 1960,
+          "width" : 719
+        },
+        {
+          "factor" : 4,
+          "height" : 359,
+          "maxByteDiff" : 22,
+          "mismatchedBytes" : 1896,
+          "width" : 359
+        },
+        {
+          "factor" : 8,
+          "height" : 179,
+          "maxByteDiff" : 1,
+          "mismatchedBytes" : 4,
+          "width" : 179
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 1439,
+      "largeSourceProbeOnly" : true,
+      "modelMatches" : true,
+      "shape" : "square",
+      "width" : 1439
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 1439,
+          "maxByteDiff" : 1,
+          "mismatchedBytes" : 33,
+          "width" : 1439
+        },
+        {
+          "factor" : 2,
+          "height" : 719,
+          "maxByteDiff" : 5,
+          "mismatchedBytes" : 619,
+          "width" : 719
+        },
+        {
+          "factor" : 4,
+          "height" : 359,
+          "maxByteDiff" : 14,
+          "mismatchedBytes" : 1018,
+          "width" : 359
+        },
+        {
+          "factor" : 8,
+          "height" : 179,
+          "maxByteDiff" : 34,
+          "mismatchedBytes" : 1490,
+          "width" : 179
+        }
+      ],
+      "format" : "PNG",
+      "height" : 1439,
+      "largeSourceProbeOnly" : true,
+      "modelMatches" : false,
+      "shape" : "square",
+      "width" : 1439
+    },
+    {
+      "bestFactor" : 8,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 479,
+          "maxByteDiff" : 100,
+          "mismatchedBytes" : 2393,
+          "width" : 1439
+        },
+        {
+          "factor" : 2,
+          "height" : 239,
+          "maxByteDiff" : 87,
+          "mismatchedBytes" : 2389,
+          "width" : 719
+        },
+        {
+          "factor" : 4,
+          "height" : 119,
+          "maxByteDiff" : 59,
+          "mismatchedBytes" : 2359,
+          "width" : 359
+        },
+        {
+          "factor" : 8,
+          "height" : 59,
+          "maxByteDiff" : 1,
+          "mismatchedBytes" : 3,
+          "width" : 179
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 479,
+      "largeSourceProbeOnly" : true,
+      "modelMatches" : true,
+      "shape" : "wide",
+      "width" : 1439
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 479,
+          "maxByteDiff" : 1,
+          "mismatchedBytes" : 23,
+          "width" : 1439
+        },
+        {
+          "factor" : 2,
+          "height" : 239,
+          "maxByteDiff" : 16,
+          "mismatchedBytes" : 1032,
+          "width" : 719
+        },
+        {
+          "factor" : 4,
+          "height" : 119,
+          "maxByteDiff" : 41,
+          "mismatchedBytes" : 1541,
+          "width" : 359
+        },
+        {
+          "factor" : 8,
+          "height" : 59,
+          "maxByteDiff" : 103,
+          "mismatchedBytes" : 1934,
+          "width" : 179
+        }
+      ],
+      "format" : "PNG",
+      "height" : 479,
+      "largeSourceProbeOnly" : true,
+      "modelMatches" : false,
+      "shape" : "wide",
+      "width" : 1439
+    },
+    {
+      "bestFactor" : 8,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 1439,
+          "maxByteDiff" : 101,
+          "mismatchedBytes" : 2709,
+          "width" : 479
+        },
+        {
+          "factor" : 2,
+          "height" : 719,
+          "maxByteDiff" : 87,
+          "mismatchedBytes" : 2674,
+          "width" : 239
+        },
+        {
+          "factor" : 4,
+          "height" : 359,
+          "maxByteDiff" : 59,
+          "mismatchedBytes" : 2606,
+          "width" : 119
+        },
+        {
+          "factor" : 8,
+          "height" : 179,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 59
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 1439,
+      "largeSourceProbeOnly" : true,
+      "modelMatches" : true,
+      "shape" : "tall",
+      "width" : 479
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 1439,
+          "maxByteDiff" : 1,
+          "mismatchedBytes" : 7,
+          "width" : 479
+        },
+        {
+          "factor" : 2,
+          "height" : 719,
+          "maxByteDiff" : 7,
+          "mismatchedBytes" : 888,
+          "width" : 239
+        },
+        {
+          "factor" : 4,
+          "height" : 359,
+          "maxByteDiff" : 15,
+          "mismatchedBytes" : 1427,
+          "width" : 119
+        },
+        {
+          "factor" : 8,
+          "height" : 179,
+          "maxByteDiff" : 38,
+          "mismatchedBytes" : 1946,
+          "width" : 59
+        }
+      ],
+      "format" : "PNG",
+      "height" : 1439,
+      "largeSourceProbeOnly" : true,
+      "modelMatches" : false,
+      "shape" : "tall",
+      "width" : 479
+    },
+    {
+      "bestFactor" : 8,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 1440,
+          "maxByteDiff" : 7,
+          "mismatchedBytes" : 991,
+          "width" : 1440
+        },
+        {
+          "factor" : 2,
+          "height" : 720,
+          "maxByteDiff" : 7,
+          "mismatchedBytes" : 964,
+          "width" : 720
+        },
+        {
+          "factor" : 4,
+          "height" : 360,
+          "maxByteDiff" : 7,
+          "mismatchedBytes" : 957,
+          "width" : 360
+        },
+        {
+          "factor" : 8,
+          "height" : 180,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 180
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 1440,
+      "largeSourceProbeOnly" : true,
+      "modelMatches" : true,
+      "shape" : "square",
+      "width" : 1440
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 1440,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 1440
+        },
+        {
+          "factor" : 2,
+          "height" : 720,
+          "maxByteDiff" : 2,
+          "mismatchedBytes" : 88,
+          "width" : 720
+        },
+        {
+          "factor" : 4,
+          "height" : 360,
+          "maxByteDiff" : 2,
+          "mismatchedBytes" : 274,
+          "width" : 360
+        },
+        {
+          "factor" : 8,
+          "height" : 180,
+          "maxByteDiff" : 8,
+          "mismatchedBytes" : 829,
+          "width" : 180
+        }
+      ],
+      "format" : "PNG",
+      "height" : 1440,
+      "largeSourceProbeOnly" : true,
+      "modelMatches" : true,
+      "shape" : "square",
+      "width" : 1440
+    },
+    {
+      "bestFactor" : 8,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 480,
+          "maxByteDiff" : 19,
+          "mismatchedBytes" : 2048,
+          "width" : 1440
+        },
+        {
+          "factor" : 2,
+          "height" : 240,
+          "maxByteDiff" : 21,
+          "mismatchedBytes" : 2045,
+          "width" : 720
+        },
+        {
+          "factor" : 4,
+          "height" : 120,
+          "maxByteDiff" : 18,
+          "mismatchedBytes" : 1999,
+          "width" : 360
+        },
+        {
+          "factor" : 8,
+          "height" : 60,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 180
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 480,
+      "largeSourceProbeOnly" : true,
+      "modelMatches" : true,
+      "shape" : "wide",
+      "width" : 1440
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 480,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 1440
+        },
+        {
+          "factor" : 2,
+          "height" : 240,
+          "maxByteDiff" : 7,
+          "mismatchedBytes" : 399,
+          "width" : 720
+        },
+        {
+          "factor" : 4,
+          "height" : 120,
+          "maxByteDiff" : 11,
+          "mismatchedBytes" : 989,
+          "width" : 360
+        },
+        {
+          "factor" : 8,
+          "height" : 60,
+          "maxByteDiff" : 20,
+          "mismatchedBytes" : 1775,
+          "width" : 180
+        }
+      ],
+      "format" : "PNG",
+      "height" : 480,
+      "largeSourceProbeOnly" : true,
+      "modelMatches" : true,
+      "shape" : "wide",
+      "width" : 1440
+    },
+    {
+      "bestFactor" : 8,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 1440,
+          "maxByteDiff" : 25,
+          "mismatchedBytes" : 2188,
+          "width" : 480
+        },
+        {
+          "factor" : 2,
+          "height" : 720,
+          "maxByteDiff" : 24,
+          "mismatchedBytes" : 2208,
+          "width" : 240
+        },
+        {
+          "factor" : 4,
+          "height" : 360,
+          "maxByteDiff" : 23,
+          "mismatchedBytes" : 2143,
+          "width" : 120
+        },
+        {
+          "factor" : 8,
+          "height" : 180,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 60
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 1440,
+      "largeSourceProbeOnly" : true,
+      "modelMatches" : true,
+      "shape" : "tall",
+      "width" : 480
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 1440,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 480
+        },
+        {
+          "factor" : 2,
+          "height" : 720,
+          "maxByteDiff" : 7,
+          "mismatchedBytes" : 364,
+          "width" : 240
+        },
+        {
+          "factor" : 4,
+          "height" : 360,
+          "maxByteDiff" : 11,
+          "mismatchedBytes" : 1141,
+          "width" : 120
+        },
+        {
+          "factor" : 8,
+          "height" : 180,
+          "maxByteDiff" : 26,
+          "mismatchedBytes" : 1737,
+          "width" : 60
+        }
+      ],
+      "format" : "PNG",
+      "height" : 1440,
+      "largeSourceProbeOnly" : true,
+      "modelMatches" : true,
+      "shape" : "tall",
+      "width" : 480
+    },
+    {
+      "bestFactor" : 8,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 1441,
+          "maxByteDiff" : 8,
+          "mismatchedBytes" : 1464,
+          "width" : 1441
+        },
+        {
+          "factor" : 2,
+          "height" : 720,
+          "maxByteDiff" : 7,
+          "mismatchedBytes" : 878,
+          "width" : 720
+        },
+        {
+          "factor" : 4,
+          "height" : 360,
+          "maxByteDiff" : 7,
+          "mismatchedBytes" : 863,
+          "width" : 360
+        },
+        {
+          "factor" : 8,
+          "height" : 180,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 180
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 1441,
+      "largeSourceProbeOnly" : true,
+      "modelMatches" : true,
+      "shape" : "square",
+      "width" : 1441
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 1441,
+          "maxByteDiff" : 1,
+          "mismatchedBytes" : 13,
+          "width" : 1441
+        },
+        {
+          "factor" : 2,
+          "height" : 720,
+          "maxByteDiff" : 4,
+          "mismatchedBytes" : 757,
+          "width" : 720
+        },
+        {
+          "factor" : 4,
+          "height" : 360,
+          "maxByteDiff" : 5,
+          "mismatchedBytes" : 833,
+          "width" : 360
+        },
+        {
+          "factor" : 8,
+          "height" : 180,
+          "maxByteDiff" : 8,
+          "mismatchedBytes" : 1152,
+          "width" : 180
+        }
+      ],
+      "format" : "PNG",
+      "height" : 1441,
+      "largeSourceProbeOnly" : true,
+      "modelMatches" : false,
+      "shape" : "square",
+      "width" : 1441
+    },
+    {
+      "bestFactor" : 8,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 480,
+          "maxByteDiff" : 19,
+          "mismatchedBytes" : 2117,
+          "width" : 1441
+        },
+        {
+          "factor" : 2,
+          "height" : 240,
+          "maxByteDiff" : 21,
+          "mismatchedBytes" : 2015,
+          "width" : 720
+        },
+        {
+          "factor" : 4,
+          "height" : 120,
+          "maxByteDiff" : 17,
+          "mismatchedBytes" : 1968,
+          "width" : 360
+        },
+        {
+          "factor" : 8,
+          "height" : 60,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 180
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 480,
+      "largeSourceProbeOnly" : true,
+      "modelMatches" : true,
+      "shape" : "wide",
+      "width" : 1441
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 480,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 1441
+        },
+        {
+          "factor" : 2,
+          "height" : 240,
+          "maxByteDiff" : 7,
+          "mismatchedBytes" : 448,
+          "width" : 720
+        },
+        {
+          "factor" : 4,
+          "height" : 120,
+          "maxByteDiff" : 11,
+          "mismatchedBytes" : 975,
+          "width" : 360
+        },
+        {
+          "factor" : 8,
+          "height" : 60,
+          "maxByteDiff" : 20,
+          "mismatchedBytes" : 1755,
+          "width" : 180
+        }
+      ],
+      "format" : "PNG",
+      "height" : 480,
+      "largeSourceProbeOnly" : true,
+      "modelMatches" : true,
+      "shape" : "wide",
+      "width" : 1441
+    },
+    {
+      "bestFactor" : 8,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 1441,
+          "maxByteDiff" : 25,
+          "mismatchedBytes" : 2262,
+          "width" : 480
+        },
+        {
+          "factor" : 2,
+          "height" : 720,
+          "maxByteDiff" : 24,
+          "mismatchedBytes" : 2213,
+          "width" : 240
+        },
+        {
+          "factor" : 4,
+          "height" : 360,
+          "maxByteDiff" : 23,
+          "mismatchedBytes" : 2139,
+          "width" : 120
+        },
+        {
+          "factor" : 8,
+          "height" : 180,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 60
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 1441,
+      "largeSourceProbeOnly" : true,
+      "modelMatches" : true,
+      "shape" : "tall",
+      "width" : 480
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 1441,
+          "maxByteDiff" : 1,
+          "mismatchedBytes" : 12,
+          "width" : 480
+        },
+        {
+          "factor" : 2,
+          "height" : 720,
+          "maxByteDiff" : 7,
+          "mismatchedBytes" : 893,
+          "width" : 240
+        },
+        {
+          "factor" : 4,
+          "height" : 360,
+          "maxByteDiff" : 11,
+          "mismatchedBytes" : 1377,
+          "width" : 120
+        },
+        {
+          "factor" : 8,
+          "height" : 180,
+          "maxByteDiff" : 26,
+          "mismatchedBytes" : 1798,
+          "width" : 60
+        }
+      ],
+      "format" : "PNG",
+      "height" : 1441,
+      "largeSourceProbeOnly" : true,
+      "modelMatches" : false,
+      "shape" : "tall",
+      "width" : 480
+    },
+    {
+      "bestFactor" : 8,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 1600,
+          "maxByteDiff" : 4,
+          "mismatchedBytes" : 597,
+          "width" : 1600
+        },
+        {
+          "factor" : 2,
+          "height" : 800,
+          "maxByteDiff" : 4,
+          "mismatchedBytes" : 611,
+          "width" : 800
+        },
+        {
+          "factor" : 4,
+          "height" : 400,
+          "maxByteDiff" : 4,
+          "mismatchedBytes" : 632,
+          "width" : 400
+        },
+        {
+          "factor" : 8,
+          "height" : 200,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 200
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 1600,
+      "largeSourceProbeOnly" : true,
+      "modelMatches" : true,
+      "shape" : "square",
+      "width" : 1600
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 1600,
+          "maxByteDiff" : 1,
+          "mismatchedBytes" : 31,
+          "width" : 1600
+        },
+        {
+          "factor" : 2,
+          "height" : 800,
+          "maxByteDiff" : 1,
+          "mismatchedBytes" : 105,
+          "width" : 800
+        },
+        {
+          "factor" : 4,
+          "height" : 400,
+          "maxByteDiff" : 2,
+          "mismatchedBytes" : 210,
+          "width" : 400
+        },
+        {
+          "factor" : 8,
+          "height" : 200,
+          "maxByteDiff" : 6,
+          "mismatchedBytes" : 689,
+          "width" : 200
+        }
+      ],
+      "format" : "PNG",
+      "height" : 1600,
+      "largeSourceProbeOnly" : true,
+      "modelMatches" : false,
+      "shape" : "square",
+      "width" : 1600
+    },
+    {
+      "bestFactor" : 8,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 533,
+          "maxByteDiff" : 63,
+          "mismatchedBytes" : 2007,
+          "width" : 1600
+        },
+        {
+          "factor" : 2,
+          "height" : 266,
+          "maxByteDiff" : 50,
+          "mismatchedBytes" : 1992,
+          "width" : 800
+        },
+        {
+          "factor" : 4,
+          "height" : 133,
+          "maxByteDiff" : 53,
+          "mismatchedBytes" : 2005,
+          "width" : 400
+        },
+        {
+          "factor" : 8,
+          "height" : 66,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 200
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 533,
+      "largeSourceProbeOnly" : true,
+      "modelMatches" : true,
+      "shape" : "wide",
+      "width" : 1600
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 533,
+          "maxByteDiff" : 1,
+          "mismatchedBytes" : 25,
+          "width" : 1600
+        },
+        {
+          "factor" : 2,
+          "height" : 266,
+          "maxByteDiff" : 13,
+          "mismatchedBytes" : 963,
+          "width" : 800
+        },
+        {
+          "factor" : 4,
+          "height" : 133,
+          "maxByteDiff" : 13,
+          "mismatchedBytes" : 1138,
+          "width" : 400
+        },
+        {
+          "factor" : 8,
+          "height" : 66,
+          "maxByteDiff" : 58,
+          "mismatchedBytes" : 1864,
+          "width" : 200
+        }
+      ],
+      "format" : "PNG",
+      "height" : 533,
+      "largeSourceProbeOnly" : true,
+      "modelMatches" : false,
+      "shape" : "wide",
+      "width" : 1600
+    },
+    {
+      "bestFactor" : 8,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 1600,
+          "maxByteDiff" : 63,
+          "mismatchedBytes" : 2319,
+          "width" : 533
+        },
+        {
+          "factor" : 2,
+          "height" : 800,
+          "maxByteDiff" : 49,
+          "mismatchedBytes" : 2306,
+          "width" : 266
+        },
+        {
+          "factor" : 4,
+          "height" : 400,
+          "maxByteDiff" : 50,
+          "mismatchedBytes" : 2292,
+          "width" : 133
+        },
+        {
+          "factor" : 8,
+          "height" : 200,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 66
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 1600,
+      "largeSourceProbeOnly" : true,
+      "modelMatches" : true,
+      "shape" : "tall",
+      "width" : 533
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 1600,
+          "maxByteDiff" : 1,
+          "mismatchedBytes" : 7,
+          "width" : 533
+        },
+        {
+          "factor" : 2,
+          "height" : 800,
+          "maxByteDiff" : 4,
+          "mismatchedBytes" : 285,
+          "width" : 266
+        },
+        {
+          "factor" : 4,
+          "height" : 400,
+          "maxByteDiff" : 3,
+          "mismatchedBytes" : 819,
+          "width" : 133
+        },
+        {
+          "factor" : 8,
+          "height" : 200,
+          "maxByteDiff" : 20,
+          "mismatchedBytes" : 1716,
+          "width" : 66
+        }
+      ],
+      "format" : "PNG",
+      "height" : 1600,
+      "largeSourceProbeOnly" : true,
+      "modelMatches" : false,
+      "shape" : "tall",
+      "width" : 533
+    },
+    {
+      "bestFactor" : 8,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 2000,
+          "maxByteDiff" : 3,
+          "mismatchedBytes" : 533,
+          "width" : 2000
+        },
+        {
+          "factor" : 2,
+          "height" : 1000,
+          "maxByteDiff" : 3,
+          "mismatchedBytes" : 553,
+          "width" : 1000
+        },
+        {
+          "factor" : 4,
+          "height" : 500,
+          "maxByteDiff" : 3,
+          "mismatchedBytes" : 540,
+          "width" : 500
+        },
+        {
+          "factor" : 8,
+          "height" : 250,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 250
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 2000,
+      "largeSourceProbeOnly" : true,
+      "modelMatches" : true,
+      "shape" : "square",
+      "width" : 2000
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 2000,
+          "maxByteDiff" : 1,
+          "mismatchedBytes" : 14,
+          "width" : 2000
+        },
+        {
+          "factor" : 2,
+          "height" : 1000,
+          "maxByteDiff" : 1,
+          "mismatchedBytes" : 78,
+          "width" : 1000
+        },
+        {
+          "factor" : 4,
+          "height" : 500,
+          "maxByteDiff" : 2,
+          "mismatchedBytes" : 172,
+          "width" : 500
+        },
+        {
+          "factor" : 8,
+          "height" : 250,
+          "maxByteDiff" : 4,
+          "mismatchedBytes" : 339,
+          "width" : 250
+        }
+      ],
+      "format" : "PNG",
+      "height" : 2000,
+      "largeSourceProbeOnly" : true,
+      "modelMatches" : false,
+      "shape" : "square",
+      "width" : 2000
+    },
+    {
+      "bestFactor" : 8,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 666,
+          "maxByteDiff" : 20,
+          "mismatchedBytes" : 1644,
+          "width" : 2000
+        },
+        {
+          "factor" : 2,
+          "height" : 333,
+          "maxByteDiff" : 20,
+          "mismatchedBytes" : 1641,
+          "width" : 1000
+        },
+        {
+          "factor" : 4,
+          "height" : 166,
+          "maxByteDiff" : 4,
+          "mismatchedBytes" : 1059,
+          "width" : 500
+        },
+        {
+          "factor" : 8,
+          "height" : 83,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 250
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 666,
+      "largeSourceProbeOnly" : true,
+      "modelMatches" : true,
+      "shape" : "wide",
+      "width" : 2000
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 666,
+          "maxByteDiff" : 1,
+          "mismatchedBytes" : 14,
+          "width" : 2000
+        },
+        {
+          "factor" : 2,
+          "height" : 333,
+          "maxByteDiff" : 2,
+          "mismatchedBytes" : 164,
+          "width" : 1000
+        },
+        {
+          "factor" : 4,
+          "height" : 166,
+          "maxByteDiff" : 19,
+          "mismatchedBytes" : 1098,
+          "width" : 500
+        },
+        {
+          "factor" : 8,
+          "height" : 83,
+          "maxByteDiff" : 20,
+          "mismatchedBytes" : 1677,
+          "width" : 250
+        }
+      ],
+      "format" : "PNG",
+      "height" : 666,
+      "largeSourceProbeOnly" : true,
+      "modelMatches" : false,
+      "shape" : "wide",
+      "width" : 2000
+    },
+    {
+      "bestFactor" : 8,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 2000,
+          "maxByteDiff" : 21,
+          "mismatchedBytes" : 2125,
+          "width" : 666
+        },
+        {
+          "factor" : 2,
+          "height" : 1000,
+          "maxByteDiff" : 21,
+          "mismatchedBytes" : 2134,
+          "width" : 333
+        },
+        {
+          "factor" : 4,
+          "height" : 500,
+          "maxByteDiff" : 5,
+          "mismatchedBytes" : 1315,
+          "width" : 166
+        },
+        {
+          "factor" : 8,
+          "height" : 250,
+          "maxByteDiff" : 0,
+          "mismatchedBytes" : 0,
+          "width" : 83
+        }
+      ],
+      "format" : "JPEG",
+      "height" : 2000,
+      "largeSourceProbeOnly" : true,
+      "modelMatches" : true,
+      "shape" : "tall",
+      "width" : 666
+    },
+    {
+      "bestFactor" : 1,
+      "candidates" : [
+        {
+          "factor" : 1,
+          "height" : 2000,
+          "maxByteDiff" : 1,
+          "mismatchedBytes" : 1,
+          "width" : 666
+        },
+        {
+          "factor" : 2,
+          "height" : 1000,
+          "maxByteDiff" : 3,
+          "mismatchedBytes" : 217,
+          "width" : 333
+        },
+        {
+          "factor" : 4,
+          "height" : 500,
+          "maxByteDiff" : 4,
+          "mismatchedBytes" : 767,
+          "width" : 166
+        },
+        {
+          "factor" : 8,
+          "height" : 250,
+          "maxByteDiff" : 6,
+          "mismatchedBytes" : 1468,
+          "width" : 83
+        }
+      ],
+      "format" : "PNG",
+      "height" : 2000,
+      "largeSourceProbeOnly" : true,
+      "modelMatches" : true,
+      "shape" : "tall",
+      "width" : 666
+    }
+  ],
+  "schemaVersion" : 1,
+  "sizes" : [
+    33,
+    40,
+    48,
+    63,
+    64,
+    65,
+    95,
+    96,
+    100,
+    127,
+    128,
+    129,
+    200,
+    254,
+    255,
+    256,
+    257,
+    300,
+    472,
+    600,
+    1000,
+    1023,
+    1024,
+    1025,
+    1200,
+    1439,
+    1440,
+    1441,
+    1600,
+    2000
+  ]
+}

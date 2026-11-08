@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Merged only into builds without the battery log (releases without -pre, benchmark; app/build.gradle.kts).
+     App info then offers "Manage space" (opens Music storage) instead of "Clear storage"; debug and -pre keep Clear. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application android:manageSpaceActivity="dev.coda.android.ManageSpaceActivity">
+        <!-- Not exported: Settings starts it with the system uid. -->
+        <activity
+            android:name="dev.coda.android.ManageSpaceActivity"
+            android:exported="false"
+            android:noHistory="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+    </application>
+</manifest>

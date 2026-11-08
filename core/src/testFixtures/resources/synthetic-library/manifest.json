@@ -1,0 +1,18 @@
+{
+  "seed": 20261020,
+  "sampleRate": 44100,
+  "tracks": [
+    {
+      "id": "track-1",
+      "sourceFrames": 91877,
+      "flacBytes": 122163,
+      "opusBytes": 36908
+    },
+    {
+      "id": "track-2",
+      "sourceFrames": 88211,
+      "flacBytes": 117633,
+      "opusBytes": 35541
+    }
+  ]
+}

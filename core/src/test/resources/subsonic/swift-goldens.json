@@ -1,0 +1,228 @@
+{
+  "reference" : "b292fdf",
+  "songs" : [
+    {
+      "discNumber" : 2,
+      "id" : "disc2",
+      "title" : "First",
+      "track" : 1
+    },
+    {
+      "id" : "missing",
+      "title" : "Last"
+    },
+    {
+      "id" : "b",
+      "title" : "beta",
+      "track" : 1
+    },
+    {
+      "id" : "a",
+      "title" : "Alpha",
+      "track" : 1
+    },
+    {
+      "discNumber" : 1,
+      "id" : "tie",
+      "title" : "ALPHA",
+      "track" : 1
+    },
+    {
+      "discNumber" : 0,
+      "id" : "zero",
+      "title" : "Zero",
+      "track" : 0
+    },
+    {
+      "id" : "track2",
+      "title" : "A",
+      "track" : 2
+    },
+    {
+      "id" : "composed-first",
+      "title" : "Écho",
+      "track" : 3
+    },
+    {
+      "id" : "decomposed-second",
+      "title" : "Écho",
+      "track" : 3
+    },
+    {
+      "id" : "decomposed-first",
+      "title" : "Écho",
+      "track" : 4
+    },
+    {
+      "id" : "composed-second",
+      "title" : "Écho",
+      "track" : 4
+    },
+    {
+      "id" : "supplementary",
+      "title" : "𐀀",
+      "track" : 5
+    },
+    {
+      "id" : "bmp",
+      "title" : "",
+      "track" : 5
+    },
+    {
+      "id" : "music-composed",
+      "title" : "𝅗𝅥",
+      "track" : 6
+    },
+    {
+      "id" : "music-decomposed",
+      "title" : "𝅗𝅥",
+      "track" : 6
+    },
+    {
+      "id" : "music-decomposed-first",
+      "title" : "𝅗𝅥",
+      "track" : 7
+    },
+    {
+      "id" : "music-composed-second",
+      "title" : "𝅗𝅥",
+      "track" : 7
+    }
+  ],
+  "sortedIds" : [
+    "zero",
+    "a",
+    "tie",
+    "b",
+    "track2",
+    "composed-first",
+    "decomposed-second",
+    "decomposed-first",
+    "composed-second",
+    "bmp",
+    "supplementary",
+    "music-composed",
+    "music-decomposed",
+    "music-decomposed-first",
+    "music-composed-second",
+    "missing",
+    "disc2"
+  ],
+  "totals" : [
+    {
+      "header" : " 1250 ",
+      "offset" : 100,
+      "requested" : 100,
+      "returned" : 100,
+      "total" : 1250
+    },
+    {
+      "header" : null,
+      "offset" : 300,
+      "requested" : 100,
+      "returned" : 42,
+      "total" : 342
+    },
+    {
+      "header" : null,
+      "offset" : 0,
+      "requested" : 100,
+      "returned" : 100,
+      "total" : null
+    },
+    {
+      "header" : "150",
+      "offset" : 100,
+      "requested" : 100,
+      "returned" : 100,
+      "total" : null
+    },
+    {
+      "header" : "not-a-number",
+      "offset" : 0,
+      "requested" : 100,
+      "returned" : 100,
+      "total" : null
+    },
+    {
+      "header" : "999",
+      "offset" : 300,
+      "requested" : 100,
+      "returned" : 42,
+      "total" : 342
+    },
+    {
+      "header" : null,
+      "offset" : -1,
+      "requested" : 100,
+      "returned" : -2,
+      "total" : 0
+    }
+  ],
+  "urls" : [
+    {
+      "input" : " music.example.test\/navidrome\/\/\/ ",
+      "output" : "https:\/\/music.example.test\/navidrome"
+    },
+    {
+      "input" : "HTTP:\/\/music.example.test:4533\/path\/",
+      "output" : "http:\/\/music.example.test:4533\/path"
+    },
+    {
+      "input" : "https:\/\/music.example.test\/",
+      "output" : "https:\/\/music.example.test\/"
+    },
+    {
+      "input" : "https:\/\/music.example.test",
+      "output" : "https:\/\/music.example.test"
+    },
+    {
+      "input" : "https:\/\/müsic.example.test\/navidrome",
+      "output" : "https:\/\/xn--msic-0ra.example.test\/navidrome"
+    },
+    {
+      "input" : "https:\/\/music.example.test\/navidrome%2F",
+      "output" : "https:\/\/music.example.test\/navidrome"
+    },
+    {
+      "input" : "https:\/\/music.example.test\/navidrome%2Fchild%2F%2F",
+      "output" : "https:\/\/music.example.test\/navidrome\/child"
+    },
+    {
+      "input" : "https:\/\/music.example.test\/a%20b%2F",
+      "output" : "https:\/\/music.example.test\/a%20b"
+    },
+    {
+      "input" : "http:\/\/[::1]:4533\/navidrome\/\/\/",
+      "output" : "http:\/\/[::1]:4533\/navidrome"
+    },
+    {
+      "input" : "",
+      "output" : null
+    },
+    {
+      "input" : "ftp:\/\/music.example.test",
+      "output" : null
+    },
+    {
+      "input" : "https:\/\/music.example.test?x=1",
+      "output" : null
+    },
+    {
+      "input" : "https:\/\/music.example.test#x",
+      "output" : null
+    },
+    {
+      "input" : "https:\/\/music.example.test?",
+      "output" : null
+    },
+    {
+      "input" : "https:\/\/music.example.test#",
+      "output" : null
+    },
+    {
+      "input" : "https:\/\/",
+      "output" : "https:\/\/"
+    }
+  ]
+}

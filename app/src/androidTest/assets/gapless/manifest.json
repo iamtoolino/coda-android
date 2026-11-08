@@ -1,0 +1,351 @@
+{
+  "flac": {
+    "rate": 44100,
+    "tracks": [
+      {
+        "frames": 91877,
+        "offsets": [
+          0,
+          45938,
+          87781
+        ],
+        "windows": "flac-1.s16"
+      },
+      {
+        "frames": 88211,
+        "offsets": [
+          0,
+          44105,
+          84115
+        ],
+        "windows": "flac-2.s16"
+      }
+    ]
+  },
+  "opus": {
+    "rate": 48000,
+    "tracks": [
+      {
+        "frames": 100003,
+        "offsets": [
+          0,
+          50001,
+          95907
+        ],
+        "windows": "opus-1.s16"
+      },
+      {
+        "frames": 96012,
+        "offsets": [
+          0,
+          48006,
+          91916
+        ],
+        "windows": "opus-2.s16"
+      }
+    ]
+  },
+  "m4a": {
+    "rate": 44100,
+    "tracks": [
+      {
+        "frames": 91877,
+        "offsets": [
+          0,
+          45938,
+          87781
+        ],
+        "windows": "m4a-1.s16"
+      },
+      {
+        "frames": 88211,
+        "offsets": [
+          0,
+          44105,
+          84115
+        ],
+        "windows": "m4a-2.s16"
+      }
+    ]
+  },
+  "vorbis": {
+    "rate": 44100,
+    "tracks": [
+      {
+        "frames": 91877,
+        "offsets": [
+          0,
+          45938,
+          87781
+        ],
+        "windows": "vorbis-1.s16"
+      },
+      {
+        "frames": 88211,
+        "offsets": [
+          0,
+          44105,
+          84115
+        ],
+        "windows": "vorbis-2.s16"
+      }
+    ]
+  },
+  "mp3": {
+    "rate": 44100,
+    "tracks": [
+      {
+        "frames": 91877,
+        "offsets": [
+          0,
+          45938,
+          87781
+        ],
+        "windows": "mp3-1.s16"
+      },
+      {
+        "frames": 88211,
+        "offsets": [
+          0,
+          44105,
+          84115
+        ],
+        "windows": "mp3-2.s16"
+      }
+    ]
+  },
+  "mp3vbr": {
+    "rate": 44100,
+    "tracks": [
+      {
+        "frames": 91877,
+        "offsets": [
+          0,
+          45938,
+          87781
+        ],
+        "windows": "mp3vbr-1.s16"
+      },
+      {
+        "frames": 88211,
+        "offsets": [
+          0,
+          44105,
+          84115
+        ],
+        "windows": "mp3vbr-2.s16"
+      }
+    ]
+  },
+  "mp3mllt": {
+    "rate": 44100,
+    "tracks": [
+      {
+        "frames": 91877,
+        "offsets": [
+          0,
+          45938,
+          87781
+        ],
+        "windows": "mp3mllt-1.s16"
+      },
+      {
+        "frames": 88211,
+        "offsets": [
+          0,
+          44105,
+          84115
+        ],
+        "windows": "mp3mllt-2.s16"
+      }
+    ]
+  },
+  "m4ams": {
+    "rate": 44100,
+    "tracks": [
+      {
+        "frames": 91877,
+        "offsets": [
+          0,
+          45938,
+          87781
+        ],
+        "windows": "m4ams-1.s16"
+      },
+      {
+        "frames": 88211,
+        "offsets": [
+          0,
+          44105,
+          84115
+        ],
+        "windows": "m4ams-2.s16"
+      }
+    ]
+  },
+  "m4aapple": {
+    "rate": 44100,
+    "tracks": [
+      {
+        "frames": 91877,
+        "offsets": [
+          0,
+          45938,
+          87781
+        ],
+        "windows": "m4aapple-1.s16"
+      },
+      {
+        "frames": 88211,
+        "offsets": [
+          0,
+          44105,
+          84115
+        ],
+        "windows": "m4aapple-2.s16"
+      }
+    ]
+  },
+  "m4ahe": {
+    "rate": 44100,
+    "tracks": [
+      {
+        "frames": 91878,
+        "offsets": [
+          0,
+          45939,
+          87782
+        ],
+        "windows": "m4ahe-1.s16"
+      },
+      {
+        "frames": 88212,
+        "offsets": [
+          0,
+          44106,
+          84116
+        ],
+        "windows": "m4ahe-2.s16"
+      }
+    ],
+    "countOnly": true,
+    "note": "HE-AAC: the decoder's SBR delay differs from ffmpeg's; only frame counts are compared (GP-1b)."
+  },
+  "m4aremux": {
+    "rate": 44100,
+    "tracks": [
+      {
+        "frames": 91877,
+        "offsets": [
+          0,
+          45938,
+          87781
+        ],
+        "windows": "m4aremux-1.s16"
+      },
+      {
+        "frames": 88211,
+        "offsets": [
+          0,
+          44105,
+          84115
+        ],
+        "windows": "m4aremux-2.s16"
+      }
+    ]
+  },
+  "m4aat": {
+    "rate": 44100,
+    "tracks": [
+      {
+        "frames": 92160,
+        "offsets": [
+          0,
+          46080,
+          88064
+        ],
+        "windows": "m4aat-1.s16"
+      },
+      {
+        "frames": 89088,
+        "offsets": [
+          0,
+          44544,
+          84992
+        ],
+        "windows": "m4aat-2.s16"
+      }
+    ]
+  },
+  "mp3lame": {
+    "rate": 44100,
+    "tracks": [
+      {
+        "frames": 91877,
+        "offsets": [
+          0,
+          45938,
+          87781
+        ],
+        "windows": "mp3lame-1.s16"
+      },
+      {
+        "frames": 88211,
+        "offsets": [
+          0,
+          44105,
+          84115
+        ],
+        "windows": "mp3lame-2.s16"
+      }
+    ]
+  },
+  "mp3nogap": {
+    "rate": 44100,
+    "tracks": [
+      {
+        "frames": 91008,
+        "offsets": [
+          0,
+          45504,
+          86912
+        ],
+        "windows": "mp3nogap-1.s16"
+      },
+      {
+        "frames": 91008,
+        "offsets": [
+          0,
+          45504,
+          86912
+        ],
+        "windows": "mp3nogap-2.s16"
+      }
+    ]
+  },
+  "m4aheedit": {
+    "rate": 44100,
+    "tracks": [
+      {
+        "frames": 91877,
+        "offsets": [
+          0,
+          45938,
+          87781
+        ],
+        "windows": "m4aheedit-1.s16"
+      },
+      {
+        "frames": 88211,
+        "offsets": [
+          0,
+          44105,
+          84115
+        ],
+        "windows": "m4aheedit-2.s16"
+      }
+    ],
+    "countOnly": true,
+    "note": "HE-AAC: the decoder's SBR delay differs from ffmpeg's; only frame counts are compared (GP-1b)."
+  }
+}

@@ -1,0 +1,11 @@
+--- a/libraries/decoder_ffmpeg/src/main/java/androidx/media3/decoder/ffmpeg/FfmpegAudioRenderer.java
++++ b/libraries/decoder_ffmpeg/src/main/java/androidx/media3/decoder/ffmpeg/FfmpegAudioRenderer.java
+@@ -132,7 +132,8 @@
+   @Override
+   protected @C.FormatSupport int supportsFormatInternal(Format format) {
+     String mimeType = checkNotNull(format.sampleMimeType);
+-    if (!FfmpegLibrary.isAvailable() || !MimeTypes.isAudio(mimeType)) {
++    // Coda: keep all other MIME types on their existing platform decoders.
++    if (!MimeTypes.AUDIO_MPEG.equals(mimeType) || !FfmpegLibrary.isAvailable()) {
+       return C.FORMAT_UNSUPPORTED_TYPE;
+     } else if (!FfmpegLibrary.supportsFormat(mimeType)

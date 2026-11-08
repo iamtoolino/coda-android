@@ -1,0 +1,22 @@
+# Developer and signing properties live outside the repository; never commit them.
+local.properties
+*.properties.local
+.coda-*.properties
+
+# Build output
+build/
+.gradle/
+.kotlin/
+captures/
+*.apk
+*.aab
+
+# Keys
+*.keystore
+*.jks
+
+# Tooling
+.idea/
+*.iml
+.DS_Store
+__pycache__/

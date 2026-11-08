@@ -1,0 +1,984 @@
+{
+  "dispositions" : [
+    {
+      "allows" : false,
+      "empty" : false,
+      "handled" : false,
+      "kind" : "absent",
+      "playing" : false,
+      "result" : "ignore"
+    },
+    {
+      "allows" : false,
+      "empty" : false,
+      "handled" : true,
+      "kind" : "absent",
+      "playing" : false,
+      "result" : "ignore"
+    },
+    {
+      "allows" : false,
+      "empty" : false,
+      "handled" : false,
+      "kind" : "absent",
+      "playing" : true,
+      "result" : "ignore"
+    },
+    {
+      "allows" : false,
+      "empty" : false,
+      "handled" : true,
+      "kind" : "absent",
+      "playing" : true,
+      "result" : "ignore"
+    },
+    {
+      "allows" : false,
+      "empty" : true,
+      "handled" : false,
+      "kind" : "absent",
+      "playing" : false,
+      "result" : "ignore"
+    },
+    {
+      "allows" : false,
+      "empty" : true,
+      "handled" : true,
+      "kind" : "absent",
+      "playing" : false,
+      "result" : "ignore"
+    },
+    {
+      "allows" : false,
+      "empty" : true,
+      "handled" : false,
+      "kind" : "absent",
+      "playing" : true,
+      "result" : "ignore"
+    },
+    {
+      "allows" : false,
+      "empty" : true,
+      "handled" : true,
+      "kind" : "absent",
+      "playing" : true,
+      "result" : "ignore"
+    },
+    {
+      "allows" : true,
+      "empty" : false,
+      "handled" : false,
+      "kind" : "absent",
+      "playing" : false,
+      "result" : "ignore"
+    },
+    {
+      "allows" : true,
+      "empty" : false,
+      "handled" : true,
+      "kind" : "absent",
+      "playing" : false,
+      "result" : "ignore"
+    },
+    {
+      "allows" : true,
+      "empty" : false,
+      "handled" : false,
+      "kind" : "absent",
+      "playing" : true,
+      "result" : "ignore"
+    },
+    {
+      "allows" : true,
+      "empty" : false,
+      "handled" : true,
+      "kind" : "absent",
+      "playing" : true,
+      "result" : "ignore"
+    },
+    {
+      "allows" : true,
+      "empty" : true,
+      "handled" : false,
+      "kind" : "absent",
+      "playing" : false,
+      "result" : "ignore"
+    },
+    {
+      "allows" : true,
+      "empty" : true,
+      "handled" : true,
+      "kind" : "absent",
+      "playing" : false,
+      "result" : "ignore"
+    },
+    {
+      "allows" : true,
+      "empty" : true,
+      "handled" : false,
+      "kind" : "absent",
+      "playing" : true,
+      "result" : "ignore"
+    },
+    {
+      "allows" : true,
+      "empty" : true,
+      "handled" : true,
+      "kind" : "absent",
+      "playing" : true,
+      "result" : "ignore"
+    },
+    {
+      "allows" : false,
+      "empty" : false,
+      "handled" : false,
+      "kind" : "empty",
+      "playing" : false,
+      "result" : "ignore"
+    },
+    {
+      "allows" : false,
+      "empty" : false,
+      "handled" : true,
+      "kind" : "empty",
+      "playing" : false,
+      "result" : "ignore"
+    },
+    {
+      "allows" : false,
+      "empty" : false,
+      "handled" : false,
+      "kind" : "empty",
+      "playing" : true,
+      "result" : "ignore"
+    },
+    {
+      "allows" : false,
+      "empty" : false,
+      "handled" : true,
+      "kind" : "empty",
+      "playing" : true,
+      "result" : "ignore"
+    },
+    {
+      "allows" : false,
+      "empty" : true,
+      "handled" : false,
+      "kind" : "empty",
+      "playing" : false,
+      "result" : "ignore"
+    },
+    {
+      "allows" : false,
+      "empty" : true,
+      "handled" : true,
+      "kind" : "empty",
+      "playing" : false,
+      "result" : "ignore"
+    },
+    {
+      "allows" : false,
+      "empty" : true,
+      "handled" : false,
+      "kind" : "empty",
+      "playing" : true,
+      "result" : "ignore"
+    },
+    {
+      "allows" : false,
+      "empty" : true,
+      "handled" : true,
+      "kind" : "empty",
+      "playing" : true,
+      "result" : "ignore"
+    },
+    {
+      "allows" : true,
+      "empty" : false,
+      "handled" : false,
+      "kind" : "empty",
+      "playing" : false,
+      "result" : "ignore"
+    },
+    {
+      "allows" : true,
+      "empty" : false,
+      "handled" : true,
+      "kind" : "empty",
+      "playing" : false,
+      "result" : "ignore"
+    },
+    {
+      "allows" : true,
+      "empty" : false,
+      "handled" : false,
+      "kind" : "empty",
+      "playing" : true,
+      "result" : "ignore"
+    },
+    {
+      "allows" : true,
+      "empty" : false,
+      "handled" : true,
+      "kind" : "empty",
+      "playing" : true,
+      "result" : "ignore"
+    },
+    {
+      "allows" : true,
+      "empty" : true,
+      "handled" : false,
+      "kind" : "empty",
+      "playing" : false,
+      "result" : "ignore"
+    },
+    {
+      "allows" : true,
+      "empty" : true,
+      "handled" : true,
+      "kind" : "empty",
+      "playing" : false,
+      "result" : "ignore"
+    },
+    {
+      "allows" : true,
+      "empty" : true,
+      "handled" : false,
+      "kind" : "empty",
+      "playing" : true,
+      "result" : "ignore"
+    },
+    {
+      "allows" : true,
+      "empty" : true,
+      "handled" : true,
+      "kind" : "empty",
+      "playing" : true,
+      "result" : "ignore"
+    },
+    {
+      "allows" : false,
+      "empty" : false,
+      "handled" : false,
+      "kind" : "own",
+      "playing" : false,
+      "result" : "ignore"
+    },
+    {
+      "allows" : false,
+      "empty" : false,
+      "handled" : true,
+      "kind" : "own",
+      "playing" : false,
+      "result" : "ignore"
+    },
+    {
+      "allows" : false,
+      "empty" : false,
+      "handled" : false,
+      "kind" : "own",
+      "playing" : true,
+      "result" : "ignore"
+    },
+    {
+      "allows" : false,
+      "empty" : false,
+      "handled" : true,
+      "kind" : "own",
+      "playing" : true,
+      "result" : "ignore"
+    },
+    {
+      "allows" : false,
+      "empty" : true,
+      "handled" : false,
+      "kind" : "own",
+      "playing" : false,
+      "result" : "ignore"
+    },
+    {
+      "allows" : false,
+      "empty" : true,
+      "handled" : true,
+      "kind" : "own",
+      "playing" : false,
+      "result" : "ignore"
+    },
+    {
+      "allows" : false,
+      "empty" : true,
+      "handled" : false,
+      "kind" : "own",
+      "playing" : true,
+      "result" : "ignore"
+    },
+    {
+      "allows" : false,
+      "empty" : true,
+      "handled" : true,
+      "kind" : "own",
+      "playing" : true,
+      "result" : "ignore"
+    },
+    {
+      "allows" : true,
+      "empty" : false,
+      "handled" : false,
+      "kind" : "own",
+      "playing" : false,
+      "result" : "ignore"
+    },
+    {
+      "allows" : true,
+      "empty" : false,
+      "handled" : true,
+      "kind" : "own",
+      "playing" : false,
+      "result" : "ignore"
+    },
+    {
+      "allows" : true,
+      "empty" : false,
+      "handled" : false,
+      "kind" : "own",
+      "playing" : true,
+      "result" : "ignore"
+    },
+    {
+      "allows" : true,
+      "empty" : false,
+      "handled" : true,
+      "kind" : "own",
+      "playing" : true,
+      "result" : "ignore"
+    },
+    {
+      "allows" : true,
+      "empty" : true,
+      "handled" : false,
+      "kind" : "own",
+      "playing" : false,
+      "result" : "restore"
+    },
+    {
+      "allows" : true,
+      "empty" : true,
+      "handled" : true,
+      "kind" : "own",
+      "playing" : false,
+      "result" : "ignore"
+    },
+    {
+      "allows" : true,
+      "empty" : true,
+      "handled" : false,
+      "kind" : "own",
+      "playing" : true,
+      "result" : "ignore"
+    },
+    {
+      "allows" : true,
+      "empty" : true,
+      "handled" : true,
+      "kind" : "own",
+      "playing" : true,
+      "result" : "ignore"
+    },
+    {
+      "allows" : false,
+      "empty" : false,
+      "handled" : false,
+      "kind" : "ownCase",
+      "playing" : false,
+      "result" : "ignore"
+    },
+    {
+      "allows" : false,
+      "empty" : false,
+      "handled" : true,
+      "kind" : "ownCase",
+      "playing" : false,
+      "result" : "ignore"
+    },
+    {
+      "allows" : false,
+      "empty" : false,
+      "handled" : false,
+      "kind" : "ownCase",
+      "playing" : true,
+      "result" : "ignore"
+    },
+    {
+      "allows" : false,
+      "empty" : false,
+      "handled" : true,
+      "kind" : "ownCase",
+      "playing" : true,
+      "result" : "ignore"
+    },
+    {
+      "allows" : false,
+      "empty" : true,
+      "handled" : false,
+      "kind" : "ownCase",
+      "playing" : false,
+      "result" : "ignore"
+    },
+    {
+      "allows" : false,
+      "empty" : true,
+      "handled" : true,
+      "kind" : "ownCase",
+      "playing" : false,
+      "result" : "ignore"
+    },
+    {
+      "allows" : false,
+      "empty" : true,
+      "handled" : false,
+      "kind" : "ownCase",
+      "playing" : true,
+      "result" : "ignore"
+    },
+    {
+      "allows" : false,
+      "empty" : true,
+      "handled" : true,
+      "kind" : "ownCase",
+      "playing" : true,
+      "result" : "ignore"
+    },
+    {
+      "allows" : true,
+      "empty" : false,
+      "handled" : false,
+      "kind" : "ownCase",
+      "playing" : false,
+      "result" : "ignore"
+    },
+    {
+      "allows" : true,
+      "empty" : false,
+      "handled" : true,
+      "kind" : "ownCase",
+      "playing" : false,
+      "result" : "ignore"
+    },
+    {
+      "allows" : true,
+      "empty" : false,
+      "handled" : false,
+      "kind" : "ownCase",
+      "playing" : true,
+      "result" : "ignore"
+    },
+    {
+      "allows" : true,
+      "empty" : false,
+      "handled" : true,
+      "kind" : "ownCase",
+      "playing" : true,
+      "result" : "ignore"
+    },
+    {
+      "allows" : true,
+      "empty" : true,
+      "handled" : false,
+      "kind" : "ownCase",
+      "playing" : false,
+      "result" : "restore"
+    },
+    {
+      "allows" : true,
+      "empty" : true,
+      "handled" : true,
+      "kind" : "ownCase",
+      "playing" : false,
+      "result" : "ignore"
+    },
+    {
+      "allows" : true,
+      "empty" : true,
+      "handled" : false,
+      "kind" : "ownCase",
+      "playing" : true,
+      "result" : "ignore"
+    },
+    {
+      "allows" : true,
+      "empty" : true,
+      "handled" : true,
+      "kind" : "ownCase",
+      "playing" : true,
+      "result" : "ignore"
+    },
+    {
+      "allows" : false,
+      "empty" : false,
+      "handled" : false,
+      "kind" : "foreign",
+      "playing" : false,
+      "result" : "offer"
+    },
+    {
+      "allows" : false,
+      "empty" : false,
+      "handled" : true,
+      "kind" : "foreign",
+      "playing" : false,
+      "result" : "ignore"
+    },
+    {
+      "allows" : false,
+      "empty" : false,
+      "handled" : false,
+      "kind" : "foreign",
+      "playing" : true,
+      "result" : "ignore"
+    },
+    {
+      "allows" : false,
+      "empty" : false,
+      "handled" : true,
+      "kind" : "foreign",
+      "playing" : true,
+      "result" : "ignore"
+    },
+    {
+      "allows" : false,
+      "empty" : true,
+      "handled" : false,
+      "kind" : "foreign",
+      "playing" : false,
+      "result" : "offer"
+    },
+    {
+      "allows" : false,
+      "empty" : true,
+      "handled" : true,
+      "kind" : "foreign",
+      "playing" : false,
+      "result" : "ignore"
+    },
+    {
+      "allows" : false,
+      "empty" : true,
+      "handled" : false,
+      "kind" : "foreign",
+      "playing" : true,
+      "result" : "ignore"
+    },
+    {
+      "allows" : false,
+      "empty" : true,
+      "handled" : true,
+      "kind" : "foreign",
+      "playing" : true,
+      "result" : "ignore"
+    },
+    {
+      "allows" : true,
+      "empty" : false,
+      "handled" : false,
+      "kind" : "foreign",
+      "playing" : false,
+      "result" : "offer"
+    },
+    {
+      "allows" : true,
+      "empty" : false,
+      "handled" : true,
+      "kind" : "foreign",
+      "playing" : false,
+      "result" : "ignore"
+    },
+    {
+      "allows" : true,
+      "empty" : false,
+      "handled" : false,
+      "kind" : "foreign",
+      "playing" : true,
+      "result" : "ignore"
+    },
+    {
+      "allows" : true,
+      "empty" : false,
+      "handled" : true,
+      "kind" : "foreign",
+      "playing" : true,
+      "result" : "ignore"
+    },
+    {
+      "allows" : true,
+      "empty" : true,
+      "handled" : false,
+      "kind" : "foreign",
+      "playing" : false,
+      "result" : "offer"
+    },
+    {
+      "allows" : true,
+      "empty" : true,
+      "handled" : true,
+      "kind" : "foreign",
+      "playing" : false,
+      "result" : "ignore"
+    },
+    {
+      "allows" : true,
+      "empty" : true,
+      "handled" : false,
+      "kind" : "foreign",
+      "playing" : true,
+      "result" : "ignore"
+    },
+    {
+      "allows" : true,
+      "empty" : true,
+      "handled" : true,
+      "kind" : "foreign",
+      "playing" : true,
+      "result" : "ignore"
+    },
+    {
+      "allows" : false,
+      "empty" : false,
+      "handled" : false,
+      "kind" : "unknown",
+      "playing" : false,
+      "result" : "offer"
+    },
+    {
+      "allows" : false,
+      "empty" : false,
+      "handled" : true,
+      "kind" : "unknown",
+      "playing" : false,
+      "result" : "ignore"
+    },
+    {
+      "allows" : false,
+      "empty" : false,
+      "handled" : false,
+      "kind" : "unknown",
+      "playing" : true,
+      "result" : "ignore"
+    },
+    {
+      "allows" : false,
+      "empty" : false,
+      "handled" : true,
+      "kind" : "unknown",
+      "playing" : true,
+      "result" : "ignore"
+    },
+    {
+      "allows" : false,
+      "empty" : true,
+      "handled" : false,
+      "kind" : "unknown",
+      "playing" : false,
+      "result" : "offer"
+    },
+    {
+      "allows" : false,
+      "empty" : true,
+      "handled" : true,
+      "kind" : "unknown",
+      "playing" : false,
+      "result" : "ignore"
+    },
+    {
+      "allows" : false,
+      "empty" : true,
+      "handled" : false,
+      "kind" : "unknown",
+      "playing" : true,
+      "result" : "ignore"
+    },
+    {
+      "allows" : false,
+      "empty" : true,
+      "handled" : true,
+      "kind" : "unknown",
+      "playing" : true,
+      "result" : "ignore"
+    },
+    {
+      "allows" : true,
+      "empty" : false,
+      "handled" : false,
+      "kind" : "unknown",
+      "playing" : false,
+      "result" : "offer"
+    },
+    {
+      "allows" : true,
+      "empty" : false,
+      "handled" : true,
+      "kind" : "unknown",
+      "playing" : false,
+      "result" : "ignore"
+    },
+    {
+      "allows" : true,
+      "empty" : false,
+      "handled" : false,
+      "kind" : "unknown",
+      "playing" : true,
+      "result" : "ignore"
+    },
+    {
+      "allows" : true,
+      "empty" : false,
+      "handled" : true,
+      "kind" : "unknown",
+      "playing" : true,
+      "result" : "ignore"
+    },
+    {
+      "allows" : true,
+      "empty" : true,
+      "handled" : false,
+      "kind" : "unknown",
+      "playing" : false,
+      "result" : "offer"
+    },
+    {
+      "allows" : true,
+      "empty" : true,
+      "handled" : true,
+      "kind" : "unknown",
+      "playing" : false,
+      "result" : "ignore"
+    },
+    {
+      "allows" : true,
+      "empty" : true,
+      "handled" : false,
+      "kind" : "unknown",
+      "playing" : true,
+      "result" : "ignore"
+    },
+    {
+      "allows" : true,
+      "empty" : true,
+      "handled" : true,
+      "kind" : "unknown",
+      "playing" : true,
+      "result" : "ignore"
+    }
+  ],
+  "restores" : [
+    {
+      "current" : "a",
+      "identity" : "||a|0|a|b|a",
+      "index" : -1,
+      "position" : 0,
+      "resolvedIndex" : 0
+    },
+    {
+      "current" : "a",
+      "identity" : "||a|12345|a|b|a",
+      "index" : -1,
+      "position" : 12345,
+      "resolvedIndex" : 0
+    },
+    {
+      "current" : "b",
+      "identity" : "||b|0|a|b|a",
+      "index" : -1,
+      "position" : 0,
+      "resolvedIndex" : 1
+    },
+    {
+      "current" : "b",
+      "identity" : "||b|12345|a|b|a",
+      "index" : -1,
+      "position" : 12345,
+      "resolvedIndex" : 1
+    },
+    {
+      "current" : "missing",
+      "identity" : "||missing|0|a|b|a",
+      "index" : -1,
+      "position" : 0,
+      "resolvedIndex" : 0
+    },
+    {
+      "current" : "missing",
+      "identity" : "||missing|12345|a|b|a",
+      "index" : -1,
+      "position" : 12345,
+      "resolvedIndex" : 0
+    },
+    {
+      "current" : "a",
+      "identity" : "||a|0|a|b|a",
+      "index" : 0,
+      "position" : 0,
+      "resolvedIndex" : 0
+    },
+    {
+      "current" : "a",
+      "identity" : "||a|12345|a|b|a",
+      "index" : 0,
+      "position" : 12345,
+      "resolvedIndex" : 0
+    },
+    {
+      "current" : "b",
+      "identity" : "||b|0|a|b|a",
+      "index" : 0,
+      "position" : 0,
+      "resolvedIndex" : 0
+    },
+    {
+      "current" : "b",
+      "identity" : "||b|12345|a|b|a",
+      "index" : 0,
+      "position" : 12345,
+      "resolvedIndex" : 0
+    },
+    {
+      "current" : "missing",
+      "identity" : "||missing|0|a|b|a",
+      "index" : 0,
+      "position" : 0,
+      "resolvedIndex" : 0
+    },
+    {
+      "current" : "missing",
+      "identity" : "||missing|12345|a|b|a",
+      "index" : 0,
+      "position" : 12345,
+      "resolvedIndex" : 0
+    },
+    {
+      "current" : "a",
+      "identity" : "||a|0|a|b|a",
+      "index" : 1,
+      "position" : 0,
+      "resolvedIndex" : 1
+    },
+    {
+      "current" : "a",
+      "identity" : "||a|12345|a|b|a",
+      "index" : 1,
+      "position" : 12345,
+      "resolvedIndex" : 1
+    },
+    {
+      "current" : "b",
+      "identity" : "||b|0|a|b|a",
+      "index" : 1,
+      "position" : 0,
+      "resolvedIndex" : 1
+    },
+    {
+      "current" : "b",
+      "identity" : "||b|12345|a|b|a",
+      "index" : 1,
+      "position" : 12345,
+      "resolvedIndex" : 1
+    },
+    {
+      "current" : "missing",
+      "identity" : "||missing|0|a|b|a",
+      "index" : 1,
+      "position" : 0,
+      "resolvedIndex" : 1
+    },
+    {
+      "current" : "missing",
+      "identity" : "||missing|12345|a|b|a",
+      "index" : 1,
+      "position" : 12345,
+      "resolvedIndex" : 1
+    },
+    {
+      "current" : "a",
+      "identity" : "||a|0|a|b|a",
+      "index" : 2,
+      "position" : 0,
+      "resolvedIndex" : 2
+    },
+    {
+      "current" : "a",
+      "identity" : "||a|12345|a|b|a",
+      "index" : 2,
+      "position" : 12345,
+      "resolvedIndex" : 2
+    },
+    {
+      "current" : "b",
+      "identity" : "||b|0|a|b|a",
+      "index" : 2,
+      "position" : 0,
+      "resolvedIndex" : 2
+    },
+    {
+      "current" : "b",
+      "identity" : "||b|12345|a|b|a",
+      "index" : 2,
+      "position" : 12345,
+      "resolvedIndex" : 2
+    },
+    {
+      "current" : "missing",
+      "identity" : "||missing|0|a|b|a",
+      "index" : 2,
+      "position" : 0,
+      "resolvedIndex" : 2
+    },
+    {
+      "current" : "missing",
+      "identity" : "||missing|12345|a|b|a",
+      "index" : 2,
+      "position" : 12345,
+      "resolvedIndex" : 2
+    },
+    {
+      "current" : "a",
+      "identity" : "||a|0|a|b|a",
+      "index" : 3,
+      "position" : 0,
+      "resolvedIndex" : 0
+    },
+    {
+      "current" : "a",
+      "identity" : "||a|12345|a|b|a",
+      "index" : 3,
+      "position" : 12345,
+      "resolvedIndex" : 0
+    },
+    {
+      "current" : "b",
+      "identity" : "||b|0|a|b|a",
+      "index" : 3,
+      "position" : 0,
+      "resolvedIndex" : 1
+    },
+    {
+      "current" : "b",
+      "identity" : "||b|12345|a|b|a",
+      "index" : 3,
+      "position" : 12345,
+      "resolvedIndex" : 1
+    },
+    {
+      "current" : "missing",
+      "identity" : "||missing|0|a|b|a",
+      "index" : 3,
+      "position" : 0,
+      "resolvedIndex" : 0
+    },
+    {
+      "current" : "missing",
+      "identity" : "||missing|12345|a|b|a",
+      "index" : 3,
+      "position" : 12345,
+      "resolvedIndex" : 0
+    }
+  ]
+}
