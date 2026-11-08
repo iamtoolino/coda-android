@@ -1,0 +1,2 @@
+# Vercel Root Directory = site. Nothing to exclude: site/ holds only page files, and the screenshots in
+# assets/shots/ are approved for the public page (PO, 2026-11-08). See docs/homepage.md.

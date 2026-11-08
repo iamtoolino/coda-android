@@ -5,11 +5,13 @@ Coda is a native Android player for your own music server. It connects to
 the play queue first. Each cover sets the colours of the screen around it. Built with Kotlin, Jetpack
 Compose and Media3.
 
+Homepage: [coda-android.vercel.app](https://coda-android.vercel.app)
+
 <p align="center">
-  <img src="screenshots/now-playing.webp" width="24%" alt="Now Playing with a neon magenta cover">
-  <img src="screenshots/album.webp" width="24%" alt="An album page tinted dark green by its cover">
-  <img src="screenshots/queue.webp" width="24%" alt="The queue, grouped by album">
-  <img src="screenshots/storage.webp" width="24%" alt="Music storage settings">
+  <img src="site/assets/shots/np-magenta.webp" width="24%" alt="Now Playing with a neon magenta cover">
+  <img src="site/assets/shots/album-green.webp" width="24%" alt="An album page tinted dark green by its cover">
+  <img src="site/assets/shots/queue.webp" width="24%" alt="The queue, grouped by album">
+  <img src="site/assets/shots/storage.webp" width="24%" alt="Music storage settings">
 </p>
 
 - **Album first.** Discographies in release order, multi-disc albums and compilations, ratings and search.
@@ -24,7 +26,7 @@ Compose and Media3.
 
 ## Install
 
-Download the APK from [Releases](../../releases) and install it on an arm64 phone with
+Download the APK from the [latest release](../../releases/latest) and install it on an arm64 phone with
 Android 16 (API 36) or newer. Coda isn't in an app store yet.
 
 This is a complete rewrite. The earlier prototype (releases up to v1.1.0) used a different app id and
@@ -55,5 +57,7 @@ app they're under Settings → About → Licences.
 MP3 decoding uses a self-built Media3 FFmpeg extension (`app/libs/media3-ffmpeg-mp3-1.11.1.aar`). It contains
 FFmpeg 6.0 with only the MP3 decoders, licensed under the GNU LGPL 2.1 or later. To rebuild it or
 swap in your own FFmpeg libraries, see [`tools/ffmpeg-ext/README.md`](tools/ffmpeg-ext/README.md).
+
+The homepage in `site/` is a static page without a build step; Vercel serves it with Root Directory `site`.
 
 Coda is an independent project and isn't affiliated with or endorsed by Navidrome.

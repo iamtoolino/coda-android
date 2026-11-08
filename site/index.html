@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en" data-shots>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Coda for Android — A gapless Navidrome player for your phone</title>
+  <meta name="description" content="A music player for your own Navidrome or OpenSubsonic server. Gapless playback, colours from the cover, and the music you play kept on your phone for offline listening.">
+  <script>
+    (() => {
+      // Pick this visit's theme before the body is parsed, so the first colours are not a placeholder flash.
+      document.documentElement.dataset.random = String(Math.random());
+      document.documentElement.classList.add('scene-pending');
+      // Never leave the page blank if the module script cannot run.
+      setTimeout(() => document.documentElement.classList.remove('scene-pending'), 3000);
+    })();
+  </script>
+  <meta name="theme-color" content="#08090a">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Coda for Android">
+  <meta property="og:description" content="A gapless music player for your own Navidrome or OpenSubsonic server.">
+  <!-- PLACEHOLDER until the domain is set (Vercel, PO go): add og:url with the site's absolute address and make
+       og:image absolute (that address + assets/og-image.jpg). Link previews need absolute URLs. -->
+  <meta property="og:image" content="assets/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/icon-192.png" type="image/png" sizes="192x192">
+  <link rel="apple-touch-icon" href="assets/icon-192.png">
+  <link rel="stylesheet" href="site.css">
+  <script type="module" src="site.mjs"></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-header">
+    <a class="brand" href="index.html"><img src="assets/favicon.svg" alt="" width="34" height="34">Coda</a>
+    <nav aria-label="Page sections"><a href="#features">Features</a><a href="#install">Install</a></nav>
+  </header>
+  <main id="main">
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">Navidrome player for Android</p>
+        <h1>Your albums,<br>without the gaps.</h1>
+        <p class="lead">Coda plays music from your own Navidrome or OpenSubsonic server. Every screen takes its colour from the cover, and the music you play stays on your phone.</p>
+        <a class="download" href="#install">Get Coda for Android<span aria-hidden="true">↓</span></a>
+        <p class="requirements">Android 16 or later · phone<br>Your own Navidrome or OpenSubsonic server</p>
+      </div>
+      <div class="hero-screen">
+        <div class="phone" data-view="nowplaying" data-scene role="img" aria-label="Placeholder drawing of the Coda Now Playing screen.">
+          <div class="screen"><div class="mock mock-np" aria-hidden="true"><div class="m-cover"></div><div class="m-body"><span class="m-line w70 big"></span><span class="m-line w45 accent"></span><span class="m-chip"></span><div class="m-wave"><i style="--h:30"></i><i style="--h:52"></i><i style="--h:44"></i><i style="--h:70"></i><i style="--h:58"></i><i style="--h:82"></i><i style="--h:64"></i><i style="--h:90"></i><i style="--h:72"></i><i style="--h:56"></i><i style="--h:80"></i><i style="--h:94"></i><i style="--h:66"></i><i style="--h:48"></i><i style="--h:74"></i><i style="--h:88"></i><i style="--h:60"></i><i style="--h:42"></i><i style="--h:68"></i><i style="--h:84"></i><i style="--h:54"></i><i style="--h:38"></i><i style="--h:62"></i><i style="--h:46"></i><i style="--h:72"></i><i style="--h:50"></i><i style="--h:34"></i><i style="--h:56"></i></div><div class="m-transport"><i></i><i></i><b></b><i></i><i></i></div><div class="m-next"><span class="m-line w55"></span></div></div></div></div>
+        </div>
+        <div class="preview-controls"><button class="motion-button" type="button" data-motion hidden>Pause preview</button></div>
+      </div>
+    </section>
+
+    <section class="band" id="features" aria-labelledby="gapless-title">
+      <p class="eyebrow">Gapless</p>
+      <h2 id="gapless-title">One album, one unbroken take.</h2>
+      <p class="lead">Live albums, DJ mixes and concept records play exactly as they were cut. Coda joins tracks sample for sample, with no gap and no click, whether the next song is streamed or already on your phone.</p>
+      <ul class="chips" aria-label="Gapless formats"><li>FLAC</li><li>MP3</li><li>AAC</li><li>Opus</li><li>Ogg Vorbis</li></ul>
+    </section>
+
+    <section class="feature" id="colour" aria-labelledby="colour-title">
+      <div class="feature-copy">
+        <p class="eyebrow">Colours from the cover</p>
+        <h2 id="colour-title">Every screen takes on the album.</h2>
+        <p class="lead">Coda picks one accent from the artwork and uses it everywhere: the album page, Now Playing, the mini player and the buttons. Grey covers get a quiet silver instead of a forced colour.</p>
+      </div>
+      <figure class="feature-screen">
+        <div class="phone" data-view="album" data-scene role="img" aria-label="Placeholder drawing of a Coda album page.">
+          <div class="screen"><div class="mock mock-album" aria-hidden="true"><div class="m-cover"></div><div class="m-body"><span class="m-line w70 big"></span><span class="m-line w45 accent"></span><span class="m-fab"></span><div class="m-row on"><span class="m-line w45"></span><span class="m-dur"></span></div><div class="m-row"><span class="m-line w60"></span><span class="m-dur"></span></div><div class="m-row"><span class="m-line w50"></span><span class="m-dur"></span></div><div class="m-row"><span class="m-line w65"></span><span class="m-dur"></span></div><div class="m-row"><span class="m-line w40"></span><span class="m-dur"></span></div></div></div></div>
+        </div>
+        <figcaption>The album page, coloured by its cover.</figcaption>
+      </figure>
+    </section>
+
+    <section class="feature flip" id="now-playing" aria-labelledby="np-title">
+      <div class="feature-copy">
+        <p class="eyebrow">Now Playing and the queue</p>
+        <h2 id="np-title">Big artwork. Everything else within reach.</h2>
+        <ul class="points">
+          <li><strong>A waveform you can read.</strong> Each bar lights up as the song reaches it. Drag to seek.</li>
+          <li><strong>Plain format info.</strong> A small chip says what is playing, such as “FLAC 912” or “MP3 270”.</li>
+          <li><strong>A queue grouped by album.</strong> See what comes next, reorder it, or cache it ahead for a trip.</li>
+          <li><strong>Pick up where you left off.</strong> Resume an album from any album list, and keep your queue across devices.</li>
+        </ul>
+      </div>
+      <figure class="feature-screen">
+        <div class="phone" data-view="queue" role="img" aria-label="Placeholder drawing of the Coda queue.">
+          <div class="screen"><div class="mock mock-queue" aria-hidden="true"><div class="m-sheet"><span class="m-grip"></span><span class="m-line w30 big"></span><span class="m-line w55"></span><div class="m-group"><span class="m-thumb"></span><span class="m-line w50"></span></div><div class="m-row on"><span class="m-line w40"></span><span class="m-dur"></span></div><div class="m-row"><span class="m-line w62"></span><span class="m-dur"></span></div><div class="m-row"><span class="m-line w48"></span><span class="m-dur"></span></div><div class="m-row"><span class="m-line w56"></span><span class="m-dur"></span></div><div class="m-row"><span class="m-line w44"></span><span class="m-dur"></span></div><div class="m-row"><span class="m-line w66"></span><span class="m-dur"></span></div><div class="m-row"><span class="m-line w38"></span><span class="m-dur"></span></div><div class="m-row"><span class="m-line w58"></span><span class="m-dur"></span></div></div></div></div>
+        </div>
+        <figcaption>The queue, grouped by album.</figcaption>
+      </figure>
+    </section>
+
+    <section class="feature" id="offline" aria-labelledby="offline-title">
+      <div class="feature-copy">
+        <p class="eyebrow">Music storage</p>
+        <h2 id="offline-title">Plays on, when the signal doesn’t.</h2>
+        <ul class="points">
+          <li><strong>An offline library that builds itself.</strong> The music you play stays on your phone, and Coda gives the space back when your phone needs it.</li>
+          <li><strong>Prefer offline.</strong> Mark an album or playlist and Coda keeps it on the phone.</li>
+          <li><strong>Offline playlists.</strong> A playlist shows how much of it is on the phone, like “8 of 14”, and skips what is missing.</li>
+          <li><strong>You set the limit.</strong> Keep free space makes sure photos and apps always have room.</li>
+        </ul>
+      </div>
+      <figure class="feature-screen">
+        <div class="phone" data-view="storage" role="img" aria-label="Placeholder drawing of the Coda Music storage screen.">
+          <div class="screen"><div class="mock mock-storage" aria-hidden="true"><div class="m-body"><span class="m-line w55 big"></span><span class="m-line w80"></span><span class="m-line w60"></span><div class="m-card"><span class="m-line w30 big"></span><div class="m-bar"><i class="b1"></i><i class="b2"></i><i class="b3"></i><i class="b4"></i></div><div class="m-legend"><span class="m-dot d1"></span><span class="m-line w30"></span><span class="m-dur"></span></div><div class="m-legend"><span class="m-dot d2"></span><span class="m-line w26"></span><span class="m-dur"></span></div><div class="m-legend"><span class="m-dot d3"></span><span class="m-line w44"></span><span class="m-dur"></span></div><div class="m-legend"><span class="m-dot d4"></span><span class="m-line w28"></span><span class="m-dur"></span></div><div class="m-legend"><span class="m-dot d5"></span><span class="m-line w50"></span><span class="m-dur"></span></div></div><div class="m-card"><span class="m-line w35"></span><div class="m-slider"><i></i></div><span class="m-line w80"></span><span class="m-line w65"></span></div></div></div></div>
+        </div>
+        <figcaption>Music storage explains what stays and why.</figcaption>
+      </figure>
+    </section>
+
+    <section class="band" id="car" aria-labelledby="car-title">
+      <p class="eyebrow">In the car</p>
+      <h2 id="car-title">Android Auto and your voice.</h2>
+      <ul class="cards">
+        <li><strong>Android Auto.</strong> Browse Home, albums, artists and playlists, and see the queue on the car’s screen. Offline, the car shows what is on your phone.</li>
+        <li><strong>“Hey Google, play … on Coda.”</strong> Ask for music by name, in the car or on the phone.</li>
+      </ul>
+    </section>
+
+    <section class="band" id="server" aria-labelledby="server-title">
+      <p class="eyebrow">Your server</p>
+      <h2 id="server-title">Made for Navidrome and OpenSubsonic.</h2>
+      <ul class="features">
+        <li><strong>Original quality.</strong> Original files on Wi-Fi. On mobile data, lossless and high-bitrate files play as smaller Opus copies.</li>
+        <li><strong>ReplayGain, if you want it.</strong> Album or track gain, picked automatically. Off by default.</li>
+        <li><strong>Your plays count.</strong> Plays are sent to your server, also the ones you listened to offline.</li>
+        <li><strong>Continue Listening.</strong> Home remembers your place in each album, like Coda for Mac.</li>
+        <li><strong>One queue, many devices.</strong> Coda offers to take over a newer queue from another device. Nothing is overwritten silently.</li>
+        <li><strong>Private by design.</strong> No analytics, ads or tracking. Coda only talks to your server.</li>
+      </ul>
+    </section>
+
+    <section class="install" id="install" aria-labelledby="install-title">
+      <div>
+        <p class="eyebrow">Install</p>
+        <h2 id="install-title">Get Coda for Android.</h2>
+        <p class="lead">Coda is installed from an APK for now. Download it on your phone, open it, and allow the install when Android asks.</p>
+      </div>
+      <div class="install-card">
+        <a class="download" href="#install" data-apk aria-describedby="apk-note">Download the APK<span aria-hidden="true">↓</span></a>
+        <p class="requirements" id="apk-note">The download link follows with the 1.0 release.</p>
+        <dl class="specs">
+          <div><dt>Android</dt><dd>16 or later, phones</dd></div>
+          <div><dt>Server</dt><dd>Navidrome or OpenSubsonic</dd></div>
+          <div><dt>Price</dt><dd>Free and open source</dd></div>
+        </dl>
+      </div>
+    </section>
+  </main>
+  <footer class="site-footer">
+    <div>
+      <p>Coda for Android is free and open source under the Apache License 2.0.</p>
+      <p class="secondary">The MP3 decoder is built from FFmpeg, licensed under the GNU LGPL 2.1 or later. Licence texts are in the app under Settings → About.</p>
+      <p class="secondary">An independent community project, not affiliated with Navidrome, Google or the FFmpeg project. Android and Android Auto are trademarks of Google LLC.</p>
+    </div>
+    <nav class="footer-links" aria-label="Footer"><a href="#features">Features</a><a href="#install">Install</a></nav>
+  </footer>
+</body>
+</html>

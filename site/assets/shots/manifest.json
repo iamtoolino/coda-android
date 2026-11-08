@@ -1,0 +1,14 @@
+{
+  "scenes": [
+    {"cover": "neon magenta", "accent": "#8B3C72", "text": "#E895CA", "page": "#3C1D34", "nowplaying": "np-magenta.webp", "album": "album-magenta.webp"},
+    {"cover": "blue and orange neon", "accent": "#3F5F87", "text": "#94B7E4", "page": "#1E2B3C", "nowplaying": "np-blue.webp", "album": "album-blue.webp"},
+    {"cover": "dark green", "accent": "#41693F", "text": "#96C293", "page": "#1F2F1F", "nowplaying": "np-green.webp", "album": "album-green.webp"},
+    {"cover": "violet and red-orange", "accent": "#6E4A91", "text": "#C6A1EF", "page": "#312340", "nowplaying": "np-violet.webp", "album": "album-violet.webp"}
+  ],
+  "static": {
+    "queue": {"file": "queue.webp", "cover": "violet and red-orange"},
+    "storage": {"file": "storage.webp"}
+  },
+  "width": 720,
+  "height": 1560
+}
