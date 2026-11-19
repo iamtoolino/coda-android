@@ -17,6 +17,8 @@ data class Occurrence(
     val item: EngineItem,
     /** The hand-off source an adapter fallback replaced; the fallback stays frozen for this occurrence. */
     val fallbackFrom: TrackSource? = null,
+    /** A cut-off start (parser/format failure before the first sound) already waited and retried once. */
+    val cutOffRetried: Boolean = false,
 ) {
     internal fun withFallback(source: TrackSource) =
         if (source == item.source) this else copy(item = item.copy(source = source), fallbackFrom = fallbackFrom ?: item.source)
@@ -101,7 +103,6 @@ class PlaybackController(
     private val networkAvailable: () -> Boolean = { true },
     private val nowMs: () -> Long = { System.nanoTime() / 1_000_000 },
     recoveryPolicy: RecoveryPolicy = RecoveryPolicy(),
-    private val screenOn: () -> Boolean = { true },
     /** Token of the signed-in session right now (null: signed out); stamped on every [CompletedPlayback]. */
     private val sessionGeneration: () -> Any? = { UnknownSession },
 ) {
@@ -131,9 +132,17 @@ class PlaybackController(
     private var hasLoadedItem = false
     private var hasStartedCurrentOccurrence = false
     private var savedPositionMs = 0L
+    /** The occurrence whose audio has been heard (first playing state); any other occurrence is before its first sound. */
+    private var audibleOccurrence: OccurrenceId? = null
+    /** FR-1: the item's run of Network failures before any sound ([rounds]) and the wait its last reload ended ([wait]). */
+    private data class SilentRounds(val entryId: UUID, val rounds: Int, val wait: ConnectivityRecovery.Waiting? = null)
+    private var silentRounds: SilentRounds? = null
+    /** FR-1b: broken items in a row skipped by [skipBroken] without any sound; [load] (any user action) and sound reset it. */
+    private var brokenInARow = 0
     val recovery = ConnectivityRecovery(recoveryPolicy)
 
     fun networkChanged() {
+        silentRounds = null // FR-1: a new network gives the item its full rounds again.
         recovery.networkChanged(nowMs()); publishWaiting()
         if (recovery.waiting == null) synchronizeNextItem()
     }
@@ -155,13 +164,14 @@ class PlaybackController(
     /** A song was written to the cache by any downloader ("Load for offline" too): [trackCached] for the successor. */
     fun cacheChanged() { preparedNext?.let { trackCached(it.entry.songId) } }
     fun retryNow() { recovery.retryNow(nowMs()); publishWaiting() }
-    fun probeFailed() { recovery.failed(nowMs(), screenOn()); publishWaiting() }
+    fun probeFailed() { recovery.failed(nowMs()); publishWaiting() }
     fun probeSucceeded(target: OccurrenceId) {
         val waiting = recovery.waiting?.takeIf { it.target == target } ?: return
         val frozen = snapshot.currentOccurrence ?: return
         // A read-ahead copy completed while waiting is played instead of fetching the stream again.
         val cached = (frozen.item.source as? TrackSource.Remote)?.let { sourceResolver.resolve(frozen.entry) as? TrackSource.CachedFile }
         val current = frozen.copy(item = frozen.item.copy(occurrence = OccurrenceId(), source = cached ?: frozen.item.source))
+        silentRounds = SilentRounds(frozen.entry.id, silentRounds?.takeIf { it.entryId == frozen.entry.id }?.rounds ?: 0, waiting)
         recovery.clear()
         val willPlay = waiting.autoResume && playbackGate.requestPlay()
         hasLoadedItem = true
@@ -177,11 +187,11 @@ class PlaybackController(
         snapshot = snapshot.copy(waiting = waiting, isPlaying = waiting.autoResume,
             isActuallyPlaying = false, isBuffering = true, isPrepared = false, failure = null, status = "Waiting for connection")
     }
-    private fun waitFor(current: Occurrence, index: Int, position: Long, autoplay: Boolean) {
+    private fun waitFor(current: Occurrence, index: Int, position: Long, autoplay: Boolean, carried: ConnectivityRecovery.Waiting? = null) {
         hasLoadedItem = false; hasStartedCurrentOccurrence = false; savedPositionMs = position
         preparedNext = null; supersededNext.clear()
         snapshot = snapshot.copy(currentIndex = index, currentOccurrence = current)
-        recovery.waitFor(current.item.occurrence, position, autoplay, nowMs())
+        recovery.waitFor(current.item.occurrence, position, autoplay, nowMs(), carried)
         engine.pause()
         publishWaiting()
     }
@@ -328,6 +338,23 @@ class PlaybackController(
         engine.stop()
     }
 
+    /**
+     * Deep sleep after a long pause. The engine lets go of the current item and its open stream; queue,
+     * item, position and every published field stay as they are (the session still shows the paused item), and Play
+     * reloads at the saved position like a cold resume ([play] with nothing loaded). Not while playing, waiting or
+     * with nothing loaded. True: released.
+     */
+    fun releaseIdle(): Boolean = atomically {
+        if (released || !hasLoadedItem || snapshot.isPlaying || recovery.waiting != null) return@atomically false
+        savedPositionMs = positionMs
+        invalidateOccurrence()
+        hasLoadedItem = false
+        preparedNext = null
+        supersededNext.clear()
+        engine.stop()
+        true
+    }
+
     fun prepare() {
         if (recovery.waiting != null) return
         val index = currentIndex ?: return
@@ -434,6 +461,8 @@ class PlaybackController(
         val current = occurrence(index, entries) ?: return@atomically
         val wasWaiting = recovery.waiting != null
         recovery.clear()
+        silentRounds = null
+        brokenInARow = 0
         snapshot = snapshot.copy(waiting = null)
         if (current.item.source is TrackSource.Remote && (!networkAvailable() || wasWaiting)) {
             snapshot = snapshot.copy(queue = entries.toList())
@@ -510,7 +539,11 @@ class PlaybackController(
             is EngineEvent.State -> {
                 if (!hasLoadedItem || playbackOccurrenceId != event.occurrence) return
                 val startsOccurrence = event.isPlaying && !hasStartedCurrentOccurrence
-                if (event.isPlaying) hasStartedCurrentOccurrence = true
+                if (event.isPlaying) {
+                    // FR-1b Rex P3-1: a playing report alone is not sound (a broken song can report it, then fail): the skip
+                    // guard resets only when an item played through (Advanced, Ended) or on a user action (load).
+                    hasStartedCurrentOccurrence = true; audibleOccurrence = event.occurrence; silentRounds = null
+                }
                 snapshot = snapshot.copy(
                     isActuallyPlaying = event.isPlaying, isBuffering = event.isBuffering,
                     engineDurationOccurrence = event.occurrence, engineDurationMs = event.durationMs,
@@ -529,6 +562,7 @@ class PlaybackController(
                     ?: supersededNext.firstOrNull { it.item.occurrence == event.to } ?: return
                 val index = successorIndex(currentIndex ?: return)
                 if (queue.getOrNull(index)?.id != incoming.entry.id) return
+                brokenInARow = 0
                 publishCompletion()
                 hasStartedCurrentOccurrence = true
                 savedPositionMs = 0
@@ -544,6 +578,8 @@ class PlaybackController(
             }
             is EngineEvent.Ended -> {
                 if (!hasLoadedItem || playbackOccurrenceId != event.last) return
+                val autoplay = playWhenReady
+                brokenInARow = 0
                 publishCompletion()
                 val successorIndex = successorIndex(currentIndex!!)
                 val successor = queue.getOrNull(successorIndex)
@@ -571,6 +607,7 @@ class PlaybackController(
                             null -> "Ready"
                             else -> "Playback failed"
                         })
+                    if (failure != null) skipBroken(successorIndex, failure, autoplay)
                 }
             }
             is EngineEvent.StreamInterrupted -> {
@@ -589,7 +626,19 @@ class PlaybackController(
             }
             is EngineEvent.Failed -> {
                 if (!hasLoadedItem) return
+                if (event.occurrence == playbackOccurrenceId && event.cutOffStart) {
+                    // A remote stream cut off before its first sound reads as a broken file; it waits and retries
+                    // once like a lost connection. The second time (after the reload) it is a real bad file.
+                    val occurrence = snapshot.currentOccurrence
+                    if (occurrence != null && occurrence.item.source is TrackSource.Remote && !occurrence.cutOffRetried &&
+                        audibleOccurrence != event.occurrence) {
+                        snapshot = snapshot.copy(currentOccurrence = occurrence.copy(cutOffRetried = true))
+                        handleEngineEvent(EngineEvent.Failed(event.occurrence, PlaybackFailure.Network))
+                        return
+                    }
+                }
                 if (event.occurrence == playbackOccurrenceId) {
+                    val autoplay = playWhenReady
                     // The connection is gone but the read-ahead finished the song: carry on from the complete local
                     // copy at the exact position (same occurrence, so no end/start pair), instead of waiting for the network.
                     if (event.failure == PlaybackFailure.Network) {
@@ -599,13 +648,26 @@ class PlaybackController(
                     invalidateOccurrence()
                     savedPositionMs = positionMs
                     if (event.failure == PlaybackFailure.Network) {
-                        waitFor(snapshot.currentOccurrence!!, currentIndex!!, savedPositionMs, playWhenReady)
-                        return
+                        // FR-1: a stream that fails again before any sound while the server answers (5xx, refused redirect)
+                        // keeps its backoff and lock window, and after MAX_SILENT_WAIT_ROUNDS waits it fails like a bad file.
+                        val current = snapshot.currentOccurrence!!
+                        val silent = audibleOccurrence != event.occurrence
+                        val prior = silentRounds?.takeIf { silent && it.entryId == current.entry.id }
+                        val rounds = if (silent) (prior?.rounds ?: 0) + 1 else 0
+                        if (rounds <= MAX_SILENT_WAIT_ROUNDS) {
+                            // Only a wait that itself came from a silent round carries: an outage wait starts round 1 fresh.
+                            waitFor(current, currentIndex!!, savedPositionMs, playWhenReady, prior?.wait?.takeIf { prior.rounds > 0 })
+                            silentRounds = SilentRounds(current.entry.id, rounds)
+                            return
+                        }
+                        silentRounds = null
                     }
+                    val failure = if (event.failure == PlaybackFailure.Network) PlaybackFailure.Unknown else event.failure
                     hasLoadedItem = false
                     snapshot = snapshot.copy(isPlaying = false, isActuallyPlaying = false, isBuffering = false, isPrepared = false,
-                        failure = event.failure, status = "Playback failed",
-                        entryFailures = snapshot.entryFailures + (currentEntry!!.id to event.failure))
+                        failure = failure, status = "Playback failed",
+                        entryFailures = snapshot.entryFailures + (currentEntry!!.id to failure))
+                    skipBroken(currentIndex!!, failure, autoplay)
                 } else if (event.occurrence == preparedNext?.item?.occurrence) {
                     // The adapter must keep current audio running when preparing next fails.
                     snapshot = snapshot.copy(entryFailures = snapshot.entryFailures +
@@ -613,6 +675,21 @@ class PlaybackController(
                 }
             }
         }
+    }
+
+    /**
+     * FR-1b: the item at [index] failed for good while the server answers (it shows its failure first):
+     * move on to the next item through [load], keeping [autoplay]. Not for a sign-in error, never back to the same item
+     * (repeat ONE), not past the end with repeat OFF, and not once [MAX_CONSECUTIVE_SKIPS] broken items came in a row.
+     */
+    private fun skipBroken(index: Int, failure: PlaybackFailure, autoplay: Boolean) {
+        if (failure == PlaybackFailure.Network || failure == PlaybackFailure.Unauthorized) return
+        val broken = brokenInARow + 1
+        if (broken >= MAX_CONSECUTIVE_SKIPS || snapshot.repeatMode == RepeatMode.ONE) return
+        val target = if (index + 1 in queue.indices) index + 1 else if (snapshot.repeatMode == RepeatMode.ALL) 0 else return
+        if (target == index) return
+        load(target, 0, autoplay)
+        brokenInARow = broken
     }
 
     private fun emitStarted() {
@@ -651,6 +728,13 @@ class PlaybackController(
          * may already be loading for the gapless join; swapping it then would waste the bytes read. Unknown length: no swap.
          */
         const val NEXT_REFRESH_MIN_REMAINING_MS = 90_000L
+        /** FR-1: waits for one queue item that end in a reload failing again before any sound; the next failure fails it. */
+        const val MAX_SILENT_WAIT_ROUNDS = 3
+        /**
+         * FR-1b: broken items in a row (final failure while the server answers, no sound in between) that
+         * Coda tries; the last of them stays on its failure instead of skipping on.
+         */
+        const val MAX_CONSECUTIVE_SKIPS = 5
         fun refreshesPreparedNext(remainingMs: Long?): Boolean = remainingMs != null && remainingMs > NEXT_REFRESH_MIN_REMAINING_MS
     }
 }

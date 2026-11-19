@@ -54,7 +54,8 @@ object ConnectionActivity {
  * playing) the idle connections are closed [delayMs] after the last [activity] (the track-change burst); the next burst
  * pays one handshake inside a radio period that is up anyway. [evictIdle] is `ConnectionPool.evictAll`, which only
  * closes idle connections: one in use (a stream being read) stays, and the end of its body restarts the delay. Screen
- * turning off restarts it too. With the screen on nothing changes (OkHttp's 5-min pool).
+ * turning off restarts it too. The app passes [BackgroundWorkPolicy.closesIdleConnections], so this also
+ * runs whenever nothing plays (screen on or off); only screen on and playing keeps OkHttp's 5-min pool.
  */
 class IdleConnectionCloser(
     scope: CoroutineScope,

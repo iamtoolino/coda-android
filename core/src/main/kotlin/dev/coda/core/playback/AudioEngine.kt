@@ -90,7 +90,11 @@ sealed interface EngineEvent {
     data class State(val occurrence: OccurrenceId, val isPlaying: Boolean, val isBuffering: Boolean, val durationMs: Long? = null) : EngineEvent
     data class Advanced(val to: OccurrenceId) : EngineEvent
     data class Ended(val last: OccurrenceId) : EngineEvent
-    data class Failed(val occurrence: OccurrenceId, val failure: PlaybackFailure) : EngineEvent
+    /**
+     * [cutOffStart]: a parser/format failure ([failure] is [PlaybackFailure.Decode]), which before the first
+     * sound of a remote stream is usually a start cut off by a weak network rather than a bad file.
+     */
+    data class Failed(val occurrence: OccurrenceId, val failure: PlaybackFailure, val cutOffStart: Boolean = false) : EngineEvent
     /** The adapter accepted a different source for this occurrence (Opus rejected → original). */
     data class SourceFallback(val occurrence: OccurrenceId, val source: TrackSource) : EngineEvent
     /**

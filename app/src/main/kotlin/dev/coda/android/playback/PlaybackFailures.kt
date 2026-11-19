@@ -32,3 +32,15 @@ internal fun playbackFailure(error: Throwable): PlaybackFailure {
     if (chain.any { it is java.io.IOException }) return PlaybackFailure.Network
     return PlaybackFailure.Unknown
 }
+
+/**
+ * A parser/format failure (ParserException, including UnrecognizedInputFormatException, or a Media3 parsing
+ * error code), not a decoder one. Before the first sound of a remote stream it is usually a start cut off by a weak
+ * network; the controller decides whether it counts as one ([dev.coda.core.playback.EngineEvent.Failed.cutOffStart]).
+ */
+@UnstableApi
+internal fun isParserFailure(error: Throwable): Boolean {
+    if (playbackFailure(error) != PlaybackFailure.Decode) return false
+    val chain = generateSequence(error) { it.cause }.take(16).toList()
+    return chain.any { it is ParserException } || (error is PlaybackException && error.errorCode in 3000..3999)
+}

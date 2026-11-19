@@ -38,5 +38,8 @@ class QuietPlayback(context: Context, scope: CoroutineScope, playing: StateFlow<
 
     val quiet: StateFlow<Boolean> = combine(screen, playing) { on, active -> BackgroundWorkPolicy.quiet(on, active) }
         .stateIn(scope, SharingStarted.Eagerly, BackgroundWorkPolicy.quiet(screen.value, playing.value))
+    /** Idle server connections are closed ([dev.coda.android.net.IdleConnectionCloser]): [quiet] or nothing plays. */
+    val closesIdleConnections: StateFlow<Boolean> = combine(screen, playing) { on, active -> BackgroundWorkPolicy.closesIdleConnections(on, active) }
+        .stateIn(scope, SharingStarted.Eagerly, BackgroundWorkPolicy.closesIdleConnections(screen.value, playing.value))
     val isPlaying: () -> Boolean = { playing.value }
 }

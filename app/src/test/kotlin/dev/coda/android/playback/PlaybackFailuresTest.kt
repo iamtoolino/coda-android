@@ -8,6 +8,8 @@ import androidx.media3.exoplayer.source.UnrecognizedInputFormatException
 import dev.coda.android.cache.TrackReadException
 import dev.coda.core.playback.PlaybackFailure
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.IOException
 
@@ -26,5 +28,15 @@ class PlaybackFailuresTest {
         assertEquals(PlaybackFailure.NotFound, playbackFailure(RuntimeException(TrackReadException(PlaybackFailure.NotFound))))
         assertEquals(PlaybackFailure.Unknown, playbackFailure(FileDataSource.FileDataSourceException(IOException("gone"), 2005)))
         assertEquals(PlaybackFailure.Unknown, playbackFailure(IllegalStateException("other")))
+    }
+
+    /** Only parser/format failures can be a cut-off start; decoder, transport and cache-read failures are not. */
+    @Test fun parserFailuresAreMarkedAsPossibleCutOffStarts() {
+        assertTrue(isParserFailure(ParserException.createForMalformedContainer("cut", null)))
+        assertTrue(isParserFailure(unrecognized()))
+        assertTrue(isParserFailure(IOException("load", ParserException.createForUnsupportedContainerFeature("x"))))
+        assertFalse(isParserFailure(RuntimeException(DecoderException("codec"))))
+        assertFalse(isParserFailure(IOException("reset")))
+        assertFalse(isParserFailure(RuntimeException(TrackReadException(PlaybackFailure.Decode))))
     }
 }

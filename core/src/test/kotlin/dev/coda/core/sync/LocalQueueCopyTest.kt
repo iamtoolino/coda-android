@@ -237,6 +237,7 @@ class LocalQueueCopyTest {
         assertEquals("pause save of the replacement", listOf("x", "y"), saves.last().songIDs)
         assertEquals(listOf("x", "y"), copies.last().entries.map { it.songId })
         advanceTimeBy(QueueHandoffCoordinator.START_WINDOW_MS + 1_000); runCurrent()          // expiry must not re-hold it
+        player.seek(1_000) // An exit with the last server save's snapshot writes only the local copy
         val exit = coordinator.terminationSave()
         assertNotNull("exit save of the replacement", exit)
         saves.clear(); exit!!.invoke()
@@ -299,6 +300,7 @@ class LocalQueueCopyTest {
         runCurrent(); advanceTimeBy(1_000); runCurrent()
         assertEquals("replacement saved", listOf("a", "b"), saves.last().songIDs); assertEquals(listOf("a", "b"), copies.last().entries.map { it.songId })
         advanceTimeBy(QueueHandoffCoordinator.START_WINDOW_MS + 1_000); runCurrent()
+        player.seek(1_000) // An exit with the last server save's snapshot writes only the local copy
         saves.clear(); val exit = coordinator.terminationSave()
         assertNotNull("exit save of the replacement", exit); exit!!.invoke()
         assertEquals(listOf("a", "b"), saves.single().songIDs)
@@ -315,6 +317,7 @@ class LocalQueueCopyTest {
         runCurrent(); advanceTimeBy(1_000); runCurrent()
         assertEquals(listOf("a", "b"), saves.last().songIDs); assertEquals(listOf("a", "b"), copies.last().entries.map { it.songId })
         advanceTimeBy(16_000); runCurrent()
+        player.seek(1_000) // An exit with the last server save's snapshot writes only the local copy
         saves.clear(); val exit = coordinator.terminationSave()
         assertNotNull("exit save", exit); exit!!.invoke()
         assertEquals(listOf("a", "b"), saves.single().songIDs)

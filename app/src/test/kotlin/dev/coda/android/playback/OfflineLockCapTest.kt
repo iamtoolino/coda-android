@@ -15,18 +15,16 @@ import org.junit.Assert.*
 import org.junit.Test
 import java.util.UUID
 
-/** Note: locks only for the first 10 minutes of the wait, then relaxed retries; the callback still resumes. */
+/** Note: locks only for the first 10 minutes of the wait, then no timed retries; the callback still resumes. */
 @OptIn(ExperimentalCoroutinesApi::class)
 class OfflineLockCapTest {
     private val minute = 60_000L
 
-    @Test fun locksReleaseAtTheCapRetriesRelaxWithTheScreenAndTheCallbackResumes() = runTest {
+    @Test fun locksReleaseAtTheCapTimedRetriesStopAndTheCallbackResumes() = runTest {
         var online = false
-        var screenOn = true
         val engine = FakeAudioEngine()
         val controller = PlaybackController(engine, networkAvailable = { online }, nowMs = { testScheduler.currentTime },
-            recoveryPolicy = RecoveryPolicy(lockCapMs = 10 * minute, relaxedScreenOnMs = 2 * minute, relaxedScreenOffMs = 5 * minute),
-            screenOn = { screenOn })
+            recoveryPolicy = RecoveryPolicy(lockCapMs = 10 * minute))
         var locks = SessionLocks(false, false)
         val lockChanges = mutableListOf<Pair<Long, SessionLocks>>()
         // Focus is still held from earlier audible playback: the cap must release the locks anyway.
@@ -55,26 +53,16 @@ class OfflineLockCapTest {
         assertEquals(listOf(0L to SessionLocks(true, true), 10 * minute to SessionLocks(false, false)), lockChanges)
         assertNotNull(controller.recovery.waiting)
 
-        // Relaxed: the first probe past the cap fails and schedules 2 min (screen on); the next, with the
-        // screen off by then, schedules 5 min.
-        advanceTimeBy(2 * minute - 1_000); runCurrent()
-        val relaxed = pings.filter { it >= 10 * minute }
-        assertEquals(1, relaxed.size)
-        val first = relaxed.single()
-        screenOn = false
-        advanceTimeBy(2 * minute); runCurrent()
-        val second = pings.last()
-        assertEquals(2 * minute, second - first)
-        advanceTimeBy(5 * minute - 30_000); runCurrent()
-        val third = pings.last()
-        assertEquals(5 * minute, third - second)
+        // The last fast probe (scheduled before the cap) fails, and then no timed probe runs.
+        advanceTimeBy(30_000); runCurrent()
+        val asleep = pings.size
+        advanceTimeBy(60 * minute); runCurrent()
+        assertEquals(asleep, pings.size)
         assertEquals(SessionLocks(false, false), locks)
         assertEquals(2, lockChanges.size)
 
-        // No timer is due for minutes, but the network-available callback probes and resumes at once.
+        // No timer is due, but the network-available callback probes and resumes at once.
         val before = pings.size
-        advanceTimeBy(30_000); runCurrent()
-        assertEquals(before, pings.size)
         online = true
         controller.networkChanged()
         advanceTimeBy(250); runCurrent()

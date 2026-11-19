@@ -68,6 +68,35 @@ object BackgroundWorkPolicy {
      */
     const val IDLE_CONNECTION_CLOSE_MS = 20_000L
 
+    /**
+     * Idle server connections are closed ([IDLE_CONNECTION_CLOSE_MS] after the last request
+     * activity) while [quiet] and whenever nothing plays, with the screen on or off.
+     */
+    fun closesIdleConnections(screenOn: Boolean, playing: Boolean): Boolean = quiet(screenOn, playing) || !playing
+
+    /**
+     * Paused or stopped this long, and the read-ahead has nothing running, Coda goes to deep sleep: the
+     * player's stream is released and nothing is polled until Play or a real network switch. The foreground service
+     * ends after the same time (Media3 `setForegroundServiceTimeoutMs`; its default is 10 min) and, BAT-6d, at the
+     * release at the latest ([runsInForeground]). A shorter pause plays on at once as before. The grace counts wall time
+     * ([wallClockDelay]).
+     */
+    const val DEEP_SLEEP_GRACE_MS = 60_000L
+
+    /**
+     * Media3's foreground decision ([required]: engaged, or its uptime timeout still pending) is overridden to
+     * false once deep sleep has released the player ([asleep]) unless playback is requested ([playWhenReady]).
+     */
+    fun runsInForeground(required: Boolean, asleep: Boolean, playWhenReady: Boolean): Boolean =
+        required && !(asleep && !playWhenReady)
+
+    /**
+     * Once deep sleep has released the player with no play requested, the playback service unstarts itself
+     * (stopSelf). A bound UI or Auto keeps it alive; otherwise it is destroyed now instead of lingering started (not
+     * freezable, sticky restart, a late exit save). Play afterwards goes through the media button / resumption path.
+     */
+    fun stopsService(asleep: Boolean, playWhenReady: Boolean): Boolean = asleep && !playWhenReady
+
     /** Read-ahead safety poll; queue, current item, network and session changes wake it at once. */
     fun readAheadIdleMs(uiVisible: Boolean): Long = if (uiVisible) 1_000 else 30_000
 }

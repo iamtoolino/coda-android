@@ -59,7 +59,9 @@ class OfflineLibraryTest {
         reachability: Reachability = reach(ping, nowMs), coverSource: CoverStore.Source? = null,
         runIn: CoroutineScope = scope, savesFail: Boolean = false,
         /** Saves fail only while this is set (a full disk that comes and goes). */
-        failSaves: java.util.concurrent.atomic.AtomicBoolean? = null): OfflineLibrary {
+        failSaves: java.util.concurrent.atomic.AtomicBoolean? = null,
+        /** Real network switches (the app wires NetworkMonitor.switches); by default every change counts as one. */
+        switches: kotlinx.coroutines.flow.Flow<Unit> = changes): OfflineLibrary {
         space = FakeFreeSpace(folder, 64 * GiB)
         val counted = object : FreeSpace {
             override fun allocatableBytes() = space.allocatableBytes().also { spaceQueries.incrementAndGet() }
@@ -85,7 +87,7 @@ class OfflineLibraryTest {
             server.authenticatedUrl("stream") + "&id=${source.songId}&format=" + if (source.format == StreamFormat.RAW) "raw" else "opus"
         }, reachability = reachability, client = client, log = {}, transfersAllowed = allowed, housekeepingMs = housekeepingMs, onUserWork = onUserWork,
             active = active, savePolicy = savePolicy, nowMs = nowMs, fallbackMs = fallbackMs, visible = visible,
-            screenOn = screenOn, screenOffMs = screenOffMs, coverSource = coverSource)
+            screenOn = screenOn, screenOffMs = screenOffMs, coverSource = coverSource, networkSwitches = switches)
     }
 
     /** The shared state as the app wires it: fed by [network] and [changes], probing with [ping]. */
@@ -824,6 +826,44 @@ class OfflineLibraryTest {
         val host = library(reachability = r)
         eventually("pinged during the backoff") { pings.get() == 1 && host.serverReachable.value }
         assertTrue(cache.expiring)
+    }
+
+    /** Signal-only capability changes keep the download backoff; only a real switch resets it. Fake clock. */
+    @Test fun signalOnlyChangesKeepTheDownloadBackoffAndARealSwitchResetsIt() = runBlocking {
+        val clock = java.util.concurrent.atomic.AtomicLong(1_000_000)
+        val switches = MutableSharedFlow<Unit>(extraBufferCapacity = 4)
+        server.goOffline() // streams answer 503 (a retry with backoff); the reachability ping is the test's own and succeeds
+        val host = library(nowMs = { clock.get() }, switches = switches)
+        host.add(album)
+        eventually("both tracks tried") { album.trackIds.all { id -> server.streamRequests.any { it.id == id } } }
+        delay(1_500) // the frozen clock: no retry falls due
+        val tried = server.streamRequests.size
+        repeat(5) { changes.tryEmit(Unit); delay(300) } // signal or bandwidth updates of the same Wi-Fi
+        delay(1_500)
+        assertEquals("Backoff kept across signal-only changes", tried, server.streamRequests.size)
+        switches.tryEmit(Unit); changes.tryEmit(Unit) // a real switch (the monitor emits both)
+        eventually("retried after the switch") { server.streamRequests.size > tried }
+    }
+
+    /**
+     * A signal-only capability change does not wake the download loop, so its reachability check (a ping once
+     * the last answer is older than 5 min) does not run; a real switch wakes it as today. Fake clock, no kept sets.
+     */
+    @Test fun signalOnlyChangesDoNotWakeTheLoopAndARealSwitchDoes() = runBlocking {
+        val clock = java.util.concurrent.atomic.AtomicLong(1_000_000)
+        val pings = java.util.concurrent.atomic.AtomicInteger()
+        // The shared state without the test's change-to-networkChanged wiring: only the library's own check can ping.
+        val r = Reachability(scope, { clock.get() }, { pings.incrementAndGet(); true }, initial = Reachability.Network.USABLE)
+        val switches = MutableSharedFlow<Unit>(extraBufferCapacity = 4)
+        val host = library(reachability = r, nowMs = { clock.get() }, switches = switches)
+        eventually("first check pinged") { pings.get() == 1 && host.serverReachable.value }
+        delay(500)
+        clock.addAndGet(6 * 60_000L) // the last answer is now older than the 5-min ping interval
+        repeat(5) { changes.tryEmit(Unit); delay(300) } // signal or bandwidth updates of the same Wi-Fi
+        delay(1_000)
+        assertEquals("no ping on signal-only changes", 1, pings.get())
+        switches.tryEmit(Unit); changes.tryEmit(Unit) // a real switch (the monitor emits both)
+        eventually("pinged after the switch") { pings.get() == 2 }
     }
 
     /** A server answer within the ping interval (on the current network) stands in for the reachability ping. */

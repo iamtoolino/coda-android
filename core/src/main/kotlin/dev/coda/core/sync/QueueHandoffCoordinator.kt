@@ -79,6 +79,8 @@ class QueueHandoffCoordinator(
     private val writeLock = kotlinx.coroutines.sync.Mutex()
     private var captureSequence = 0L
     private var writtenSequence = 0L
+    // The snapshot of the last successful server save; an exit with the same one writes only the local copy.
+    private var lastServerSave: QueueHandoffSnapshot? = null
     private var localSequence = 0L
     private var pending: Request? = null
     private var pauseSavePending = false
@@ -222,7 +224,11 @@ class QueueHandoffCoordinator(
     private fun holdsGate(): Boolean { observeQueue(); return heldGeneration == generation }
 
     fun setForeground(value: Boolean) { foreground = value; if (value) scheduleRefresh(250) }
-    fun networkAvailable() = scheduleRefresh(2_000)
+    /**
+     * A real network switch with a usable network. Refreshes only while the UI is on screen or before the first
+     * lookup succeeded; otherwise the next [setForeground] true refreshes anyway (no request for a card nobody sees).
+     */
+    fun networkAvailable() { if (foreground || !initialQueueResolved) scheduleRefresh(2_000) }
     fun scheduleRefresh(delayMs: Long = 0) {
         if (player.isPlaying) return
         // Rescheduling supersedes both the pending delay and any request already in flight.
@@ -417,6 +423,7 @@ class QueueHandoffCoordinator(
         writeLocalLocked(sequence, local)
         save(snapshot)
         writtenSequence = sequence
+        lastServerSave = snapshot
         // Read the server's queue back once for the exact `changed` of our save (pure server-value equality later, robust
         // to another device with the same client name). Only our own save counts; a failed read keeps the old baseline.
         if (readBack) try {
@@ -435,7 +442,8 @@ class QueueHandoffCoordinator(
         val local = LocalQueueCopy.capture(player)
         val sequence = ++captureSequence
         // An unverified held save (or a conflict) must not reach the server at exit: local copy only.
-        val localOnly = ownership == Ownership.CONFLICT || verifyBeforeSave || serverGate?.isOpen() == false
+        // Nor does the same queue and position the server already has from us (the pause save before deep sleep).
+        val localOnly = ownership == Ownership.CONFLICT || verifyBeforeSave || serverGate?.isOpen() == false || snapshot == lastServerSave
         cancelSaves()
         return {
             try {

@@ -34,7 +34,7 @@ can't be updated to this version, so install Coda fresh.
 
 ## Build from source
 
-This source is version 1.0.0-rc3. You need JDK 17 and the Android SDK (platform 36, build-tools
+This source is version 1.0.0. You need JDK 17 and the Android SDK (platform 36, build-tools
 37.0.0). Set `ANDROID_HOME` to the SDK, or put `sdk.dir=...` in `local.properties`. Then run:
 
 ```sh

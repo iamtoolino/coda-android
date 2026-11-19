@@ -37,8 +37,8 @@ android {
         minSdk = 36
         targetSdk = 36
         testInstrumentationRunner = "dev.coda.android.CodaTestRunner"
-        versionCode = 28
-        versionName = "1.0.0-rc3"
+        versionCode = 42
+        versionName = "1.0.0"
         buildConfigField("String", "GIT_COMMIT", buildLiteral(gitBuild.commit))
         buildConfigField("String", "GIT_DESCRIBE", buildLiteral(gitBuild.describe))
         buildConfigField("String", "GIT_TAG", buildLiteral(gitBuild.tag))

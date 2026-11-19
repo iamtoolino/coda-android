@@ -325,7 +325,7 @@ class ExoAudioEngine(
             override fun onPlayerError(error: PlaybackException) {
                 reopen.clear() // Nor after a failure.
                 silence.completePause(); silence.end(SeekSilence.Exit.FAILED) // The player stopped and dropped its audio.
-                current()?.let { emit(EngineEvent.Failed(it.occurrence, failure(error))) }
+                current()?.let { emit(EngineEvent.Failed(it.occurrence, failure(error), isParserFailure(error))) }
             }
         })
         player.addAnalyticsListener(object : AnalyticsListener {

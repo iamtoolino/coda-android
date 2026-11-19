@@ -91,4 +91,26 @@ class AudioFocusPolicyTest {
         assertFalse(f.policy.focused)
         assertEquals(2, f.abandons)
     }
+
+    /** The service learns of a resuming transient loss before the suspension is published, and of its end. */
+    @Test fun aTransientLossReportsAPendingResumeBeforeSuspendingAndClearsItOnGain() {
+        val engine = FakeAudioEngine()
+        val controller = PlaybackController(engine)
+        val reports = mutableListOf<Pair<Boolean, Boolean>>() // (pending, controller still playing when reported)
+        val policy = AudioFocusPolicy(controller, { true }, {}) { pending -> reports += pending to controller.isPlaying }
+        controller.playbackGate = policy
+        controller.replaceQueue(listOf(QueueEntry("synthetic")))
+        policy.transientLoss()
+        assertFalse(controller.isPlaying)
+        assertEquals(listOf(true to true), reports)
+        policy.gain()
+        assertTrue(controller.isPlaying)
+        assertEquals(listOf(true, false), reports.map { it.first }) // cleared as Play requests focus again
+        // A user pause during the call ends the pending resume too; a transient loss while paused reports nothing.
+        policy.transientLoss(); controller.pause()
+        assertEquals(false, reports.last().first)
+        val count = reports.size
+        policy.transientLoss()
+        assertEquals(count, reports.size)
+    }
 }

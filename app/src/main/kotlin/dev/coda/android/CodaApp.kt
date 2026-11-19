@@ -212,8 +212,8 @@ class CodaApp : Application() {
             // Only while the server answers; bounded (ScrobbleHost.SIGN_OUT_FLUSH_MS), entries stay on failure.
             beforeSignOut = { if (reachability.state.value.reachable) scrobbles.flushForSignOut() })
         quietPlayback = dev.coda.android.playback.QuietPlayback(this, scope, playbackActive)
-        // Screen off and playing: close idle server connections shortly after each request burst.
-        val idleConnections = dev.coda.android.net.IdleConnectionCloser(scope, quietPlayback.quiet,
+        // Screen off and playing (or nothing playing): close idle server connections shortly after each request burst.
+        val idleConnections = dev.coda.android.net.IdleConnectionCloser(scope, quietPlayback.closesIdleConnections,
             { dev.coda.android.net.HttpClientFactory.client.connectionPool.evictAll() })
         dev.coda.android.net.ConnectionActivity.onActivity = idleConnections::activity
         var gate: dev.coda.core.connectivity.ServerGate? = null
@@ -317,7 +317,7 @@ class CodaApp : Application() {
                             reachability = reachability, onClose = monitor::close, transfersAllowed = transfersAllowed,
                             onUserWork = transferGate::userAskedForWork, active = cacheActive, savePolicy = { policy, custom -> cacheSettings.setPolicy(policy, custom) }, networkIdentity = { monitor.identity },
                             visible = transferGate.visible, screenOn = quietPlayback.screenOn,
-                            coverSource = dev.coda.android.artwork.KeptCoverSource(this@CodaApp, ::current))
+                            coverSource = dev.coda.android.artwork.KeptCoverSource(this@CodaApp, ::current), networkSwitches = monitor.switches)
                         collectCatalogue(CoroutineScope(scope.coroutineContext + job), offlineLibrary.value!!, libraryStore(key)) {
                             current().recentAlbums.get(it)
                         }

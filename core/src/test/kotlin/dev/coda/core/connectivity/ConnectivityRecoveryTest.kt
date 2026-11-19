@@ -46,16 +46,17 @@ class ConnectivityRecoveryTest {
         recovery.play(now); assertTrue(recovery.waiting!!.autoResume)
         recovery.clear(); assertNull(recovery.waiting); assertFalse(recovery.due(now))
     }
-    @Test fun retriesRelaxAfterTheLockCapByScreenStateAndCallbackStillProbesAtOnce() {
-        val recovery = ConnectivityRecovery(RecoveryPolicy(lockCapMs = 10_000, relaxedScreenOnMs = 2_000, relaxedScreenOffMs = 5_000))
+    @Test fun retriesStopAfterTheLockCapAndCallbackStillProbesAtOnce() {
+        val recovery = ConnectivityRecovery(RecoveryPolicy(lockCapMs = 10_000))
         recovery.waitFor(OccurrenceId(), 0, true, 100)
         assertEquals(10_100, recovery.waiting!!.lockUntilMs)
         recovery.failed(9_000)
         assertEquals(9_000 + ConnectivityRecovery.retryDelayMs(1), recovery.waiting!!.retryAtMs)
-        recovery.failed(10_100); assertEquals(12_100, recovery.waiting!!.retryAtMs)
-        recovery.failed(12_100, screenOn = false); assertEquals(17_100, recovery.waiting!!.retryAtMs)
+        // Past the cap the wait sleeps (no timed probe) instead of relaxed retries.
+        recovery.failed(10_100); assertEquals(ConnectivityRecovery.UNSCHEDULED, recovery.waiting!!.retryAtMs)
         recovery.networkChanged(13_000); assertTrue(recovery.due(13_000))
-        assertEquals(10_100, recovery.waiting!!.lockUntilMs)
+        // A real switch opens a short fast-retry window again.
+        assertEquals(13_000 + RecoveryPolicy.SWITCH_FAST_RETRY_MS, recovery.waiting!!.lockUntilMs)
     }
     @Test fun formatChangesOnlyForNextOccurrenceAndCacheWinsOnEveryNetwork() {
         val engine = FakeAudioEngine()

@@ -8,11 +8,17 @@ internal class AudioFocusPolicy(
     private val controller: PlaybackController,
     private val request: () -> Boolean,
     private val abandon: () -> Unit,
+    /**
+     * True while a transient loss (a call) will resume playback on gain, false once that ends. Called
+     * synchronously, before the suspension is published, so the service can keep its foreground and stay awake.
+     */
+    private val resumePendingChanged: (Boolean) -> Unit = {},
 ) : PlaybackGate {
     var focused = false
         private set
     private var requested = false
     private var resumeOnGain = false
+        set(value) { if (field != value) { field = value; resumePendingChanged(value) } }
 
     override fun requestPlay(): Boolean {
         resumeOnGain = false

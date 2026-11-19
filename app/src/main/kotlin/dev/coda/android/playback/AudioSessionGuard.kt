@@ -19,7 +19,7 @@ internal data class SessionLocks(val wake: Boolean, val wifi: Boolean)
  * Lock ownership. Audible playback holds the locks while it has focus. Waiting to resume holds
  * them too, without focus (playback that starts offline never requested focus), but only until the wait's
  * [dev.coda.core.connectivity.ConnectivityRecovery.Waiting.lockUntilMs]: [capExpired] then releases them even
- * if focus is still held, and resume relies on the network callback and the relaxed retry timer. A paused
+ * if focus is still held, and resume relies on the network callback, Play or Retry (no timed retry). A paused
  * wait holds nothing.
  */
 internal fun sessionLocks(state: PlaybackState, focused: Boolean, capExpired: Boolean = false): SessionLocks {
@@ -54,7 +54,8 @@ internal class SessionLockDriver(
 }
 
 /** One owner of focus, noisy handling and locks, independent of the decoder implementation. */
-internal class AudioSessionGuard(context: Context, private val controller: PlaybackController, scope: CoroutineScope) {
+internal class AudioSessionGuard(context: Context, private val controller: PlaybackController, scope: CoroutineScope,
+    resumePendingChanged: (Boolean) -> Unit = {}) {
     private val context = context.applicationContext
     private val audio = context.getSystemService(AudioManager::class.java)
     private val wake = context.getSystemService(PowerManager::class.java)
@@ -65,6 +66,7 @@ internal class AudioSessionGuard(context: Context, private val controller: Playb
     private val focusPolicy = AudioFocusPolicy(controller,
         request = { audio.requestAudioFocus(focus) == AudioManager.AUDIOFOCUS_REQUEST_GRANTED },
         abandon = { audio.abandonAudioFocusRequest(focus) },
+        resumePendingChanged = resumePendingChanged,
     )
     private val focus: AudioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
         .setAudioAttributes(AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA)

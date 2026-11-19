@@ -87,7 +87,8 @@ class QueueHandoffCoordinatorTest {
         player.play(); runCurrent(); advanceTimeBy(501); runCurrent()
         assertEquals(3, saves.size)
         advanceTimeBy(15_000); runCurrent(); assertEquals(4, saves.size)
-        coordinator.terminationSave()!!.invoke(); assertEquals(5, saves.size)
+        coordinator.terminationSave()!!.invoke(); assertEquals("BAT-7: unchanged since the tick save, local copy only", 4, saves.size)
+        player.seek(23_456); coordinator.terminationSave()!!.invoke(); assertEquals(5, saves.size)
         coordinator.close()
     }
 
@@ -634,6 +635,63 @@ class QueueHandoffCoordinatorTest {
         assertEquals(1, player.currentIndex); assertEquals(777L, player.positionMs)
         runCurrent()
         assertEquals(listOf(QueueHandoffSnapshot(listOf("c", "a"), 1, 777)), saves)
+        coordinator.close()
+    }
+
+    /**
+     * A network switch refreshes the handoff queue only with the UI on screen or before the first lookup
+     * succeeded; in the background after it nothing is sent (the next return to the front refreshes anyway).
+     */
+    @Test fun aNetworkSwitchRefreshesOnlyOnScreenOrBeforeTheFirstLookup() = runTest {
+        val player = PlaybackController(FakeAudioEngine())
+        var loads = 0
+        var fail = true
+        val coordinator = QueueHandoffCoordinator(player, backgroundScope, phone,
+            { loads++; if (fail) throw java.io.IOException() else null }, {})
+        advanceTimeBy(251); runCurrent()
+        assertEquals(1, loads); assertFalse(coordinator.initialQueueResolved)
+        fail = false
+        coordinator.networkAvailable(); advanceTimeBy(2_001); runCurrent()
+        assertEquals("first lookup still due: as today", 2, loads); assertTrue(coordinator.initialQueueResolved)
+        repeat(5) { coordinator.networkAvailable(); advanceTimeBy(2_001); runCurrent() }
+        assertEquals("background after the first lookup: no getPlayQueue", 2, loads)
+        coordinator.setForeground(true); advanceTimeBy(251); runCurrent()
+        assertEquals("the return to the front refreshes", 3, loads)
+        coordinator.networkAvailable(); advanceTimeBy(2_001); runCurrent()
+        assertEquals("UI on screen: as today", 4, loads)
+        coordinator.setForeground(false)
+        coordinator.networkAvailable(); advanceTimeBy(2_001); runCurrent()
+        assertEquals(4, loads)
+        coordinator.close()
+    }
+
+    /**
+     * The exit save (service destroyed after deep sleep) writes only the local copy when the server already has
+     * this queue and position from our last successful save (the pause save); a changed snapshot is saved as today.
+     */
+    @Test fun anExitWithTheSnapshotOfTheLastServerSaveWritesOnlyTheLocalCopy() = runTest {
+        val engine = FakeAudioEngine()
+        val player = PlaybackController(engine)
+        val saves = mutableListOf<QueueHandoffSnapshot>()
+        val local = mutableListOf<LocalQueueCopy>()
+        var saved = 0
+        val coordinator = QueueHandoffCoordinator(player, backgroundScope, phone, { null }, { saves += it },
+            saveLocal = { local += it }, screenOn = { false }, onSaved = { saved++ })
+        runCurrent()
+        player.replaceQueue(listOf(QueueEntry("a"), QueueEntry("b")), 0, 0, startsPlaying = true)
+        runCurrent(); advanceTimeBy(251); runCurrent()
+        engine.position = 42_000
+        player.pause(); runCurrent()
+        assertEquals("the pause save", 2, saves.size); assertEquals(42_000, saves.last().positionMilliseconds)
+        val locals = local.size
+        coordinator.terminationSave()!!.invoke(); runCurrent()
+        assertEquals("unchanged: no server save at exit", 2, saves.size)
+        assertEquals(2, saved)
+        assertEquals("the local copy is still written", locals + 1, local.size)
+        // Changed after the last server save (a paused seek saves nothing by itself): the exit saves it as today.
+        player.seek(50_000); runCurrent()
+        coordinator.terminationSave()!!.invoke(); runCurrent()
+        assertEquals(3, saves.size); assertEquals(50_000, saves.last().positionMilliseconds)
         coordinator.close()
     }
 }

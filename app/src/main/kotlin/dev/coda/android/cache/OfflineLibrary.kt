@@ -35,6 +35,7 @@ class OfflineLibrary(
     private val scope: CoroutineScope,
     val cache: TrackCache,
     private val network: StateFlow<NetworkState>,
+    /** Every network callback; Only the default for [networkSwitches] (tests and device tests that do not tell them apart). */
     networkChanges: Flow<Unit>,
     private val remote: (TrackSource.Remote) -> String,
     /** The shared connectivity state; it owns the one reachability probe ([Reachability.refresh]). */
@@ -73,6 +74,8 @@ class OfflineLibrary(
     private val networkIdentity: () -> String? = { null },
     /** Where kept covers come from (the picture cache, then one fetch on proper Wi-Fi); null: no cover store. */
     private val coverSource: dev.coda.core.cache.CoverStore.Source? = null,
+    /** Real network switches only (NetworkMonitor.switches); only these reset the download backoff. */
+    networkSwitches: Flow<Unit> = networkChanges,
 ) {
     /** Added sets (for badges and pages). */
     val items = MutableStateFlow(cache.addedSets)
@@ -151,12 +154,16 @@ class OfflineLibrary(
             }
         }
         scope.launch {
-            networkChanges.collect {
+            // Only a real switch wakes the loop (whose first step may ping). A switch covers every change of the
+            // NetworkState that canTransfer reads (NetworkSwitch: available, unmetered, cellular), so signal and bandwidth
+            // updates of the same network change nothing here.
+            networkSwitches.collect {
                 // Adds download only on proper Wi-Fi: leaving it stops the running download (an original resumes
                 // later with Range, an Opus transcode restarts). "Load for offline" stops only without a network.
                 if (downloading.value?.let { !canTransfer(it) } ?: !canTransfer()) transfer?.cancel()
-                prefetch.networkChanged(networkIdentity())
                 publishDownloads()
+                // Signal and bandwidth updates of the same network keep the backoff; a real switch resets it.
+                prefetch.networkChanged(networkIdentity())
                 wake.trySend(Unit)
             }
         }

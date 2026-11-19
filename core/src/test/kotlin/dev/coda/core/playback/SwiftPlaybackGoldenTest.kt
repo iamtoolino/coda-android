@@ -121,7 +121,14 @@ class SwiftPlaybackGoldenTest {
                 engine.loadCalls.size.toString(), engine.updatedNextItems.size.toString(),
             )
             val swift = expected.getValue(label)
-            assertEquals(label, swift.dropLast(1), actual.dropLast(1))
+            // FR-1b deliberately departs from Swift: a final failure while the server answers moves on to
+            // the next item (here b at index 2, one more load) instead of staying on "Playback failed".
+            val golden = when (label) {
+                "fail" -> listOf("controller", "fail", "b", "2", "true", "Playing", "0.0", "false", "b", "true", "9", swift.last())
+                "clear" -> swift.dropLast(2) + listOf("9", swift.last())
+                else -> swift
+            }
+            assertEquals(label, golden.dropLast(1), actual.dropLast(1))
             // F2 deliberately omits Swift's redundant updateNext(nil) at insert-before-current.
             // Assert the resulting call counts explicitly; every product-state column stays golden.
             val expectedNextUpdates = when (label) {

@@ -2,15 +2,19 @@ package dev.coda.android.session
 
 import android.content.Context
 import android.security.keystore.KeyGenParameterSpec
+import android.security.keystore.KeyPermanentlyInvalidatedException
 import android.security.keystore.KeyProperties
 import android.util.AtomicFile
 import java.security.KeyStore
+import java.security.UnrecoverableKeyException
+import javax.crypto.AEADBadTagException
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.json.JSONException
 import org.json.JSONObject
 
 /** Intentionally has no generated toString: all three fields are private user data. */
@@ -24,9 +28,10 @@ internal interface CredentialStorage {
 
 class CredentialStore(context: Context) : CredentialStorage {
     private val file by lazy { AtomicFile(java.io.File(context.noBackupFilesDir, "credentials.bin")) }
+    private fun existingKey(): SecretKey? =
+        KeyStore.getInstance("AndroidKeyStore").apply { load(null) }.getKey("coda-login", null) as? SecretKey
     private fun key(): SecretKey {
-        val store = KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
-        return store.getKey("coda-login", null) as? SecretKey ?: KeyGenerator
+        return existingKey() ?: KeyGenerator
             .getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore").apply {
                 init(KeyGenParameterSpec.Builder("coda-login", KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT)
                     .setKeySize(256).setBlockModes(KeyProperties.BLOCK_MODE_GCM)
@@ -34,19 +39,7 @@ class CredentialStore(context: Context) : CredentialStorage {
             }.generateKey()
     }
     override suspend fun read(): Credentials? = withContext(Dispatchers.IO) {
-        if (!file.baseFile.exists()) return@withContext null
-        try {
-            val bytes = file.readFully()
-            require(bytes.size > 28 && bytes[0] == 1.toByte())
-            val cipher = Cipher.getInstance("AES/GCM/NoPadding")
-            cipher.init(Cipher.DECRYPT_MODE, key(), GCMParameterSpec(128, bytes.copyOfRange(1, 13)))
-            val json = JSONObject(String(cipher.doFinal(bytes.copyOfRange(13, bytes.size)), Charsets.UTF_8))
-            Credentials(json.getString("serverUrl"), json.getString("username"), json.getString("password"))
-        } catch (_: Exception) {
-            // Missing/invalidated Keystore keys and damaged files require a fresh login.
-            file.delete()
-            null
-        }
+        readSaved(exists = { file.baseFile.exists() }, bytes = { file.readFully() }, delete = { file.delete() }, key = ::existingKey)
     }
     override suspend fun write(value: Credentials) = withContext(Dispatchers.IO) {
         val cipher = Cipher.getInstance("AES/GCM/NoPadding")
@@ -60,3 +53,30 @@ class CredentialStore(context: Context) : CredentialStorage {
     }
     override suspend fun clear() = withContext(Dispatchers.IO) { file.delete() }
 }
+
+/**
+ * FR-2: decrypts the saved login. The file is deleted only when it can never be read again: a missing key
+ * ([key] returns null, so nothing can decrypt it), a key Keystore reports as invalidated or unrecoverable,
+ * a failed GCM tag check, or a malformed file (format check or JSON). Any other error (a transient Keystore
+ * or IO failure) returns null and keeps the file, so the next start can still sign in. Internal for tests.
+ */
+internal fun readSaved(
+    exists: () -> Boolean, bytes: () -> ByteArray, delete: () -> Unit, key: () -> SecretKey?,
+): Credentials? {
+    if (!exists()) return null
+    try {
+        val data = bytes()
+        if (data.size <= 28 || data[0] != 1.toByte()) { delete(); return null }
+        val secret = key() ?: run { delete(); return null }
+        val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+        cipher.init(Cipher.DECRYPT_MODE, secret, GCMParameterSpec(128, data.copyOfRange(1, 13)))
+        val json = JSONObject(String(cipher.doFinal(data.copyOfRange(13, data.size)), Charsets.UTF_8))
+        return Credentials(json.getString("serverUrl"), json.getString("username"), json.getString("password"))
+    } catch (error: Exception) {
+        if (unusable(error)) delete()
+        return null
+    }
+}
+
+private fun unusable(error: Exception) = error is AEADBadTagException || error is KeyPermanentlyInvalidatedException ||
+    error is UnrecoverableKeyException || error is JSONException

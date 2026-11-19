@@ -12,6 +12,7 @@ import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
 import java.io.IOException
 
@@ -78,6 +79,8 @@ class PlaybackService : MediaLibraryService() {
     // Application scope so exit I/O outlives the service; the coordinator serializes it with its own writes.
     private fun saveOnExit() { handoff?.terminationSave()?.let { save -> app.scope.launch { withTimeoutOrNull(5_000) { save() } } } }
 
+    /** A transient focus loss will resume on gain ([AudioFocusPolicy]). */
+    private val transientHold = kotlinx.coroutines.flow.MutableStateFlow(false)
     private var foregroundRequired: Boolean? = null
     override fun onUpdateNotification(session: MediaSession, startInForegroundRequired: Boolean) {
         dev.coda.android.diag.BatteryLog.count(dev.coda.android.diag.BatteryIds.NOTIFICATION_UPDATE)
@@ -88,8 +91,33 @@ class PlaybackService : MediaLibraryService() {
         super.onUpdateNotification(session, startInForegroundRequired)
     }
 
+    /**
+     * Leave the foreground as soon as deep sleep has released the player, not when Media3's uptime timeout fires.
+     * Media3 1.11.1 passes this method's boolean on to `MediaNotificationManager.updateNotification`, which calls
+     * `startForeground` or `notify` + `stopForeground(false)` with it; the boolean of `onUpdateNotification(session, Boolean)`
+     * is not used. Play (playWhenReady) brings the foreground back through Media3's own path.
+     */
+    private var deepSleep: DeepSleep? = null
+    override fun onUpdateNotificationAsync(session: MediaSession, startInForegroundRequired: Boolean): ListenableFuture<Void> {
+        val asleep = deepSleep?.asleep?.value == true
+        return super.onUpdateNotificationAsync(session,
+            BackgroundWorkPolicy.runsInForeground(startInForegroundRequired, asleep, session.player.playWhenReady))
+    }
+
+    /** The deep-sleep grace by wall time; a non-wakeup alarm needs no permission and fires at the next CPU wake. */
+    private val wallAlarm = WallAlarm { afterMs, onFire ->
+        val alarms = getSystemService(android.app.AlarmManager::class.java)
+        val listener = android.app.AlarmManager.OnAlarmListener { onFire() }
+        alarms.set(android.app.AlarmManager.ELAPSED_REALTIME, android.os.SystemClock.elapsedRealtime() + afterMs,
+            "coda:deep-sleep", listener, android.os.Handler(android.os.Looper.getMainLooper()))
+        return@WallAlarm { alarms.cancel(listener) }
+    }
+
     override fun onCreate() {
         super.onCreate()
+        // Media3 ends the foreground service this long after playback stops being "engaged" (paused or
+        // stopped); its default is DEFAULT_FOREGROUND_SERVICE_TIMEOUT_MS, 10 min.
+        setForegroundServiceTimeoutMs(BackgroundWorkPolicy.DEEP_SLEEP_GRACE_MS)
         dev.coda.android.diag.BatteryLog.event(dev.coda.android.diag.BatteryIds.EV_SERVICE_CREATE)
         val monitor = dev.coda.android.net.NetworkMonitor(this).also { network = it }
         uiVisible.value = androidx.lifecycle.ProcessLifecycleOwner.get().lifecycle.currentState.isAtLeast(androidx.lifecycle.Lifecycle.State.STARTED)
@@ -99,7 +127,6 @@ class PlaybackService : MediaLibraryService() {
             sourceResolver = dev.coda.core.connectivity.CachedSourceResolver({ app.trackCache }, { monitor.state.value },
                 { app.reachability.state.value.reachable }),
             networkAvailable = { monitor.state.value.available }, nowMs = { android.os.SystemClock.elapsedRealtime() },
-            screenOn = { screenOn },
             sessionGeneration = { (app.sessions.state.value as? dev.coda.android.session.SessionState.Connected)?.session?.token })
         val prefetcher = dev.coda.android.cache.Prefetcher(dev.coda.android.net.HttpClientFactory.client)
         val cacheWorker = dev.coda.android.cache.QueueCacheWorker(prefetcher, { monitor.state.value },
@@ -142,12 +169,35 @@ class PlaybackService : MediaLibraryService() {
                 scope.launch(Dispatchers.IO) { cache.markPlayed(songId, meta) }
             }
         }
+        // Only a real network switch resets the retry clock, the FR-1 rounds, the read-ahead backoff and probes a
+        // paused wait; signal-strength and bandwidth updates of the same network do none of that.
+        val networkSwitches = kotlinx.coroutines.flow.MutableSharedFlow<Unit>(extraBufferCapacity = 1)
         scope.launch {
-            monitor.changes.collect {
+            monitor.switches.collect {
                 controller.networkChanged()
                 prefetcher.networkChanged(monitor.identity)
+                networkSwitches.tryEmit(Unit)
                 prefetchWake.trySend(Unit)
+                // The handoff refresh too; a signal or bandwidth update sends no getPlayQueue.
                 if (monitor.state.value.available) handoff?.networkAvailable()
+            }
+        }
+        scope.launch { monitor.changes.collect { prefetchWake.trySend(Unit) } }
+        // Deep sleep after a pause of DEEP_SLEEP_GRACE_MS once the read-ahead has no download running.
+        val readAheadBusy = kotlinx.coroutines.flow.MutableStateFlow(false)
+        val deepSleep = DeepSleep(controller.state, readAheadBusy, controller::releaseIdle, transientHold = transientHold,
+            wait = { wallClockDelay(it, wallAlarm) },
+            // The pause save's pooled connection would otherwise stay open (server keep-alives wake the CPU)
+            // until the 20 s uptime closer runs; deep sleep has already waited a minute of wall time.
+            closeIdleConnections = { scope.launch(Dispatchers.IO) { dev.coda.android.net.HttpClientFactory.client.connectionPool.evictAll() } },
+        ).also { this.deepSleep = it }
+        scope.launch { deepSleep.run() }
+        // Re-run Media3's foreground decision when deep sleep starts or ends (onUpdateNotificationAsync).
+        // And unstart the service once asleep and paused (a bound UI keeps it; otherwise onDestroy runs now).
+        scope.launch {
+            deepSleep.asleep.drop(1).collect { asleep ->
+                triggerNotificationUpdate()
+                if (BackgroundWorkPolicy.stopsService(asleep, session?.player?.playWhenReady == true)) stopSelf()
             }
         }
         val probe = ConnectionProbe(controller,
@@ -159,8 +209,9 @@ class PlaybackService : MediaLibraryService() {
         // inside runIfDue (stop on Unauthorized) must not cancel the sign-out that follows it.
         scope.launch {
             while (isActive) {
-                if (BackgroundWorkPolicy.probePollMs(controller.state.value.waiting != null) == null)
-                    controller.state.first { it.waiting != null }
+                // A paused wait has no probe scheduled (Play, Retry or a network switch schedules one).
+                if (BackgroundWorkPolicy.probePollMs(controller.state.value.waiting?.scheduled == true) == null)
+                    controller.state.first { it.waiting?.scheduled == true }
                 dev.coda.android.diag.BatteryLog.count(dev.coda.android.diag.BatteryIds.PROBE_LOOP)
                 probe.runIfDue()
                 delay(BackgroundWorkPolicy.probePollMs(true)!!)
@@ -180,12 +231,16 @@ class PlaybackService : MediaLibraryService() {
         scope.launch { uiVisible.collect { prefetchWake.trySend(Unit) } }
         scope.launch {
             while (isActive) {
+                // A wait that ended (timeout, a signal-only wake) after falling asleep runs no further pass.
+                // Likewise while an auto-resume wait sleeps past its lock cap; its end (or a switch) wakes it.
+                ReadAheadRest.await(deepSleep.asleep, controller.state, networkSwitches)
                 val cache = app.trackCache
                 val state = controller.state.value
                 if (cache != null && (controller.queue.isNotEmpty() || handoff?.initialQueueResolved == true)) {
                     dev.coda.android.diag.BatteryLog.count(dev.coda.android.diag.BatteryIds.CACHE_CYCLE)
                     protectCachedFiles()
                     try {
+                        readAheadBusy.value = true
                         withContext(Dispatchers.IO) {
                             cacheWorker.cycle(cache, state.queue, state.currentIndex,
                                 stillCurrent = { controller.state.value.let { it.queue == state.queue && it.currentIndex == state.currentIndex } },
@@ -196,9 +251,11 @@ class PlaybackService : MediaLibraryService() {
                     catch (e: Exception) {
                         // Storage trouble must not end the worker; pending downloads keep their retry schedule.
                         android.util.Log.w("CodaPlayback", "Track cache pass failed: ${e.javaClass.simpleName}")
-                    }
+                    } finally { readAheadBusy.value = false }
                 } else prefetcher.updateWindow(emptyList())
-                withTimeoutOrNull(prefetcher.retryDelayMs(BackgroundWorkPolicy.readAheadIdleMs(uiVisible.value))) { prefetchWake.receive() }
+                // Asleep, no read-ahead pass or retry timer runs until Play (or another item) or a network switch
+                // (the check at the top of the loop; after a switch one pass runs, then it sleeps again).
+                if (!ReadAheadRest.rests(deepSleep.asleep.value, controller.state.value)) withTimeoutOrNull(prefetcher.retryDelayMs(BackgroundWorkPolicy.readAheadIdleMs(uiVisible.value))) { prefetchWake.receive() }
             }
         }
         // Likewise when another downloader ("Load for offline", a keep) completes the successor's copy.
@@ -330,7 +387,12 @@ class PlaybackService : MediaLibraryService() {
             }
         }
         androidx.lifecycle.ProcessLifecycleOwner.get().lifecycle.addObserver(lifecycleObserver)
-        guard = AudioSessionGuard(this, controller, scope)
+        // While a call (a transient focus loss) will resume playback, Media3 keeps its default foreground timeout
+        // (10 min, as before BAT-6) instead of the 1 min one, and deep sleep waits; set before the suspension is published.
+        guard = AudioSessionGuard(this, controller, scope) { pending ->
+            setForegroundServiceTimeoutMs(if (pending) DEFAULT_FOREGROUND_SERVICE_TIMEOUT_MS else BackgroundWorkPolicy.DEEP_SLEEP_GRACE_MS)
+            transientHold.value = pending
+        }
         // The ReplayGain setting reaches the controller here; an explicit toggle applies to the current item too.
         scope.launch { (application as dev.coda.android.CodaApp).settings.replayGainEnabled.collect { controller.setReplayGainEnabled(it) } }
         // AutoLibraryCallback authenticates controllers and serves the Auto tree; the app's own custom commands are added here.
@@ -389,7 +451,7 @@ class PlaybackService : MediaLibraryService() {
                     indexedCache = cache; indexedRevision = revision; indexedQueue = queue
                 }
                 val waiting = controller.recovery.waiting
-                val seconds = waiting?.let { ((it.retryAtMs - android.os.SystemClock.elapsedRealtime() + 999) / 1000).coerceAtLeast(0) } ?: 0
+                val seconds = waiting?.takeIf { it.scheduled }?.let { ((it.retryAtMs - android.os.SystemClock.elapsedRealtime() + 999) / 1000).coerceAtLeast(0) } ?: 0
                 val source = controller.state.value.currentOccurrence?.item?.source
                 val metered = dev.coda.core.connectivity.StreamFormatPolicy.metered(monitor.state.value)
                 val offline = !monitor.state.value.available || waiting != null

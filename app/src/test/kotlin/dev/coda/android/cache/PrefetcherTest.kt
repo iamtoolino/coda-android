@@ -106,6 +106,28 @@ class PrefetcherTest {
         }
     }
 
+    /** As PlaybackService wires it, only a real network switch clears the read-ahead backoff. */
+    @Test fun signalOnlyCapabilityChangesKeepTheBackoffAndASwitchClearsIt() = runTest {
+        FakeSubsonicServer().use { server ->
+            val cache = memoryTrackCache(temporary.newFolder())
+            val prefetcher = Prefetcher(OkHttpClient()) { testScheduler.currentTime }
+            val downloads = Downloads(server) { testScheduler.currentTime }
+            val wifi = dev.coda.core.connectivity.NetworkState()
+            val switch = dev.coda.android.net.NetworkSwitch("100/[1]", wifi)
+            fun deliver(identity: String) { if (switch.update(identity, wifi)) prefetcher.networkChanged(identity) }
+            prefetcher.updateWindow(listOf(first).map { it.songId })
+            suspend fun fetch() = prefetcher.fetch(cache, first, downloads.urls, false)
+            server.goOffline()
+            fetch(); advanceTimeBy(1000); fetch(); advanceTimeBy(2000); fetch() // next retry at 7000
+            advanceTimeBy(100)
+            repeat(10) { deliver("100/[1]"); fetch(); advanceTimeBy(100) } // signal updates
+            assertEquals("No retry before its backoff", 3, downloads.attempts.size)
+            deliver("200/[0]")
+            fetch()
+            assertEquals(4, downloads.attempts.size)
+        }
+    }
+
     @Test fun leavingWindowCancelsPendingRetryAndReentryStartsFresh() = runTest {
         FakeSubsonicServer().use { server ->
             val cache = memoryTrackCache(temporary.newFolder())
